@@ -1,11 +1,14 @@
 // Global comfort settings, respected by the site and by every game (Plan/README.md).
 import * as v from "valibot";
-import { defineSave } from "./save/define-save";
+import { defineSave, type SaveDef } from "./save/define-save";
 
 const Volume = v.pipe(v.number(), v.minValue(0), v.maxValue(1));
 
-const SettingsV1 = v.object({
-  v: v.literal(1),
+/** The tap offset can't be set outside this range (milliseconds). */
+export const TAP_OFFSET_RANGE = [-200, 400] as const;
+
+const SettingsV2 = v.object({
+  v: v.literal(2),
   /** Master sound switch (the speaker button in the header). */
   sound: v.boolean(),
   volume: v.object({ master: Volume, music: Volume, sfx: Volume }),
@@ -15,13 +18,18 @@ const SettingsV1 = v.object({
   jumpScares: v.boolean(),
   textSize: v.picklist(["normal", "large", "xl"]),
   colorblind: v.picklist(["off", "deuteranopia", "protanopia", "tritanopia"]),
+  /**
+   * How late taps land on this device, in milliseconds (touch delay, Bluetooth audio…). Measured
+   * by a rhythm game's calibration screen; null until then.
+   */
+  tapOffsetMs: v.nullable(v.pipe(v.number(), v.minValue(TAP_OFFSET_RANGE[0]), v.maxValue(TAP_OFFSET_RANGE[1]))),
 });
 
-export type Settings = v.InferOutput<typeof SettingsV1>;
+export type Settings = v.InferOutput<typeof SettingsV2>;
 export type MotionSetting = Settings["motion"];
 
 export const DEFAULT_SETTINGS: Settings = {
-  v: 1,
+  v: 2,
   sound: true,
   volume: { master: 0.8, music: 0.7, sfx: 0.8 },
   motion: "system",
@@ -29,15 +37,22 @@ export const DEFAULT_SETTINGS: Settings = {
   jumpScares: false,
   textSize: "normal",
   colorblind: "off",
+  tapOffsetMs: null,
 };
 
-export const settingsSave = defineSave<Settings>({
+export const settingsDefinition: SaveDef<Settings> = {
   key: "mfg:settings",
-  version: 1,
-  schema: SettingsV1,
+  version: 2,
+  schema: SettingsV2,
+  migrations: {
+    // v2 adds the tap timing offset (One Tap Chaos's calibration).
+    1: (old: Record<string, unknown>) => ({ ...old, v: 2, tapOffsetMs: null }),
+  },
   defaults: () => structuredClone(DEFAULT_SETTINGS),
   debounceMs: 150,
-});
+};
+
+export const settingsSave = defineSave(settingsDefinition);
 
 function setAttr(el: HTMLElement, name: string, value: string | null) {
   if (value === null) el.removeAttribute(name);

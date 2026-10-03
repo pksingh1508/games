@@ -4,7 +4,10 @@ Fifteen short browser games that lie to you, trap you and turn your own habits a
 
 This repo holds the arcade website (the landing page, the game library, a cabinet page for every game, settings, a local data manager and offline support) and the games, which are being built one by one. Until a game ships, its cabinet shows "Out of order".
 
-**Playable now:** [NOPE!](Plan/02-nope.md), the troll quiz: 60 questions in 4 episodes, at `/games/nope/play`.
+**Playable now:**
+
+- [NOPE!](Plan/02-nope.md), the troll quiz: 60 questions in 4 episodes, at `/games/nope/play`.
+- [One Tap Chaos](Plan/09-one-tap-chaos.md), the one-button microgame gauntlet: 24 microgames, 8 Chaos Cards and 3 bosses on a music-synced clock, plus Daily Chaos and a practice room, at `/games/one-tap-chaos/play`.
 
 "Mind Games" is a working title, set in `src/lib/site.ts`.
 
@@ -34,7 +37,7 @@ pnpm dev        # http://localhost:3000
 | `pnpm preview` | Serves `out/` on http://localhost:3000. The service worker only runs here, not in `dev` |
 | `pnpm lint` | ESLint |
 | `pnpm typecheck` | Generates route types, then type-checks the app and the service worker |
-| `pnpm test` | Unit tests (Vitest), including a scripted player that solves every NOPE! question |
+| `pnpm test` | Unit tests (Vitest), including a scripted player that solves every NOPE! question, and bots that win every One Tap Chaos microgame under every allowed rule combination |
 | `pnpm e2e` | End-to-end tests (Playwright) against the static build. Run `pnpm build` first; `pnpm exec playwright install chromium` once |
 | `pnpm icons` | Regenerates the app icons and favicon from the logo |
 
@@ -49,7 +52,8 @@ src/
   app/          routes: landing, /games, /games/<slug>, /games/<slug>/play, /settings, /data, /about
   components/   site chrome, landing sections, game cards, UI kit, settings, data manager, PWA
   engine/       framework-free code: saves, settings, achievements, sounds (Web Audio), seeded random numbers
-  games/        the game registry, palettes, title fonts, SVG cover art, and one folder per game (nope/)
+  games/        the game registry, palettes, title fonts, SVG cover art, one folder per game (nope/, one-tap-chaos/),
+                and shared/ (what every game uses: the one-tab guard, achievements, sharing, comfort hooks)
   sw/           service worker source (Serwist)
 scripts/        service worker build, icon generation
 tests/e2e/      Playwright tests
@@ -58,7 +62,7 @@ Plan/           design plans for every game, plus the stack
 
 ## Adding a game
 
-1. Build the game in `src/games/<slug>/`, with a default export from `index.tsx` (see that game's plan in [Plan/](Plan/README.md), and `src/games/nope/` for a finished example).
+1. Build the game in `src/games/<slug>/`, with a default export from `index.tsx` (see that game's plan in [Plan/](Plan/README.md); `src/games/nope/` is a DOM game, `src/games/one-tap-chaos/` a canvas one). Reuse `src/games/shared/` for the one-tab guard, achievements, sharing and comfort hooks, and `src/engine/save/runs.ts` for run history.
 2. Add it to the map in `src/app/games/[slug]/play/GameLoader.tsx`. It loads client-only, as its own chunk.
 3. Set the game's `status` to `"playable"` in `src/games/registry.ts`. The cabinet lights up everywhere on the site.
 4. Optionally, teach `src/games/progress.ts` to summarize its save for the cabinet page.

@@ -6,6 +6,7 @@ import { ArrowRight, Check, RotateCcw, Share2, Tv } from "lucide-react";
 import { animate, m, useMotionValue, useTransform } from "motion/react";
 import { Suspense, use, useEffect, useRef, useState } from "react";
 import { toast } from "@/components/ui/toast-store";
+import { shareResult } from "@/games/shared/share";
 import { cn } from "@/lib/cn";
 import { SITE } from "@/lib/site";
 import styles from "../nope.module.css";
@@ -89,21 +90,11 @@ export function ClearedScreen({
   }, []);
 
   const share = async () => {
-    // The text leaves the device only here, when the player chooses to share it.
-    const canShare = typeof navigator.share === "function" && window.matchMedia("(pointer: coarse)").matches;
-    if (canShare) {
-      try {
-        await navigator.share({ text });
-        return;
-      } catch {
-        // Cancelled, or not allowed: fall back to copying.
-      }
-    }
-    try {
-      await navigator.clipboard.writeText(text);
+    const outcome = await shareResult(text);
+    if (outcome === "copied") {
       setCopied(true);
       toast({ kind: "success", title: "Result copied", description: "Paste it anywhere you like." });
-    } catch {
+    } else if (outcome === "failed") {
       toast({ kind: "info", title: "Couldn't copy", description: "Select the text in the box and copy it yourself." });
     }
   };

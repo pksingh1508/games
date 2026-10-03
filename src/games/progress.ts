@@ -25,6 +25,17 @@ const SUMMARIES: Partial<Record<GameSlug, Summarize>> = {
       { label: "Trophies", value: `${Object.keys(record(save.achievements)).length}/7` },
     ];
   },
+  "one-tap-chaos"(save) {
+    const best = count(save.best);
+    // Mirrors the game's unlocks: 12 to start, 3 + 3 + 2 + 2 + 2 more at 10, 20, 30, 40 and 50.
+    const unlocked = 12 + [10, 20, 30, 40, 50].reduce((n, at, i) => n + (best >= at ? (i < 2 ? 3 : 2) : 0), 0);
+    return [
+      { label: "Best score", value: best ? best.toLocaleString("en-US") : "—" },
+      { label: "Microgames", value: `${unlocked}/24` },
+      { label: "Chaos cards", value: `${Math.min(8, count(save.cardsUnlocked))}/8` },
+      { label: "Trophies", value: `${Object.keys(record(save.achievements)).length}/6` },
+    ];
+  },
 };
 
 /** Stats for the cabinet page, or null when there's nothing (or nothing readable) to show. */

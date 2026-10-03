@@ -102,13 +102,15 @@ src/
     registry.ts               # slug, title, tagline, genre, controls, tricks, status (built)
     slugs.ts palettes.ts fonts.ts covers/   # ids, colours, title fonts, SVG cover art (built)
     progress.ts               # what each cabinet page shows about your save (built)
+    shared/                   # what every game reuses: one-tab guard, achievements, sharing, comfort hooks (built)
     nope/                     # NOPE!: the first playable game (built)
+    one-tap-chaos/            # One Tap Chaos: the second playable game, on canvas (built)
     one-more-step/ ...        # one folder per game; entry file: index.tsx
   engine/                     # shared, framework-free TypeScript
     loop.ts                   # fixed-timestep loop (60 Hz) on requestAnimationFrame; auto-pauses on hidden tab
     input.ts                  # keyboard / pointer / touch / gamepad → game actions
     audio/engine.ts           # Web Audio engine: buses, volumes, unlock on first gesture (built)
-    save/                     # local saves: localStorage + IndexedDB, versioned, backups (built)
+    save/                     # local saves: localStorage + IndexedDB, versioned, backups, run history (built)
     rng.ts                    # seeded random numbers: daily challenges, procedural levels (built)
     settings.ts               # global comfort settings, see below (built)
     meta.ts achievements.ts   # visits, arcade achievements (built)
@@ -118,8 +120,8 @@ src/
     browser/                  # tab title, favicon, visibility, fullscreen, pointer lock helpers
   components/
     site/ landing/ games/ ui/ settings/ data/ pwa/   # the website (built)
-    GameShell.tsx             # frame, pause menu, settings panel, results screen (NOPE! has its own for now;
-                              #   it becomes shared when the second game needs it)
+    GameShell.tsx             # not needed after all: a DOM quiz and a canvas rhythm game share little of their
+                              #   frames. What they do share lives in src/games/shared/ (built with game 2)
 tests/e2e/                    # Playwright: games played end to end on desktop and phone (built)
 ```
 
@@ -127,7 +129,7 @@ tests/e2e/                    # Playwright: games played end to end on desktop a
 
 | Shared piece | Used by |
 |---|---|
-| `engine/loop` (canvas game loop) | Every canvas game: One More Step, Fake Floor, TrapSprint, Glitch Run, Almost There, One Tap Chaos, Last Pixel, Panic Stack, Cursor Escape, Don't Blink, Gravity Is Lying, Don't Trust The Game (platform scenes) |
+| `engine/loop` (canvas game loop) | Every canvas game: One More Step, Fake Floor, TrapSprint, Glitch Run, Almost There, Last Pixel, Panic Stack, Cursor Escape, Don't Blink, Gravity Is Lying, Don't Trust The Game (platform scenes). One Tap Chaos runs on its own beat clock instead: everything in it is measured in beats |
 | `engine/platformer` | **TrapSprint** (built first), Fake Floor, Almost There, Gravity Is Lying, Glitch Run, Don't Trust The Game |
 | `engine/postfx` | Glitch Run, Don't Blink, Don't Trust The Game |
 | `engine/browser` | Don't Trust The Game, Last Pixel, Cursor Escape, 99 Seconds |
@@ -154,7 +156,7 @@ tests/e2e/                    # Playwright: games played end to end on desktop a
 |---|---|---|
 | 0 | Hub page, `GameShell`, registry, `engine` basics | Everything depends on it |
 | 1 | ✅ **NOPE!** (playable) | Pure React/DOM. Ships fast and tests the shell. |
-| 2 | **One Tap Chaos** | Adds the canvas loop, input handling and audio-synced timing |
+| 2 | ✅ **One Tap Chaos** (playable) | Adds the canvas game, one-button input and audio-synced timing |
 | 3 | **TrapSprint** | Builds the shared platformer kit |
 | 4 | **Fake Floor**, **Almost There**, **Gravity Is Lying**, **Glitch Run** | Reuse and extend the platformer kit |
 | 5 | **Cursor Escape**, **Last Pixel** | Pointer-driven games, browser helpers |

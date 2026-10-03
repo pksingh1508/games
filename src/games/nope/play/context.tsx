@@ -4,19 +4,8 @@
 // - `paused`: menus, a hidden tab and answer animations all stop the clocks (Plan/02-nope.md §10.5)
 // - hotspots: the HUD, the host and the stage are clickable, and a question can claim them
 // - <OnStage>: questions can put things anywhere on the stage, outside their card
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useEffectEvent,
-  useRef,
-  useState,
-  useSyncExternalStore,
-  type ReactNode,
-} from "react";
+import { createContext, useContext, useEffect, useEffectEvent, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { useSave } from "@/engine/save";
-import { prefersReducedMotion, settingsSave } from "@/engine/settings";
 
 /** Things outside the question card that can be clicked (secret rule 2). */
 export type HotspotName = "host" | "hearts" | "counter" | "logo" | "skip" | "fuse" | "sky" | "stage";
@@ -112,49 +101,5 @@ export function useGameCountdown(ms: number, onDone: () => void, enabled = true)
   return left;
 }
 
-// ---------------------------------------------------------------------------------------------
-// Device and comfort.
-// ---------------------------------------------------------------------------------------------
-
-function mediaStore(query: string) {
-  return {
-    subscribe(onChange: () => void) {
-      const list = window.matchMedia(query);
-      list.addEventListener("change", onChange);
-      return () => list.removeEventListener("change", onChange);
-    },
-    get: () => window.matchMedia(query).matches,
-  };
-}
-
-const coarseStore = mediaStore("(pointer: coarse)");
-const portraitStore = mediaStore("(max-aspect-ratio: 1/1)");
-const reducedMotionStore = mediaStore("(prefers-reduced-motion: reduce)");
-
-/** The main pointer is a finger. */
-export const useCoarsePointer = () => useSyncExternalStore(coarseStore.subscribe, coarseStore.get, () => false);
-
-/** The screen is taller than it is wide. */
-export const usePortrait = () => useSyncExternalStore(portraitStore.subscribe, portraitStore.get, () => false);
-
-const hiddenStore = {
-  subscribe(onChange: () => void) {
-    document.addEventListener("visibilitychange", onChange);
-    return () => document.removeEventListener("visibilitychange", onChange);
-  },
-  get: () => document.visibilityState === "hidden",
-};
-
-export const useDocumentHidden = () => useSyncExternalStore(hiddenStore.subscribe, hiddenStore.get, () => false);
-
-/** Comfort settings that change how questions look and move. */
-export function useComfort() {
-  const settings = useSave(settingsSave);
-  // Subscribed so a change to the device setting re-renders; the value itself comes from settings.
-  useSyncExternalStore(reducedMotionStore.subscribe, reducedMotionStore.get, () => false);
-  return {
-    reducedMotion: prefersReducedMotion(settings),
-    reduceFlashing: settings.reduceFlashing,
-    colorblind: settings.colorblind !== "off",
-  };
-}
+// Device and comfort hooks are shared by every game.
+export { useCoarsePointer, usePortrait, useDocumentHidden, useComfort } from "@/games/shared/device";
