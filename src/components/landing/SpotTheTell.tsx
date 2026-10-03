@@ -1,7 +1,8 @@
 "use client";
 
 import { AnimatePresence, m } from "motion/react";
-import { RotateCcw } from "lucide-react";
+import { ArrowRight, RotateCcw } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { unlockAchievement } from "@/engine/achievements";
@@ -107,6 +108,13 @@ export function SpotTheTell() {
               <span>Unsolved</span>
             )}
           </p>
+          <Link
+            href="/games/nope/play"
+            data-sound="coin"
+            className="btn btn-secondary mt-8 whitespace-normal text-center max-sm:w-full"
+          >
+            That was 1 question of 60. Play NOPE! <ArrowRight className="size-4" aria-hidden />
+          </Link>
         </div>
 
         {/* The quiz card */}

@@ -303,23 +303,31 @@ interface RunState {
 }
 ```
 
-### Folder structure
+### Folder structure (as built)
 ```
 src/games/nope/
-  index.tsx
+  index.tsx                   # the game: title → channel guide → episode → results / credits
+  save.ts  achievements.ts    # local save (mfg:game:nope) and NOPE!'s own achievements
+  sfx.ts  lines.ts  fonts.ts  # synthesized sounds, Mr. Nope's stock lines, Lilita One
+  nope.module.css             # the game-show set and its animations
   state/
-    run.ts                    # run store + save/load
+    run.ts  wall.ts           # run rules, scoring, sharing; the stamp wall layout (pure, tested)
+  play/
+    context.tsx               # pausing, hotspots, <OnStage>, pausable timers
   questions/
-    episode-1.ts … episode-4.ts   # data-driven questions
-    custom/                       # complex question components (lazy-loaded)
+    types.ts  episodes.ts     # the question API; episodes load lazily, one chunk each
+    episode-1.tsx … episode-4.tsx   # 15 question components each, with their metadata
+  kit/                        # building blocks: buttons, typing, drag, hold, runaway, wires, art
   components/
-    QuestionShell.tsx  Host.tsx  Stamp.tsx  StampWall.tsx
-    Hearts.tsx  SkipFly.tsx  BombFuse.tsx  ShareCard.tsx
+    PlayScreen.tsx  QuestionCard.tsx  HostPanel.tsx  MrNope.tsx  Hud.tsx  BombFuse.tsx
+    StampWall.tsx  Stamp.tsx  Effects.tsx (slam, confetti, fake confetti, skip fly)
+    Title.tsx  Channels.tsx  EpisodeIntro.tsx  Results.tsx  Credits.tsx  Menus.tsx  TabGuard.tsx
 ```
 
-### Testing
-- **Unit tests:** every question declares at least one rule, has an answer or a custom component, and has a valid mobile solution.
-- **End-to-end (Playwright):** a script plays Episode 1 with the correct answers on desktop and on a mobile viewport.
+### Testing (as built)
+- **Unit tests** (`questions.test.ts`, `state/run.test.ts`): every question declares at least one rule and its answer, tell and honest hint; every episode uses all five rules and ends with one boss; bombs last at least 10 seconds; key and hover questions have a touch version.
+- **A scripted player** solves all 60 questions through their real UI (clicks, typing, keys, timers, and the keyboard versions of drag and hold), checks the obvious answers get stamped, and checks the colour-vision and touch variants.
+- **End-to-end (Playwright, `tests/e2e/nope.spec.ts`):** a script clears Episode 1 with the right answers on desktop and on a phone, against the static build. It also checks NOPEs cost hearts, three NOPEs end the attempt, a run survives a reload, and Esc pauses.
 
 ### Technical risks
 | Risk | Plan |
@@ -332,11 +340,12 @@ src/games/nope/
 
 ## 13. Build Roadmap
 
-- [ ] **M1: Shell.** Hearts, the NOPE stamp, Mr. Nope, results screen, Episode 1 (15 questions)
-- [ ] **M2: All answer types.** Episodes 2–3, bombs, skips, the stamp wall as a mechanic
-- [ ] **M3: Finale.** Episode 4, boss questions, the ending, share card
-- [ ] **M4: Playtest pass.** Tune difficulty, add accessibility variants
-- [ ] **Later:** Explain-o-Matic, Daily NOPE, speedrun mode
+- [x] **M1: Shell.** Hearts, the NOPE stamp, Mr. Nope, results screen, Episode 1 (15 questions)
+- [x] **M2: All answer types.** Episodes 2–3, bombs, skips, the stamp wall as a mechanic
+- [x] **M3: Finale.** Episode 4, boss questions, the ending, share card
+- [ ] **M4: Playtest pass.** Accessibility variants are in (touch, keyboard, colour vision, reduced motion). Tuning difficulty needs real players.
+- [x] **Later:** Explain-o-Matic (the review after each cleared episode)
+- [ ] **Later:** Daily NOPE, speedrun mode, question editor, localisation
 
 ---
 
@@ -348,3 +357,99 @@ src/games/nope/
 - Timers pause correctly when the tab is hidden.
 - Progress survives page reloads.
 - No question depends on colour alone when colourblind mode is on.
+
+---
+
+## 15. As Built
+
+NOPE! is playable at `/games/nope/play`. The questions below are spoilers: each one's answer, tell and honest hint live next to its component in `src/games/nope/questions/`, and the Explain-o-Matic shows them after you clear an episode.
+
+**Rules:** 1 Read it literally · 2 Everything is clickable · 3 Doing nothing is an answer · 4 Remember everything · 5 Mr. Nope lies when he winks.
+**Episode 1: Easy Peasy (Lies)**
+
+| # | Question | Kind | Rules | Bomb |
+|---|---|---|---|---|
+| 1 | The Biggest Button: “Click the biggest button.” | hotspot | 1, 2 |  |
+| 2 | Basic Maths: “What's 2 + 2?” | choice | 5 |  |
+| 3 | Hands Off: “Don't press anything.” | wait | 3 |  |
+| 4 | The Missing Answer: “Pick the answer that isn't here.” | hotspot | 1 |  |
+| 5 | Any Key: “Press any key.” | key, choice | 1 |  |
+| 6 | The Blue Button: “Click the blue button.” | choice | 1 |  |
+| 7 | The Elephant: “Put the elephant in the fridge.” | drag, sequence | 1 |  |
+| 8 | The Giraffe: “Now put the giraffe in the fridge.” | drag, memory | 4 |  |
+| 9 | The Smallest Number: “Click the smallest number.” | hotspot | 2 | Red 15 s |
+| 10 | Count the Stamps: “How many NOPE stamps are on your screen?” | dynamic, type | 4 |  |
+| 11 | The Colour of the Sky: “Type the colour of the sky.” | type | 1, 4 |  |
+| 12 | Under the Question: “The answer is under this question.” | drag | 2 |  |
+| 13 | Trust Me: “What's the secret password?” | type | 5 |  |
+| 14 | Count to Five: “Click the numbers from 1 to 5.” | sequence, hotspot | 2 |  |
+| 15 | **Boss:** Leave the Quiz: “Leave the quiz.” | drag, hotspot | 1, 2, 5 |  |
+
+**Episode 2: Brain Freeze**
+
+| # | Question | Kind | Rules | Bomb |
+|---|---|---|---|---|
+| 1 | Twenty-Eight Days: “How many months have 28 days?” | choice | 1 |  |
+| 2 | Ink Spill: “Click the word written in red.” | choice | 1 |  |
+| 3 | Let Him Finish: “Which answer is correct?” | choice, wait | 3, 5 |  |
+| 4 | The Kind Fuse: “Quick! Which wire do you cut?” | wait | 3 | Green 10 s |
+| 5 | Close This Question: “Close this question.” | hotspot | 2 |  |
+| 6 | Kite Maths: “A kite and its string cost 110 coins together. The kite costs 100 coins more than the string. How much does the string cost?” | choice | 1, 5 |  |
+| 7 | Type Fast: “Type the word “fast”, fast.” | type | 1, 5 | Red 12 s |
+| 8 | The End of the Alphabet: “Click the last letter of the alphabet.” | choice | 1 |  |
+| 9 | The Wink Door: “Which door hides the prize?” | choice | 5 | Red 12 s |
+| 10 | Pet the Cat: “Pet the cat.” | hover | 1 |  |
+| 11 | Catch the Answer: “Click the correct answer.” | hotspot | 1 |  |
+| 12 | Wakey Wakey: “Wake Mr. Nope up.” | hotspot | 2 |  |
+| 13 | Stop the Bomb: “Stop the bomb!” | hotspot | 2 | Red 15 s |
+| 14 | Count the Fs: “How many times does the letter F appear on the sign?” | type | 1 |  |
+| 15 | **Boss:** The Five-Part Bomb: “Defuse the bomb in five parts.” | type, hotspot, wait, memory, choice | 1, 2, 3, 4, 5 | Red 60 s |
+
+**Episode 3: Memory Lane**
+
+| # | Question | Kind | Rules | Bomb |
+|---|---|---|---|---|
+| 1 | The Sky, Back Then: “What colour was the sky in episode 1?” | memory, choice | 4 |  |
+| 2 | Fridge Check: “Who is in the fridge right now?” | memory, choice, hotspot | 2, 4 |  |
+| 3 | Three Plus Three: “What's 3 + 3?” | choice | 4, 5 |  |
+| 4 | Under the Stamp: “Click the answer.” | drag, hotspot | 2 |  |
+| 5 | Don't Press Anything (Again): “Don't press anything.” | wait, choice | 1, 3, 4 |  |
+| 6 | Hearts Left: “Click as many hearts as you have left.” | dynamic | 4 |  |
+| 7 | Not Wrong: “What's the opposite of “not wrong”?” | choice | 1 |  |
+| 8 | The Biggest Button, Again: “Click the biggest button.” | choice | 1, 4 |  |
+| 9 | Two Plus Two, Remembered: “In episode 1, what was the right answer to “What's 2 + 2?”” | memory, choice | 4, 5 | Red 12 s |
+| 10 | Count Every Stamp: “How many NOPE stamps are on your screen now?” | dynamic, type | 2, 4 |  |
+| 11 | The Shiny Button: “In episode 1, what did the shiny button say?” | memory, choice | 4, 5 |  |
+| 12 | Fruit or Not: “Which of these is a fruit?” | choice | 1 |  |
+| 13 | The Sticky Note: “In episode 1, what password was written on the sticky note?” | memory, type | 1, 4 |  |
+| 14 | In Order: “Click these in the order they happened in episode 1.” | memory, sequence | 4 |  |
+| 15 | **Boss:** Encore: “Answer questions 3, 7 and 12 again, in reverse order.” | memory, sequence, choice | 1, 4 |  |
+
+**Episode 4: The Final NOPE**
+
+| # | Question | Kind | Rules | Bomb |
+|---|---|---|---|---|
+| 1 | The Biggest Button, Final Form: “Click the biggest button.” | hotspot | 1, 2 |  |
+| 2 | Ketchup: “Get the ketchup out.” | drag | 1 |  |
+| 3 | Fast Wink: “Pick the safe button!” | choice | 5 | Red 10 s |
+| 4 | Cut It: “Cut the wire before the fuse runs out.” | choice | 1 | Green 10 s |
+| 5 | No Question: “(There is no question.)” | wait | 3 |  |
+| 6 | Triangles: “How many triangles are in this picture?” | type | 1 |  |
+| 7 | Five to One: “Click the numbers from 5 to 1.” | sequence, hotspot | 2, 4 |  |
+| 8 | Stroop Speed: “Click the yellow word.” | choice | 1 | Red 12 s |
+| 9 | Let It Go: “Let the fly go.” | wait | 3 |  |
+| 10 | Mirror Name: “What is my name?” | type | 1 |  |
+| 11 | Give a Heart: “Give Mr. Nope one of your hearts.” | hotspot | 2 |  |
+| 12 | Wait for GO: “When the fuse runs out, click GO.” | wait, choice | 1, 3 | Green 12 s |
+| 13 | Not a Rule: “Which of these is NOT one of NOPE!'s secret rules?” | choice, memory | 4 |  |
+| 14 | The Last Normal Question: “What's 1 + 1?” | choice | 5 | Red 10 s |
+| 15 | **Boss:** Play Again?: “Want to play again?” | choice, hotspot | 1, 2 |  |
+
+**How it differs from the first draft of this plan**
+- A wrong answer replays the same question (hearts permitting), so every NOPE is a chance to spot the tell. Mr. Nope's honest hint takes over after two NOPEs on one question.
+- The stamp wall holds the last 20 stamps, laid out in a jittered grid so they can always be counted. On stamp questions Mr. Nope steps off the stage (red ink on a red host is hard to count).
+- Colour questions swap colour for shape, text style or capitals in colour-vision mode. Every wire has a written label and its own pattern.
+- Bosses change slightly on every new attempt: the key hides somewhere else, the five-part bomb swaps its word and wire, and the Memory Lane encore flips its order.
+- Achievements are NOPE!'s own (saved in the game's save) and use the arcade's achievement toasts.
+- Sounds are synthesized with Web Audio (no audio files). The studio audience (laughs, groans, applause) follows the game's laugh-track switch.
+

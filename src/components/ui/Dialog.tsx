@@ -16,6 +16,7 @@ export function Dialog({
   children,
   className,
   eyebrow,
+  game,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -24,6 +25,8 @@ export function Dialog({
   children: ReactNode;
   className?: string;
   eyebrow?: string;
+  /** Wear a game's palette (dialogs render outside the page, so they don't inherit it). */
+  game?: string;
 }) {
   return (
     <RadixDialog.Root
@@ -46,6 +49,7 @@ export function Dialog({
             </RadixDialog.Overlay>
             <RadixDialog.Content asChild forceMount>
               <m.div
+                data-game={game}
                 className={cn(
                   "fixed left-1/2 top-1/2 z-[71] max-h-[86vh] w-[min(94vw,34rem)] overflow-y-auto rounded-[1.75rem] border border-line bg-surface p-6 text-ink shadow-2xl sm:p-8",
                   className,

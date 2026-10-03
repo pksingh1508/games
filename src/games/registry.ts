@@ -122,7 +122,8 @@ const DATA: Record<GameSlug, GameData> = {
     goal: "Answer all 15 questions in an episode before your hearts run out.",
     controls: [
       { action: "Answer", desktop: "Click", mobile: "Tap" },
-      { action: "Drag things", desktop: "Click + drag", mobile: "Touch + drag" },
+      { action: "Drag things", desktop: "Click + drag (or click, then click where it goes)", mobile: "Touch + drag (or tap, then tap)" },
+      { action: "Hold on something", desktop: "Rest the cursor on it, or hold Space", mobile: "Press and hold" },
       { action: "Type answers", desktop: "Keyboard", mobile: "On-screen keyboard" },
       { action: "Pause", desktop: "Esc", mobile: "Pause button" },
     ],
@@ -158,7 +159,7 @@ const DATA: Record<GameSlug, GameData> = {
     inspirations: ["The Impossible Quiz", "Brain Test", "TV game shows"],
     session: "10–20 min per episode",
     inputs: ["mouse", "touch"],
-    status: "workshop",
+    status: "playable",
   },
 
   "99-seconds": {

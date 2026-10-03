@@ -7,6 +7,7 @@ import { ButtonLink } from "@/components/ui/Button";
 import { GameCover } from "@/games/covers";
 import { getGame } from "@/games/registry";
 import type { GameSlug } from "@/games/slugs";
+import { GameLoader } from "./GameLoader";
 
 export async function generateMetadata({ params }: PageProps<"/games/[slug]/play">): Promise<Metadata> {
   const { slug } = await params;
@@ -15,12 +16,20 @@ export async function generateMetadata({ params }: PageProps<"/games/[slug]/play
 }
 
 /**
- * Where each game runs. Until a game is built, its cabinet is "out of order".
- * When a game ships, its client-only game component mounts here (see Plan/README.md › Routes).
+ * Where each game runs: playable games mount their client-only component (GameLoader). Until a
+ * game is built, its cabinet is "out of order".
  */
 export default async function PlayPage({ params }: PageProps<"/games/[slug]/play">) {
   const { slug } = await params;
   const game = getGame(slug as GameSlug);
+
+  if (game.status === "playable") {
+    return (
+      <section aria-label={game.title}>
+        <GameLoader slug={game.slug} />
+      </section>
+    );
+  }
 
   return (
     <section className="relative isolate flex min-h-[calc(100dvh-4rem)] items-center overflow-clip py-16" aria-labelledby="ooo-title">

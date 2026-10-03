@@ -1,8 +1,9 @@
-import { Accessibility, HardDrive, UserX, WifiOff } from "lucide-react";
+import { Accessibility, HardDrive, Play, UserX, WifiOff } from "lucide-react";
+import Link from "next/link";
 import { GameTitle } from "@/components/games/GameTitle";
 import { ButtonLink } from "@/components/ui/Button";
 import { GameCover } from "@/games/covers";
-import { getGame } from "@/games/registry";
+import { GAMES, getGame } from "@/games/registry";
 import type { GameSlug } from "@/games/slugs";
 
 const COLUMN_A: GameSlug[] = ["nope", "glitch-run", "last-pixel", "wrong-door"];
@@ -48,6 +49,8 @@ const PROMISES = [
 ];
 
 export function Hero() {
+  // The newest cabinet to come online gets a shout-out.
+  const newest = GAMES.filter((g) => g.status === "playable").at(-1);
   return (
     <section className="noise relative isolate overflow-clip" aria-labelledby="hero-title">
       <div aria-hidden className="absolute -left-48 -top-48 -z-10 size-[40rem] rounded-full bg-accent/25 blur-[140px]" />
@@ -60,10 +63,21 @@ export function Hero() {
       <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 pb-24 pt-12 sm:px-6 lg:grid-cols-[1.25fr_1fr] lg:gap-6 lg:pb-28 lg:pt-16">
         {/* A size container: the headline scales to its column, so its lines never re-wrap. */}
         <div className="@container">
-          <p className="chip animate-rise border-white/15 bg-white/5">
-            <span className="size-2 animate-blink rounded-full bg-lie" aria-hidden />
-            15 games <span className="max-sm:hidden">· 0 accounts </span>· every lie has a tell
-          </p>
+          <div className="flex animate-rise flex-wrap items-center gap-2">
+            <p className="chip border-white/15 bg-white/5">
+              <span className="size-2 animate-blink rounded-full bg-lie" aria-hidden />
+              15 games <span className="max-sm:hidden">· 0 accounts </span>· every lie has a tell
+            </p>
+            {newest && (
+              <Link
+                href={`/games/${newest.slug}/play`}
+                data-sound="coin"
+                className="chip border-transparent bg-lie text-[#0E0B16] transition-transform hover:-translate-y-0.5"
+              >
+                <Play className="size-3" fill="currentColor" aria-hidden /> Now open: {newest.title}
+              </Link>
+            )}
+          </div>
 
           <h1
             id="hero-title"

@@ -1,5 +1,6 @@
-// Site achievements. Stored locally in the meta save; unlocking fires a window event that the
-// achievement toaster listens to.
+// Arcade achievements. Stored locally in the meta save; unlocking fires a window event that the
+// achievement toaster listens to. Games keep their own achievements in their own saves and
+// announce them through the same event.
 import { metaSave } from "./meta";
 
 export const ACHIEVEMENTS = [
@@ -59,15 +60,35 @@ export type Achievement = (typeof ACHIEVEMENTS)[number];
 
 export const ACHIEVEMENT_EVENT = "mfg:achievement";
 
+/** What the achievement toast shows. Games announce their own achievements the same way. */
+export interface AchievementNotice {
+  id: string;
+  title: string;
+  description: string;
+  /** The game it belongs to, shown on the toast. Omitted for arcade achievements. */
+  game?: string;
+  /** Throw confetti too. */
+  celebrate?: boolean;
+}
+
+const CELEBRATE: AchievementId[] = ["spot-the-tell", "window-shopper", "up-up-down-down"];
+
 export function getAchievement(id: AchievementId): Achievement {
   return ACHIEVEMENTS.find((a) => a.id === id)!;
 }
 
-/** Unlock an achievement once. Returns true if it was newly unlocked. */
+/** Show the achievement toast (the toaster listens for this event). */
+export function announceAchievement(notice: AchievementNotice) {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent<AchievementNotice>(ACHIEVEMENT_EVENT, { detail: notice }));
+}
+
+/** Unlock an arcade achievement once. Returns true if it was newly unlocked. */
 export function unlockAchievement(id: AchievementId): boolean {
   if (typeof window === "undefined") return false;
   if (metaSave.get().achievements[id]) return false;
   metaSave.update((meta) => ({ ...meta, achievements: { ...meta.achievements, [id]: Date.now() } }));
-  window.dispatchEvent(new CustomEvent<{ id: AchievementId }>(ACHIEVEMENT_EVENT, { detail: { id } }));
+  const { title, description } = getAchievement(id);
+  announceAchievement({ id, title, description, celebrate: CELEBRATE.includes(id) });
   return true;
 }

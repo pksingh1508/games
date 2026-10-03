@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { ACHIEVEMENT_EVENT, getAchievement, unlockAchievement, type AchievementId } from "@/engine/achievements";
+import { ACHIEVEMENT_EVENT, unlockAchievement, type AchievementNotice } from "@/engine/achievements";
 import { playSound, type UISound } from "@/engine/audio/ui-sound";
 import { recordVisit } from "@/engine/meta";
 import { STORAGE_ERROR_EVENT } from "@/engine/save";
@@ -9,7 +9,6 @@ import { applySettingsToDocument, prefersReducedMotion, settingsSave } from "@/e
 import { toast } from "@/components/ui/toast-store";
 
 const KONAMI = ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown", "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight", "b", "a"];
-const CONFETTI_FOR: AchievementId[] = ["spot-the-tell", "window-shopper", "up-up-down-down"];
 
 async function celebrate() {
   const settings = settingsSave.get();
@@ -44,11 +43,16 @@ export function GlobalEffects() {
   // Achievement toasts.
   useEffect(() => {
     const onUnlock = (event: Event) => {
-      const { id } = (event as CustomEvent<{ id: AchievementId }>).detail;
-      const achievement = getAchievement(id);
-      toast({ kind: "achievement", title: achievement.title, description: achievement.description, duration: 6000 });
+      const notice = (event as CustomEvent<AchievementNotice>).detail;
+      toast({
+        kind: "achievement",
+        eyebrow: notice.game ? `${notice.game} · Achievement` : undefined,
+        title: notice.title,
+        description: notice.description,
+        duration: 6000,
+      });
       playSound("success");
-      if (CONFETTI_FOR.includes(id)) void celebrate();
+      if (notice.celebrate) void celebrate();
     };
     window.addEventListener(ACHIEVEMENT_EVENT, onUnlock);
     return () => window.removeEventListener(ACHIEVEMENT_EVENT, onUnlock);
