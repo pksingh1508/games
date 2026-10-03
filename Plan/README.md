@@ -4,6 +4,8 @@ This folder has one design plan for each game in this project: a collection of *
 
 Each plan is a working document. Numbers like level counts, timings and medal times are starting targets, and we'll tune them during playtesting.
 
+**Tech stack:** [gameStack.md](gameStack.md) lists every library, font, sound source and tool, explains why each was chosen, and describes how all player data is stored locally on the player's device (no database, no accounts, no server).
+
 ---
 
 ## The Games
@@ -39,6 +41,7 @@ Every game in the collection follows these rules.
 5. **Built for the browser.** Use things only the web can do, like the tab title, favicon, cursor, window size and URL. Never do anything harmful (see the guardrails below).
 6. **Desktop and mobile.** Every game can be played by touch. If a trick needs a mouse or keyboard, it has a touch version that's just as fair.
 7. **Comfort settings always win.** Reduce motion, reduce flashing, no jump scares and volume are respected by every game.
+8. **Your data stays on your device.** No database, no accounts, no analytics. Progress is saved in the player's own browser, and it only leaves the device when the player shares it (see [gameStack.md](gameStack.md)).
 
 ### Guardrails (things no game will ever do)
 
@@ -47,6 +50,7 @@ Every game in the collection follows these rules.
 - Block the back button, closing the tab or leaving the page (no `beforeunload` traps).
 - Fake-delete the player's progress for more than a joke of a few seconds.
 - Show fake ads, fake downloads or anything that looks like phishing.
+- Send player data off the device: no analytics, no tracking, no cookies, no third-party requests while playing.
 
 ---
 
@@ -58,6 +62,7 @@ Every game in the collection follows these rules.
 - **React 19.2** + **TypeScript**
 - **Tailwind CSS v4**
 - **pnpm**
+- **Static export** (`output: "export"`): the whole site builds into plain files with no server or database, and it works offline as an installable web app. Full details are in [gameStack.md](gameStack.md).
 
 ### Routes
 
@@ -93,7 +98,7 @@ src/
     loop.ts                   # fixed-timestep loop (60 Hz) on requestAnimationFrame; auto-pauses on hidden tab
     input.ts                  # keyboard / pointer / touch / gamepad → game actions
     audio.ts                  # Web Audio wrapper (unlocks on the first user gesture)
-    save.ts                   # versioned localStorage saves, key format "mfg:<slug>:v1"
+    save/                     # local saves: localStorage + IndexedDB, versioned (see gameStack.md)
     rng.ts                    # seeded random numbers (daily challenges, procedural levels)
     settings.ts               # global comfort settings (see below)
     platformer/               # tile collisions, jump physics, camera (shared by 6 games)

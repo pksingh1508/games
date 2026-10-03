@@ -170,7 +170,7 @@ Each stage teaches one glitch, mixes in the earlier ones, and ends with a short 
 
 ### Later
 - **Practice mode:** pick which glitches appear
-- Global daily leaderboards
+- **Daily challenge links:** share your Daily Corruption score as a link; friends play the same seed on their own device and compare (no server)
 - Character skins ("corrupted" versions of the other games' heroes)
 
 ---
@@ -346,7 +346,7 @@ src/engine/postfx/             # shared WebGL2 effects
 - [ ] **M3: Story part 1.** Stages 1–10, The Debugger chase
 - [ ] **M4: Story part 2.** Remaining events, stages 11–20, Kernel Panic, the ending
 - [ ] **M5: Polish.** Comfort settings, visual beat bar, daily seed, achievements
-- [ ] **Later:** practice mode, leaderboards, skins
+- [ ] **Later:** practice mode, daily challenge links, skins
 
 ---
 

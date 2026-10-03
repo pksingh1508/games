@@ -175,7 +175,7 @@ Every event has a **warning of at least 1.5 seconds**.
 ### Later
 - **Local versus:** two players, two towers, events hit both
 - Custom level editor
-- Global endless leaderboard
+- Personal Endless records, plus challenge links so friends can try to beat your height on their own device (no server)
 
 ---
 
@@ -353,7 +353,7 @@ src/games/panic-stack/
 - [ ] **M3: Panic.** Panic meter, event scheduler, Earthquake/Wind/Cat/Fake Panic, Zen mode
 - [ ] **M4: All content.** Remaining items and events, Toy Room → Space Station (24 more levels)
 - [ ] **M5: Modes + polish.** Endless Tower, Daily Stack, X-ray glasses, achievements, accessibility options
-- [ ] **Later:** local versus, level editor, leaderboards
+- [ ] **Later:** local versus, level editor, challenge links
 
 ---
 

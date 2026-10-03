@@ -165,6 +165,7 @@ At 6:00 AM, the sun rises. The day guard arrives, looks at you and says: *"Who a
 - **Strict privacy rules:**
   - Off by default, with a clear explanation screen before asking for the camera
   - Everything is processed on your device; nothing is recorded or uploaded
+  - The MediaPipe model and WebAssembly files are served from our own site, not a third-party CDN
   - A visible "camera on" indicator the whole time
   - One click to turn it off; falls back to automatic blinking
 - Loaded only when someone turns it on, so it doesn't slow down the normal game.
