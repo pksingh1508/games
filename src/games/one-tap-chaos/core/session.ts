@@ -14,7 +14,7 @@ import { DARK_BEATS, type RuleId } from "../rules";
 import { isTrap, Round, wantsNoTap } from "../rules/round";
 import { playCount, playSfx, playWin, type SfxName } from "../sfx";
 import { AudioClock, eventSeconds } from "./clock";
-import { Store } from "./store";
+import { Store } from "@/games/shared/store";
 import type { Planner } from "./practice";
 import { applyResult, isOver, newRunState, pointsFor, type RoundPlan, type RunState } from "./run";
 import { BREAK_BEATS, CARD_BEATS, BOSS_INTRO_BEATS, COUNT_IN_BEATS, RESUME_COUNT_IN_BEATS } from "./timing";

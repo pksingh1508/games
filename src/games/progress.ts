@@ -25,6 +25,18 @@ const SUMMARIES: Partial<Record<GameSlug, Summarize>> = {
       { label: "Trophies", value: `${Object.keys(record(save.achievements)).length}/7` },
     ];
   },
+  trapsprint(save) {
+    // Main levels are "1-01" to "3-10"; Remix ones start with "R".
+    const levels = Object.entries(record(save.levels)).filter(([id]) => /^[123]-\d\d$/.test(id)).map(([, l]) => record(l));
+    const cleared = levels.filter((l) => count(l.clears) > 0).length;
+    const golds = levels.filter((l) => l.medal === "gold" || l.medal === "dev").length;
+    return [
+      { label: "Levels cleared", value: `${cleared}/30` },
+      { label: "Gold medals", value: `${golds}/30` },
+      { label: "Deaths", value: count(save.deaths).toLocaleString("en-US") },
+      { label: "Trophies", value: `${Object.keys(record(save.achievements)).length}/7` },
+    ];
+  },
   "one-tap-chaos"(save) {
     const best = count(save.best);
     // Mirrors the game's unlocks: 12 to start, 3 + 3 + 2 + 2 + 2 more at 10, 20, 30, 40 and 50.
