@@ -4,21 +4,45 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
+    "build": "next build && node scripts/build-sw.mjs",
+    "preview": "pnpm dlx serve@14 out -l 3000",
+    "lint": "eslint .",
+    "typecheck": "next typegen && tsc --noEmit && tsc --noEmit -p src/sw/tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "icons": "node scripts/generate-icons.mjs"
   },
   "dependencies": {
+    "canvas-confetti": "^1.9.4",
+    "clsx": "^2.1.1",
+    "idb": "^8.0.3",
+    "lucide-react": "^1.51.0",
+    "motion": "^14.0.0",
     "next": "16.3.8",
+    "radix-ui": "^1.6.7",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "tailwind-merge": "^3.7.0",
+    "valibot": "^1.5.0",
+    "zzfx": "^1.4.0"
   },
   "devDependencies": {
+    "@serwist/build": "^9.5.12",
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/canvas-confetti": "^1.9.0",
+    "@types/node": "^24.19.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "esbuild": "^0.28.2",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.3.8",
+    "fake-indexeddb": "^6.2.5",
+    "happy-dom": "^20.14.5",
+    "serwist": "^9.5.12",
+    "sharp": "^0.35.5",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^5.0.3"
   },
   "packageManager": "pnpm@10.33.0"
 }

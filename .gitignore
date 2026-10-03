@@ -17,6 +17,9 @@
 /.next/
 /out/
 
+# service worker build step (scripts/build-sw.mjs)
+/.sw/
+
 # production
 /build
 

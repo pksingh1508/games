@@ -67,30 +67,40 @@ Every game in the collection follows these rules.
 ### Routes
 
 ```
-src/app/page.tsx                    → "/"              Arcade hub: a grid of all 15 games
-src/app/games/[slug]/page.tsx       → "/games/<slug>"  One shared page for every game
-src/app/games/[slug]/GameLoader.tsx → "use client" component that loads the game
+src/app/page.tsx                         → "/"                   Landing page: hero, game library, Spot the Tell demo, FAQ
+src/app/games/page.tsx                   → "/games"              Full library with search and filters
+src/app/games/[slug]/layout.tsx          → wraps every game route in that game's palette (data-game)
+src/app/games/[slug]/page.tsx            → "/games/<slug>"       The game's cabinet page: pitch, controls, tricks, progress
+src/app/games/[slug]/play/page.tsx       → "/games/<slug>/play"  Where the game runs ("Out of order" until it ships)
+src/app/games/[slug]/play/GameLoader.tsx → "use client" component that loads the game (added with the first game)
+src/app/settings, data, about            → "/settings", "/data", "/about"
 ```
 
 These conventions were checked against the Next.js docs bundled in `node_modules/next/dist/docs/`:
 
-- `generateStaticParams()` returns all 15 slugs from the game registry, so every game page is prerendered at build time.
+- `generateStaticParams()` in `games/[slug]/layout.tsx` returns all 15 slugs, so the cabinet page and `/play` are prerendered for every game. Image routes such as `opengraph-image.tsx` need their own `generateStaticParams()`.
 - `export const dynamicParams = false` makes unknown slugs return a 404. This option isn't available if Cache Components is turned on later.
 - `generateMetadata()` gives each game its own title, description and share image.
 - In this Next.js version `params` is a **Promise**. Use `const { slug } = await props.params` in the page, and type it with the global `PageProps<'/games/[slug]'>` helper.
-- Games use `window`, canvas and audio, so they only render in the browser. The page (a Server Component) renders `GameLoader`, a Client Component that loads the game with `next/dynamic(() => import(...), { ssr: false })`. **`ssr: false` is only allowed inside Client Components.**
+- Games use `window`, canvas and audio, so they only render in the browser. The play page (a Server Component) renders `GameLoader`, a Client Component that loads the game with `next/dynamic(() => import(...), { ssr: false })`. **`ssr: false` is only allowed inside Client Components.** When a game ships, set its `status` to `"playable"` in the registry.
 - `window.history.pushState` / `replaceState` work alongside the Next.js router (used by *Don't Trust The Game*).
 
 ### Folder structure
 
+Items marked *(built)* exist now; the rest arrive with the games that need them.
+
 ```
 src/
   app/
-    page.tsx                  # Arcade hub
-    games/[slug]/page.tsx     # Shared game page (static params from the registry)
-    games/[slug]/GameLoader.tsx
+    page.tsx                  # Landing page (built)
+    games/page.tsx            # Game library (built)
+    games/[slug]/layout.tsx   # Game palette + static params for every game route (built)
+    games/[slug]/page.tsx     # Cabinet page: pitch, controls, tricks, progress (built)
+    games/[slug]/play/        # Where the game runs; GameLoader.tsx arrives with the first game
+    settings/ data/ about/    # Comfort settings, local data manager, how it works (built)
   games/
-    registry.ts               # slug, title, tagline, genre, controls, cover, lazy import
+    registry.ts               # slug, title, tagline, genre, controls, tricks, status (built)
+    slugs.ts palettes.ts fonts.ts covers/   # ids, colours, title fonts, SVG cover art (built)
     one-more-step/            # one folder per game; entry file: index.tsx
     nope/
     ...
@@ -98,13 +108,16 @@ src/
     loop.ts                   # fixed-timestep loop (60 Hz) on requestAnimationFrame; auto-pauses on hidden tab
     input.ts                  # keyboard / pointer / touch / gamepad → game actions
     audio.ts                  # Web Audio wrapper (unlocks on the first user gesture)
-    save/                     # local saves: localStorage + IndexedDB, versioned (see gameStack.md)
+    save/                     # local saves: localStorage + IndexedDB, versioned, backups (built)
     rng.ts                    # seeded random numbers (daily challenges, procedural levels)
-    settings.ts               # global comfort settings (see below)
+    settings.ts               # global comfort settings, see below (built)
+    meta.ts achievements.ts   # visits, arcade achievements (built)
+    audio/ui-sound.ts         # ZzFX interface sounds (built)
     platformer/               # tile collisions, jump physics, camera (shared by 6 games)
     postfx/                   # optional WebGL2 screen effects (glitch, CCTV noise, scanlines)
     browser/                  # tab title, favicon, visibility, fullscreen, pointer lock helpers
   components/
+    site/ landing/ games/ ui/ settings/ data/ pwa/   # the website (built)
     GameShell.tsx             # frame, pause menu, settings panel, results screen
 ```
 
