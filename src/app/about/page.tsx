@@ -23,6 +23,7 @@ const FONTS = [
   "Pixelify Sans",
   "Fredoka",
   "Bangers",
+  "Lilita One",
   "Fraunces",
   "Baloo 2",
   "Press Start 2P",
@@ -164,7 +165,8 @@ export default function AboutPage() {
           </ul>
         </div>
         <p className="text-base">
-          All cover art and sound effects on the site are original, drawn as code and generated in the browser.
+          All cover art, game art and sound effects are original: drawn as code and generated in the browser, with no
+          image or audio files to download.
         </p>
       </Block>
 

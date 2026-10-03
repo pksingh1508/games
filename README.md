@@ -2,7 +2,9 @@
 
 Fifteen short browser games that lie to you, trap you and turn your own habits against you, but always play fair. Every lie has a tell.
 
-This repo holds the arcade website: the landing page, the game library, a cabinet page for every game, settings, a local data manager and offline support. The games are being built one by one. Until a game ships, its cabinet shows "Out of order".
+This repo holds the arcade website (the landing page, the game library, a cabinet page for every game, settings, a local data manager and offline support) and the games, which are being built one by one. Until a game ships, its cabinet shows "Out of order".
+
+**Playable now:** [NOPE!](Plan/02-nope.md), the troll quiz: 60 questions in 4 episodes, at `/games/nope/play`.
 
 "Mind Games" is a working title, set in `src/lib/site.ts`.
 
@@ -32,7 +34,8 @@ pnpm dev        # http://localhost:3000
 | `pnpm preview` | Serves `out/` on http://localhost:3000. The service worker only runs here, not in `dev` |
 | `pnpm lint` | ESLint |
 | `pnpm typecheck` | Generates route types, then type-checks the app and the service worker |
-| `pnpm test` | Unit tests (Vitest) |
+| `pnpm test` | Unit tests (Vitest), including a scripted player that solves every NOPE! question |
+| `pnpm e2e` | End-to-end tests (Playwright) against the static build. Run `pnpm build` first; `pnpm exec playwright install chromium` once |
 | `pnpm icons` | Regenerates the app icons and favicon from the logo |
 
 ## Deploying
@@ -45,15 +48,17 @@ pnpm dev        # http://localhost:3000
 src/
   app/          routes: landing, /games, /games/<slug>, /games/<slug>/play, /settings, /data, /about
   components/   site chrome, landing sections, game cards, UI kit, settings, data manager, PWA
-  engine/       framework-free code: saves, settings, achievements, UI sounds
-  games/        the game registry, palettes, title fonts and SVG cover art
+  engine/       framework-free code: saves, settings, achievements, sounds (Web Audio), seeded random numbers
+  games/        the game registry, palettes, title fonts, SVG cover art, and one folder per game (nope/)
   sw/           service worker source (Serwist)
 scripts/        service worker build, icon generation
+tests/e2e/      Playwright tests
 Plan/           design plans for every game, plus the stack
 ```
 
 ## Adding a game
 
-1. Build the game in `src/games/<slug>/` (see that game's plan in [Plan/](Plan/README.md)).
-2. Load it from `src/app/games/[slug]/play/` with a client-only `GameLoader`.
+1. Build the game in `src/games/<slug>/`, with a default export from `index.tsx` (see that game's plan in [Plan/](Plan/README.md), and `src/games/nope/` for a finished example).
+2. Add it to the map in `src/app/games/[slug]/play/GameLoader.tsx`. It loads client-only, as its own chunk.
 3. Set the game's `status` to `"playable"` in `src/games/registry.ts`. The cabinet lights up everywhere on the site.
+4. Optionally, teach `src/games/progress.ts` to summarize its save for the cabinet page.

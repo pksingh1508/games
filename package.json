@@ -10,6 +10,7 @@
     "typecheck": "next typegen && tsc --noEmit && tsc --noEmit -p src/sw/tsconfig.json",
     "test": "vitest run",
     "test:watch": "vitest",
+    "e2e": "playwright test",
     "icons": "node scripts/generate-icons.mjs"
   },
   "dependencies": {
@@ -27,6 +28,7 @@
     "zzfx": "^1.4.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@serwist/build": "^9.5.12",
     "@tailwindcss/postcss": "^4",
     "@types/canvas-confetti": "^1.9.0",

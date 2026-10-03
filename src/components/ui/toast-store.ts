@@ -4,6 +4,8 @@ import type { ReactNode } from "react";
 export interface ToastItem {
   id: number;
   kind: "info" | "success" | "achievement" | "warning";
+  /** Small label above the title (achievements default to "Achievement unlocked"). */
+  eyebrow?: string;
   title: string;
   description?: ReactNode;
   /** Optional button inside the toast. */

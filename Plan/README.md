@@ -72,7 +72,7 @@ src/app/games/page.tsx                   → "/games"              Full library 
 src/app/games/[slug]/layout.tsx          → wraps every game route in that game's palette (data-game)
 src/app/games/[slug]/page.tsx            → "/games/<slug>"       The game's cabinet page: pitch, controls, tricks, progress
 src/app/games/[slug]/play/page.tsx       → "/games/<slug>/play"  Where the game runs ("Out of order" until it ships)
-src/app/games/[slug]/play/GameLoader.tsx → "use client" component that loads the game (added with the first game)
+src/app/games/[slug]/play/GameLoader.tsx → "use client" component that loads each playable game's chunk
 src/app/settings, data, about            → "/settings", "/data", "/about"
 ```
 
@@ -96,20 +96,20 @@ src/
     games/page.tsx            # Game library (built)
     games/[slug]/layout.tsx   # Game palette + static params for every game route (built)
     games/[slug]/page.tsx     # Cabinet page: pitch, controls, tricks, progress (built)
-    games/[slug]/play/        # Where the game runs; GameLoader.tsx arrives with the first game
+    games/[slug]/play/        # Where the game runs; GameLoader.tsx loads it client-side (built)
     settings/ data/ about/    # Comfort settings, local data manager, how it works (built)
   games/
     registry.ts               # slug, title, tagline, genre, controls, tricks, status (built)
     slugs.ts palettes.ts fonts.ts covers/   # ids, colours, title fonts, SVG cover art (built)
-    one-more-step/            # one folder per game; entry file: index.tsx
-    nope/
-    ...
+    progress.ts               # what each cabinet page shows about your save (built)
+    nope/                     # NOPE!: the first playable game (built)
+    one-more-step/ ...        # one folder per game; entry file: index.tsx
   engine/                     # shared, framework-free TypeScript
     loop.ts                   # fixed-timestep loop (60 Hz) on requestAnimationFrame; auto-pauses on hidden tab
     input.ts                  # keyboard / pointer / touch / gamepad → game actions
-    audio.ts                  # Web Audio wrapper (unlocks on the first user gesture)
+    audio/engine.ts           # Web Audio engine: buses, volumes, unlock on first gesture (built)
     save/                     # local saves: localStorage + IndexedDB, versioned, backups (built)
-    rng.ts                    # seeded random numbers (daily challenges, procedural levels)
+    rng.ts                    # seeded random numbers: daily challenges, procedural levels (built)
     settings.ts               # global comfort settings, see below (built)
     meta.ts achievements.ts   # visits, arcade achievements (built)
     audio/ui-sound.ts         # ZzFX interface sounds (built)
@@ -118,7 +118,9 @@ src/
     browser/                  # tab title, favicon, visibility, fullscreen, pointer lock helpers
   components/
     site/ landing/ games/ ui/ settings/ data/ pwa/   # the website (built)
-    GameShell.tsx             # frame, pause menu, settings panel, results screen
+    GameShell.tsx             # frame, pause menu, settings panel, results screen (NOPE! has its own for now;
+                              #   it becomes shared when the second game needs it)
+tests/e2e/                    # Playwright: games played end to end on desktop and phone (built)
 ```
 
 ### Engine reuse map
@@ -151,7 +153,7 @@ src/
 | Step | What | Why |
 |---|---|---|
 | 0 | Hub page, `GameShell`, registry, `engine` basics | Everything depends on it |
-| 1 | **NOPE!** | Pure React/DOM. Ships fast and tests the shell. |
+| 1 | ✅ **NOPE!** (playable) | Pure React/DOM. Ships fast and tests the shell. |
 | 2 | **One Tap Chaos** | Adds the canvas loop, input handling and audio-synced timing |
 | 3 | **TrapSprint** | Builds the shared platformer kit |
 | 4 | **Fake Floor**, **Almost There**, **Gravity Is Lying**, **Glitch Run** | Reuse and extend the platformer kit |

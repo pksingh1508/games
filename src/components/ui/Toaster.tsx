@@ -45,7 +45,12 @@ function ToastCard({ item }: { item: ToastItem }) {
         <Icon className="size-5" strokeWidth={2.4} />
       </span>
       <div className="min-w-0 flex-1">
-        {item.kind === "achievement" && <p className="pixel-label text-[0.7rem] text-lie">Achievement unlocked</p>}
+        {item.kind === "achievement" && (
+          <p className="pixel-label text-[0.7rem] text-lie">{item.eyebrow ?? "Achievement unlocked"}</p>
+        )}
+        {item.kind !== "achievement" && item.eyebrow && (
+          <p className="pixel-label text-[0.7rem] text-muted-surface">{item.eyebrow}</p>
+        )}
         <p className="font-display text-base font-bold leading-tight">{item.title}</p>
         {item.description && <div className="mt-1 text-sm text-muted-surface">{item.description}</div>}
         {item.action && (
