@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { NOPE_ACHIEVEMENTS } from "./nope/achievements";
 import { defaultNopeSave } from "./nope/save";
+import { OTC_ACHIEVEMENTS } from "./one-tap-chaos/achievements";
+import { MICROGAME_IDS, unlockedMicrogames } from "./one-tap-chaos/microgames";
+import { defaultOtcSave } from "./one-tap-chaos/save";
 import { summarizeProgress } from "./progress";
 
 describe("cabinet progress", () => {
@@ -23,6 +26,18 @@ describe("cabinet progress", () => {
     expect(summarizeProgress("nope", "{nope")).toBeNull();
     expect(summarizeProgress("nope", null)).toBeNull();
     expect(summarizeProgress("nope", JSON.stringify({ episodes: 7 }))?.[0]).toEqual({ label: "Episodes cleared", value: "0/4" });
+  });
+
+  it("summarizes a One Tap Chaos save, with unlocks matching the game's own", () => {
+    for (const best of [0, 9, 10, 25, 49, 50, 120]) {
+      const save = { ...defaultOtcSave(), best, cardsUnlocked: 3, achievements: { fifty: 1, conductor: 2 } };
+      expect(summarizeProgress("one-tap-chaos", JSON.stringify(save))).toEqual([
+        { label: "Best score", value: best ? best.toLocaleString("en-US") : "—" },
+        { label: "Microgames", value: `${unlockedMicrogames(best).length}/${MICROGAME_IDS.length}` },
+        { label: "Chaos cards", value: "3/8" },
+        { label: "Trophies", value: `2/${OTC_ACHIEVEMENTS.length}` },
+      ]);
+    }
   });
 
   it("has nothing to say about games without a summary", () => {

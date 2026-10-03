@@ -4,10 +4,11 @@
 // Screens: title → channel guide → episode → cleared / out of hearts → (after episode 4) credits.
 import Link from "next/link";
 import { Suspense, use, useState } from "react";
-import { getDb } from "@/engine/save/db";
 import { useSave } from "@/engine/save";
+import { recordRun } from "@/engine/save/runs";
 import { newSeed } from "@/engine/rng";
 import { Dialog } from "@/components/ui/Dialog";
+import { ElsewhereNotice, useTabGuard } from "@/games/shared/tab-guard";
 import { cn } from "@/lib/cn";
 import { unlockNopeAchievement } from "./achievements";
 import { Backdrop } from "./components/Backdrop";
@@ -16,7 +17,6 @@ import { Credits } from "./components/Credits";
 import { HowToPlay, SoundOptions, TrophyCase } from "./components/Menus";
 import { PlayScreen } from "./components/PlayScreen";
 import { ClearedScreen, FailedScreen, type FailInfo } from "./components/Results";
-import { ElsewhereNotice, useTabGuard } from "./components/TabGuard";
 import { TitleScreen } from "./components/Title";
 import { showFont } from "./fonts";
 import { sfx } from "./sfx";
@@ -47,15 +47,9 @@ type Screen =
   | { name: "failed"; info: FailInfo }
   | { name: "credits"; summary: ClearSummary };
 
-/** Run history goes to IndexedDB (Plan/gameStack.md §5.5). Best-effort. */
-async function recordRun(episode: EpisodeId, score: number, mode: "cleared" | "failed") {
-  try {
-    const db = await getDb();
-    await db.add("runs", { game: "nope", level: `e${episode}`, mode, score, at: Date.now() });
-  } catch {
-    // History is nice to have; never let it break the game.
-  }
-}
+/** Run history (IndexedDB, best-effort). */
+const saveRun = (episode: EpisodeId, score: number, mode: "cleared" | "failed") =>
+  void recordRun({ game: "nope", level: `e${episode}`, mode, score });
 
 function Loading() {
   return (
@@ -91,7 +85,11 @@ export default function NopeGame() {
   };
   const [jokeDone, setJokeDone] = useState(false);
   const [dialog, setDialog] = useState<"help" | "trophies" | "options" | null>(null);
-  const { elsewhere, playHere } = useTabGuard(() => setScreen({ name: "title" }));
+  const { elsewhere, playHere } = useTabGuard({
+    channel: "mfg:nope",
+    save: nopeSave,
+    onElsewhere: () => setScreen({ name: "title" }),
+  });
 
   const play = (episode: EpisodeId, fresh = false) => {
     const current = nopeSave.get().run;
@@ -107,7 +105,7 @@ export default function NopeGame() {
     const { save: next, summary } = clearEpisode(save, save.run);
     nopeSave.set(next);
     nopeSave.flush();
-    void recordRun(summary.episode, summary.score.total, "cleared");
+    saveRun(summary.episode, summary.score.total, "cleared");
     if (summary.perfect) unlockNopeAchievement("nightmare");
     if (summary.episode === 4) {
       nopeSave.update((s) => ({ ...s, finished: true }));
@@ -124,7 +122,7 @@ export default function NopeGame() {
     const run = save.run;
     nopeSave.set(failEpisode(save, run));
     nopeSave.flush();
-    void recordRun(run.episode, 0, "failed");
+    saveRun(run.episode, 0, "failed");
     setScreen({
       name: "failed",
       info: { episode: run.episode, reached: run.index + 1, nopes: run.nopes, wall: run.wall, attempt: run.attempt },
@@ -132,7 +130,7 @@ export default function NopeGame() {
   };
 
   const body = (() => {
-    if (elsewhere) return <ElsewhereNotice onPlayHere={playHere} />;
+    if (elsewhere) return <ElsewhereNotice game="NOPE!" onPlayHere={playHere} />;
     switch (screen.name) {
       case "title":
         return (

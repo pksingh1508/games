@@ -317,22 +317,32 @@ interface ChaosRule {
 - **Bots:** every microgame has a tiny auto-player that knows the right moment to tap. Automated tests run every microgame under every allowed rule combination, at top speed, and check that it's winnable.
 - **Daily seed** tests check that the same date always gives the same run.
 
-### Folder structure
+### Folder structure (as built)
 ```
 src/games/one-tap-chaos/
-  index.tsx
+  index.tsx              # screens: title → calibration (first time) → play → game over; practice room, demo
+  save.ts achievements.ts sfx.ts music.ts otc.module.css
   core/
-    tempo.ts          # audio clock, beat scheduler
-    input.ts          # tap timing + calibration offset
-    run.ts            # lives, score, tier, rule rotation
+    timing.ts            # tiers, beats per segment, timing windows, Lag and Double Tap constants
+    clock.ts             # maps the audio clock onto the performance clock (getOutputTimestamp)
+    session.ts           # the live game: timeline of segments, input, rounds, drawing, music scheduling, HUD state
+    run.ts               # the run planner (tiers, cards, bosses, picks), scoring, lives
+    practice.ts          # the practice room's planner
+    daily.ts             # Daily Chaos seed and number, share card
+    progress.ts          # what a round or run changes in the save, and which achievements it earns
+    calibration.ts       # tap-along offset measurement
+    store.ts             # tiny external store for the React HUD
   microgames/
-    jump.ts  catch.ts  stop.ts  dont.ts  …  loading.ts
+    types.ts kit.ts index.ts                      # the contract, shared helpers, registry + unlocks
+    jump.ts catch.ts stop.ts dont.ts … loading.ts  # 23 scenes (??? is defined in index.ts)
+    bosses/ commands.ts conductor.ts liar.ts final-tap.ts
+    microgames.test.ts                            # bots win everything, at every tempo and rule combination
   rules/
-    opposite.ts  red-means-no.ts  simon-says.ts  lag.ts  …
-    compatibility.ts  # which rules can be combined
-  bots/               # auto-players for tests
-  ui/
-    Hud.tsx  ChaosCard.tsx  GameOver.tsx  Calibration.tsx  Practice.tsx
+    index.ts             # the 8 cards, which microgames each allows, the clash table
+    round.ts             # a round = a scene wrapped in its rules (Lag, Double Tap, traps)
+  bots/harness.ts        # turns a bot's moments into presses under the rules, and plays a round
+  render/ draw.ts lobby.ts                         # the art kit, the between-rounds background
+  ui/ Play.tsx Title.tsx Calibration.tsx GameOver.tsx Practice.tsx Menus.tsx Metro.tsx icons.tsx
 ```
 
 ### Technical risks
@@ -346,12 +356,12 @@ src/games/one-tap-chaos/
 
 ## 13. Build Roadmap
 
-- [ ] **M1: Engine.** Audio clock, beat scheduler, tap timing, calibration, the first 4 microgames
-- [ ] **M2: The run.** Lives, tiers, score, game over, 12 microgames
-- [ ] **M3: Chaos.** Rule wrappers, the first 3 Chaos Cards, compatibility table, bots
-- [ ] **M4: Full content.** 24 microgames, all 8 cards, 3 bosses, Daily Chaos
-- [ ] **M5: Polish.** Practice room, unlocks, achievements, accessibility options
-- [ ] **Later:** versus mode, more microgame packs
+- [x] **M1: Engine.** Audio clock, beat scheduler, tap timing, calibration, the first 4 microgames
+- [x] **M2: The run.** Lives, tiers, score, game over, 12 microgames
+- [x] **M3: Chaos.** Rule wrappers, the first 3 Chaos Cards, compatibility table, bots
+- [x] **M4: Full content.** 24 microgames, all 8 cards, 3 bosses, Daily Chaos
+- [x] **M5: Polish.** Practice room, unlocks, achievements, accessibility options (plus a demo mode)
+- [ ] **Later:** versus mode, more microgame packs, cosmetic host skins
 
 ---
 
@@ -363,3 +373,59 @@ src/games/one-tap-chaos/
 - The whole game works with a single input device (keyboard only, mouse only, touch only, switch).
 - 60 fps on a mid-range phone.
 - The daily seed gives an identical run on every device.
+
+---
+
+## 15. As Built
+
+One Tap Chaos is playable at `/games/one-tap-chaos/play`: all 24 microgames, all 8 Chaos Cards, the 3 bosses, Daily Chaos with a share card, the practice room, unlocks, the 6 achievements, calibration and every comfort option in §11. Everything (art, music, sound) is generated in code; there are no asset files.
+
+### The microgames
+
+| Instruction | What to do | Opposite Day | Unlocks at |
+|---|---|---|---|
+| JUMP! | Tap to jump the cactus (two later on) | — | start |
+| CATCH! | Tap to stop the basket under the falling egg | — | start |
+| STOP! | Tap when the needle is in the green zone (marked with a ★) | — | start |
+| DON'T! | Don't tap the big blue TAP button, even with a fly on it | tap it | start |
+| SHOOT! | Tap when the target crosses the crosshair | hold your fire | start |
+| PUMP! | Tap up to the dashed ring, without popping it (hold mode available) | — | start |
+| FLIP! | Tap when the pancake is golden (it sparkles), not raw or burnt | — | start |
+| WAIT… | Tap only after the crossing signal shows GO | tap before it does | start |
+| HIGH FIVE! | Tap when the hands really meet; near misses don't count | leave him hanging | start |
+| SLEEP! | Don't tap, even when the alarm rings | tap to switch it off | start |
+| STACK! | Tap to drop the block on the tower (two blocks later on) | — | start |
+| BIGGER! | Tap while the bigger number is lit (later: negatives, decimals, the smaller one written bigger) | — | start |
+| COUNT! | Tap once per sheep; later a sheep balks at the fence | — | 10 |
+| DODGE! | Tap to switch lanes before each cone | — | 10 |
+| LOADING… | Don't tap "Tap to skip"; on the last beat it says …DON'T. | skip it | 10 |
+| BEAT! | The sticks count 1-2-3, then tap the next 4 beats (later with off-beats) | — | 20 |
+| MATCH! | Tap when the big shape matches the framed one (colour doesn't count) | — | 20 |
+| SWAT! | Tap when the mosquito lands and its wings stop | let it live | 20 |
+| SNAP! | Tap when everyone in the photo is smiling | — | 30 |
+| CUT! | Tap to cut the rope so the sandbag lands on the villain | — | 30 |
+| KICK! | Tap when the keeper dives away from your arrow | — | 40 |
+| LAND! | Tap thruster bursts to touch down slowly (the speed gauge shows safe) | — | 40 |
+| FREEZE! | Tap to freeze when the guard turns (each tap holds you still a moment) | — | 50 |
+| ??? | One of 12 microgames whose scene needs no words, unnamed | — | 50 |
+
+### Differences from the draft
+
+- **Clocks.** The timeline lives on the performance clock (what input events and frames are stamped with). The audio clock is mapped onto it continuously with `getOutputTimestamp()`, and every note is scheduled about 250 ms ahead on the audio clock to be heard exactly on its beat. Same accuracy as "audio is the master", without the game freezing if audio stalls.
+- **One calibration number.** The calibrated offset delays both what you see and how taps are judged. That keeps picture, sound and thumb together even when the browser doesn't know about Bluetooth delay. It lives in the arcade's global settings (`tapOffsetMs`, settings v2) and can be nudged ±10 ms in Options.
+- **Scenes are a 1000 × 1000 square** that extends to every edge of the screen, instead of a 16:9 canvas, so portrait phones get a full-width scene. The square can reach a little under the beat dots.
+- **Red is only for Red Means No.** DON'T!'s button is the cover's blue TAP button; WAIT…'s stop light is the orange pedestrian hand.
+- **Fairness built into the scenes.** Each scene sizes its target from the timing window (a wider window → a wider cactus gap, basket, green zone…). Under Lights Out, key moments are kept out of the dark beats. Taps that arrive a frame late are still judged on their own timestamp.
+- **COUNT!** checks the number of taps (your tally is chalked on a board), not each tap's timing.
+- **Bosses.** The Chaos Conductor gives 8 commands, 1.75 beats apart (PLAY!/REST!), and flips to Opposite at the fifth. The Liar crowns exactly 4 of 8. The Final Tap's decoys include KNOW and SNOW, and every word looks and sounds the same, because reading is the test. Bosses ignore the active cards.
+- **Cards.** New cards arrive in order, the first time you reach their slot; after that, any card you've met. From the third card on, the previous card stays as well (two rules). A card never repeats within three slots. Opposite Day never shares a round with Red Means No or Simon Says. Double Tap skips PUMP! and BEAT!.
+- **Scoring.** 1 point a round, 2 with two rules, 6 for a boss. Only normal runs raise your best (and unlock microgames); Daily Chaos keeps its own best per day.
+- **Extras.** A demo mode (the bot plays, and fluffs one now and then), a dev-only `debugPlan()` for QA scripts, and Metro the metronome as the host.
+
+### Testing (as built)
+
+- `microgames/microgames.test.ts`: every microgame's bot wins at every tier and difficulty over 12 seeds, under every allowed rule and pair of rules at top speed. It still wins with input a frame late, or 70% of the window early or late. Doing nothing loses (or wins the don't-tap ones), button mashing loses, traps are won by not tapping, and every scene draws without errors on a strict canvas stand-in.
+- `core/run.test.ts`: tiers, card schedule, bosses, two-rule slots, no clashes, no repeats, unlocks, a deterministic daily.
+- `core/progress.test.ts`: achievements, practice records, run results, daily bests, calibration maths.
+- `tests/e2e/one-tap-chaos.spec.ts`: the real build in Chromium on a desktop and a phone (start, count-in, pause, a full run to game over, practice, calibration, demo, one tab).
+

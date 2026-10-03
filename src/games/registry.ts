@@ -521,8 +521,8 @@ const DATA: Record<GameSlug, GameData> = {
     ],
     goal: "Clear as many microgames in a row as you can before you run out of lives.",
     controls: [
-      { action: "Tap (the only input)", desktop: "Space / click / Enter", mobile: "Tap anywhere" },
-      { action: "Pause", desktop: "Esc", mobile: "Pause button" },
+      { action: "Tap (the only input)", desktop: "Space / Enter / click / gamepad A", mobile: "Tap anywhere" },
+      { action: "Pause", desktop: "Esc or P", mobile: "Pause button (top right)" },
     ],
     tricks: [
       {
@@ -556,7 +556,7 @@ const DATA: Record<GameSlug, GameData> = {
     inspirations: ["WarioWare", "Rhythm Heaven", "Simon Says"],
     session: "1–5 min runs",
     inputs: ["one-button", "keyboard", "touch"],
-    status: "workshop",
+    status: "playable",
   },
 
   "last-pixel": {

@@ -1,6 +1,6 @@
 // NOPE!'s own achievements (Plan/02-nope.md §7). They live in the game's save, so deleting the
 // game's data clears them too, and they're announced through the arcade's achievement toasts.
-import { announceAchievement } from "@/engine/achievements";
+import { defineGameAchievements } from "@/games/shared/achievements";
 import { nopeSave } from "./save";
 
 export const NOPE_ACHIEVEMENTS = [
@@ -50,19 +50,13 @@ export const NOPE_ACHIEVEMENTS = [
 
 export type NopeAchievementId = (typeof NOPE_ACHIEVEMENTS)[number]["id"];
 
-const CELEBRATE: NopeAchievementId[] = ["nightmare", "nope-the-nope", "patience"];
+const achievements = defineGameAchievements({
+  game: "NOPE!",
+  prefix: "nope",
+  list: NOPE_ACHIEVEMENTS,
+  celebrate: ["nightmare", "nope-the-nope", "patience"],
+  save: nopeSave,
+});
 
 /** Unlock once. Returns true when it's new. */
-export function unlockNopeAchievement(id: NopeAchievementId): boolean {
-  if (typeof window === "undefined" || nopeSave.get().achievements[id]) return false;
-  nopeSave.update((save) => ({ ...save, achievements: { ...save.achievements, [id]: Date.now() } }));
-  const achievement = NOPE_ACHIEVEMENTS.find((a) => a.id === id)!;
-  announceAchievement({
-    id: `nope:${id}`,
-    title: achievement.title,
-    description: achievement.description,
-    game: "NOPE!",
-    celebrate: CELEBRATE.includes(id),
-  });
-  return true;
-}
+export const unlockNopeAchievement = achievements.unlock;

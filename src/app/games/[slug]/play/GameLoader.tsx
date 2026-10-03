@@ -17,6 +17,7 @@ function Loading() {
 
 const GAMES: Partial<Record<GameSlug, ComponentType>> = {
   nope: dynamic(() => import("@/games/nope"), { ssr: false, loading: Loading }),
+  "one-tap-chaos": dynamic(() => import("@/games/one-tap-chaos"), { ssr: false, loading: Loading }),
 };
 
 export function GameLoader({ slug }: { slug: GameSlug }) {
