@@ -167,7 +167,7 @@ Reach the **real** summit and plant your flag.
 - Achievements, New Game+
 
 ### Later
-- Speedrun leaderboards (with replay verification, like TrapSprint)
+- Personal speedrun history, plus ghost challenge links verified in the friend's browser (like TrapSprint, no server)
 - Ghost of your best run
 - A "Fall Cam" that shows your biggest fall as a shareable replay
 
@@ -334,7 +334,7 @@ src/games/almost-there/
 - [ ] **M3: The twist.** Fake summit sequence, fake credits, Inside the Mountain
 - [ ] **M4: Second half.** Sky Ladder, final zone, real ending, Chirp's full script
 - [ ] **M5: Polish.** Final art, music per zone, assist mode, feathers, achievements, New Game+
-- [ ] **Later:** leaderboards, ghosts, Fall Cam
+- [ ] **Later:** speedrun history, ghosts and ghost challenge links, Fall Cam
 
 ---
 

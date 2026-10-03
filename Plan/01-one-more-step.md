@@ -265,7 +265,7 @@ Total steps, total undos, total deaths, plus a fun line on the results screen: *
 - **Undo:** a stack of previous states. States are tiny, so storing full copies is fine.
 - **Solver:** breadth-first search over game states (player position, door position, spike phase, broken tiles, echo history, twin position). It runs as a Node script (`pnpm levels:verify`) and in CI. It outputs the optimal step count, which sets each level's par.
 - **Input:** a small input buffer (up to 2 queued steps) so fast players aren't slowed down by the 120 ms step animation. Swipes are detected with pointer events and a 24 px threshold.
-- **Saving:** localStorage key `mfg:one-more-step:v1` (stars, stats, settings), through `engine/save`.
+- **Saving:** localStorage key `mfg:game:one-more-step` (stars, stats; the value carries its own version number), through `engine/save`. See [gameStack.md](gameStack.md), Section 5.
 
 ### Data model
 ```ts

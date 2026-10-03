@@ -162,9 +162,10 @@ Once you know it, it takes **about 6 seconds**. Gold medal: 5.5 s.
 - Achievements
 
 ### Later
-- **Global leaderboards** with replay verification (see the Technical Plan)
-- **Level editor** with share codes, plus community levels
-- **Global death heatmap:** see where *everyone* dies on each level
+- **Personal leaderboard:** your local top 10 runs per level
+- **Ghost challenge links:** share a link with your run inside it; friends race your ghost on their own device, and their browser re-runs it to verify your time (see the Technical Plan)
+- **Level editor** with share codes: levels travel inside links or `.mfglevel` files, with no server
+- **Personal death heatmap:** every place you've ever died on a level, stored on your device
 
 ---
 
@@ -249,12 +250,13 @@ Once you know it, it takes **about 6 seconds**. Gold medal: 5.5 s.
 - **Input recording:** each frame's input is stored as a small bitmask (left / right / jump), run-length encoded. This one recording powers:
   - the **ghost** (replay your best run)
   - the **All-Deaths Replay** (simulate every attempt in parallel at the end of the level, which is cheap for small levels)
-  - future **leaderboard verification**
+  - **ghost challenge links** (later)
 - **Level authoring:** LDtk (a free 2D level editor), with traps as entities with fields, exported as JSON.
+- **Storage:** progress in localStorage; ghosts and attempts in IndexedDB (see [gameStack.md](gameStack.md), Section 5).
 
-### Leaderboards (later)
-- A Route Handler, e.g. `src/app/api/trapsprint/scores/route.ts`, receives a run's **input recording**, not just a time.
-- The server **re-runs the same TypeScript simulation** to confirm the time. This is very hard to cheat, and it's possible because the engine is pure and deterministic.
+### Ghost challenge links (later, no server)
+- The run's **input recording** (usually a few hundred bytes) is compressed into the link's `#` part, e.g. `/games/trapsprint#c=…`. The part after `#` is never sent to the host.
+- The friend's browser **re-runs the same TypeScript simulation** to confirm the time before showing it. Faking a time is very hard, and it works because the engine is pure and deterministic.
 
 ### Data model
 ```ts
@@ -333,7 +335,7 @@ src/engine/platformer/       # built here, shared with other games
 - [ ] **M3: Replays.** Input recording, ghost, All-Deaths Replay, timers, medals
 - [ ] **M4: Zones 2–3.** Remaining traps, 20 more levels
 - [ ] **M5: Polish.** Remix mode, achievements, touch controls tuning, assist mode
-- [ ] **Later:** leaderboards with server verification, level editor, death heatmap
+- [ ] **Later:** personal leaderboard, ghost challenge links, level editor, personal death heatmap
 
 ---
 

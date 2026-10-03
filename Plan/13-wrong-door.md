@@ -174,7 +174,7 @@ Five beautiful doors. The plaque reads: *"None of these doors is the way out."* 
 ### Later
 - **Floor editor** for custom puzzles
 - **Detective mode:** no items, no knocking. Pure logic.
-- Daily leaderboards
+- Personal run history and daily challenge links (friends play the same seeded run on their own device, no server)
 
 ---
 
@@ -367,7 +367,7 @@ src/games/wrong-door/
 - [ ] **M3: More clues.** Doorman, knocking + sound, light, candle, footprints, sequence floors
 - [ ] **M4: Special floors.** Mirror, anomaly, Monty Hall, memory, dark, shifting, Liar's Banquet, the Final Floor
 - [ ] **M5: Modes + polish.** Items, Endless, Daily Door, codex, achievements, accessibility
-- [ ] **Later:** floor editor, Detective mode, leaderboards
+- [ ] **Later:** floor editor, Detective mode, run history, daily challenge links
 
 ---
 

@@ -169,7 +169,7 @@ Every NOPE leaves a red stamp on the background, and the stamps stay for the who
 - **Explain-o-Matic**: after clearing an episode, a review mode that explains each trick
 - **Daily NOPE**: one new question per day, with streaks
 - **Speedrun mode**: all 60 questions in a row with 3 hearts in total
-- **Question editor** for the simple question types, with community packs
+- **Question editor** for the simple question types, with shareable question packs (sent as links or files, with no server)
 - **Localisation** (wordplay is hard to translate, so each question gets "translation notes")
 
 ---

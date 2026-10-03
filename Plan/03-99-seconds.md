@@ -175,7 +175,7 @@ The credits run for exactly 99 seconds. When they end, the title screen says: *"
 
 ### Later
 - **Room editor** (rooms are data, see the Technical Plan)
-- Community rooms
+- Shareable rooms: players send rooms they've made as links or files (no server)
 - A "ghost" replay of your previous loop shown as a faint silhouette
 
 ---
@@ -339,7 +339,7 @@ src/games/99-seconds/
 - [ ] **M3: Chapter 1 final.** Art, audio, the 99-second soundtrack, fake escape + real escape
 - [ ] **M4: Chapters 2–3.** Watched pot, two clocks, time flies, the 100th second, both endings
 - [ ] **M5: Polish.** Hardcore/Relaxed modes, achievements, Single Loop challenge, accessibility pass
-- [ ] **Later:** room editor, community rooms
+- [ ] **Later:** room editor, shareable rooms
 
 ---
 
