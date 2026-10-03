@@ -330,11 +330,11 @@ src/engine/platformer/       # built here, shared with other games
 
 ## 13. Build Roadmap
 
-- [ ] **M1: Platformer kit.** Movement, tile collisions, camera, fixed timestep, 3 test levels
-- [ ] **M2: Traps + Zone 1.** Trap system, the first 12 traps, 10 levels
-- [ ] **M3: Replays.** Input recording, ghost, All-Deaths Replay, timers, medals
-- [ ] **M4: Zones 2–3.** Remaining traps, 20 more levels
-- [ ] **M5: Polish.** Remix mode, achievements, touch controls tuning, assist mode
+- [x] **M1: Platformer kit.** Movement, tile collisions, camera, fixed timestep, 3 test levels
+- [x] **M2: Traps + Zone 1.** Trap system, the first 12 traps, 10 levels
+- [x] **M3: Replays.** Input recording, ghost, All-Deaths Replay, timers, medals
+- [x] **M4: Zones 2–3.** Remaining traps, 20 more levels
+- [x] **M5: Polish.** Remix mode, achievements, touch controls tuning, assist mode (plus zone speedruns)
 - [ ] **Later:** personal leaderboard, ghost challenge links, level editor, personal death heatmap
 
 ---
@@ -348,3 +348,96 @@ src/engine/platformer/       # built here, shared with other games
 - Respawn takes under 300 ms.
 - Touch controls are good enough that a tester can earn a gold medal on Level 1-1 on a phone.
 - Progress, medals and ghosts survive page reloads.
+
+---
+
+## 15. As Built
+
+TrapSprint is playable at `/games/trapsprint/play`: 30 levels in three zones, 30 Remix levels, all 20 traps from §3, medals (Dev, Gold, Silver, Bronze), the ghost of your best run, the All-Deaths Replay, death markers, zone speedruns with splits, the 7 achievements, assist mode, remappable keys, gamepads and touch buttons. The art (Sweetie 16 pixel art), the music (a chiptune per zone) and the sounds (ZzFX) are all generated in code: there are no asset files.
+
+It built the shared kit other games will reuse: `engine/loop.ts` (fixed 60 Hz accumulator), `engine/input.ts` (keys by `event.code`, gamepads, on-screen buttons, latched taps), `engine/replay.ts` (run-length input recordings, two bytes a run), `engine/sprites.ts` (pixel art as rows of letters) and `engine/platformer/` (pixel-stepped tile physics, the runner with coyote time, jump buffer and variable jump height, a camera with shake).
+
+### The levels
+
+| Level | Name | Traps | Dev / Gold (s) |
+|---|---|---|---|
+| 1-01 | Welcome | pop spikes, runaway door, drop floor | 3.25 / 3.8 |
+| 1-02 | Mind the Gap | drop floor | 3.25 / 3.8 |
+| 1-03 | Headache | invisible blocks | 3.25 / 3.8 |
+| 1-04 | Painted Door | fake door, pop spikes | 5.90 / 6.8 |
+| 1-05 | Fear Itself | painted spikes, pop spikes that only fire if you jump | 3.25 / 3.8 |
+| 1-06 | Spring Fling | springs, drop floor | 2.88 / 3.4 |
+| 1-07 | Shiny | coin bait | 3.38 / 3.9 |
+| 1-08 | Déjà Vu? | pop spikes (they move after your first death) | 3.25 / 3.8 |
+| 1-09 | Door Chase | runaway door, drop floors | 3.25 / 3.8 |
+| 1-10 | Green Lies | everything from Zone 1 | 5.05 / 5.9 |
+| 2-01 | Clocking In | conveyors, crushers | 3.63 / 4.2 |
+| 2-02 | Shing! | saws | 3.13 / 3.7 |
+| 2-03 | Reverse Gear | conveyor flip, crusher | 4.85 / 5.6 |
+| 2-04 | Tight Squeeze | wall squeeze | 3.25 / 3.8 |
+| 2-05 | Don't Wait Up | rising floor, crusher | 3.25 / 3.8 |
+| 2-06 | Low Ceiling | jump punisher | 3.13 / 3.7 |
+| 2-07 | Sideways | sideways spring | 2.77 / 3.2 |
+| 2-08 | Overtime? | crushers (one moves after your first death) | 5.52 / 6.4 |
+| 2-09 | Round Trip | fake door, return trap, crusher | 4.65 / 5.4 |
+| 2-10 | Factory of Fails | crusher, saw, jump punisher | 3.83 / 4.5 |
+| 3-01 | Drip | stalactites | 5.77 / 6.7 |
+| 3-02 | Safe Spot | fake checkpoint (and a real one) | 3.25 / 3.8 |
+| 3-03 | Shadow | the Follower, crusher | 5.67 / 6.6 |
+| 3-04 | Victory Lap | "Level Complete!" banner | 3.02 / 3.5 |
+| 3-05 | Domino | pop spikes → saw → crusher, a chain | 3.50 / 4.1 |
+| 3-06 | Run, Door, Run | runaway door, stalactites | 3.25 / 3.8 |
+| 3-07 | Your Own Ghost | your best run's ghost, red, with spikes | 3.25 / 3.8 |
+| 3-08 | Encore? | stalactites (one moves after your first death) | 3.38 / 3.9 |
+| 3-09 | Gauntlet | the Follower, stalactites, pop spikes | 3.13 / 3.7 |
+| 3-10 | The Last Door | the Follower, stalactite, fake checkpoint, banner | 5.65 / 6.5 |
+
+Remix (`R1-01` to `R3-10`) opens when 3-10 is cleared. Each level is mirrored, and its traps are meaner: warnings 25% shorter, moving traps 12% faster (saws still warn for 0.4 s).
+
+### The tells, as drawn
+
+| Trap | Tell |
+|---|---|
+| Pop spikes | Three tiny holes in each floor tile |
+| Drop floor | A hairline seam either side, and the floor is a separate slab |
+| Crusher | Cracks above; dust trickles from it now and then (castle blocks have a grumpy face) |
+| Runaway door | Little wheels |
+| Fake door | No shadow under the frame (real doors have one); after touching it, it peels |
+| Saw | A dark slot in the wall, a "shing" and the blade rattling in the slot 0.4 s before |
+| Jump punisher | Slits in the ceiling tiles above |
+| Invisible block | A sparkle every 3 seconds |
+| Stalactite | Cracks above; it wobbles before it drops |
+| Wall squeeze | Rails along the floor |
+| Fake checkpoint | Its flag is perfectly flat; real flags ripple |
+| Coin bait | It spins the other way |
+| Conveyor flip | Its arrow lights flicker |
+| Painted spikes | Flat grey, no shine |
+| Sideways spring | Its base leans |
+| Return trap | Holes, plus a little clock engraved in the floor |
+| Second-Try trap | "?" after the level's name |
+| Victory banner | You can see its ropes (they fray before it falls) |
+| Rising floor | Pistons underneath |
+| The Follower | Visible from the start, asleep (Zs) |
+
+### Differences from the draft
+
+- **Levels are text, not LDtk.** Each level is a 30 × 17 character map (16 px tiles, a 480 × 272 canvas) next to its trap definitions, in `levels/zone*.ts`. They read well in code review and need no editor or export step.
+- **A solver proves every level.** `core/solver.ts` is a beam search over short bursts of input, run on the real simulation, with a navigation map (`core/navigation.ts`) for direction and waypoints for levels that double back. Its runs are the **Dev runs** (`levels/dev-runs.ts`, regenerated with `UPDATE_DEV_RUNS=1`): they set the medal times and are replayed by the tests. Gold is the Dev time + 15% (rounded up to 0.1 s), Silver Gold × 1.35, Bronze Gold × 1.9. Levels with a Second-Try trap have a Dev run per layout, and the slower one sets the times.
+- **Remix mirrors and toughens** instead of shuffling traps, so every Remix level is still proven solvable (the solver runs on all 60).
+- **Your Own Ghost** leaves the start with you, harmless for half a second, and goes through the door when your best run did, so a slower run can still finish. Its touch is deadly (death cause "ghost").
+- **Blame.** Dying on spikes or in a pit within 70 ticks of being thrown by a trap (spring, fake checkpoint, drop floor, bonk, a belt that turned on you) counts as that trap's kill, so Collector counts all 17 deadly traps (your own ghost included).
+- **Timer and restart.** Each attempt's clock starts on its first input, and so does the level (the Follower stays asleep until you move). R restarts without counting a death. Runs from a checkpoint, or with any assist option on, clear the level but earn no medal and set no best time.
+- **Zone speedrun** time is game time: every tick played from the first input to the last door, deaths included, but not the short pause between levels. The music runs 8% faster.
+- **Speed Demon** is for matching a Dev time: on most levels the Dev run is already as fast as the physics allow.
+- **Ghosts** are stored in IndexedDB (`replays`, key `trapsprint:<level>:best`) with the engine version and which layout they ran through (`variant`). A new physics version stops racing old ghosts instead of desyncing them.
+
+### Testing (as built)
+
+- `levels/dev-runs.test.ts`: every level, in every layout (60 levels plus the Second-Try layouts), replays its Dev run to a win in 15 s or less, tick for tick.
+- `core/world.test.ts`: each trap behaves as described, saws always warn for 0.4 s, Remix mirrors, Your Own Ghost's grace and exit, and a Dev run plays identically at 60, 120 and 144 Hz.
+- `core/session.test.ts`: the clock waits for input, respawn takes 16 ticks (under 300 ms) into the Second-Try layout, restarts aren't deaths, every attempt replays to the same death (the All-Deaths Replay), the ghost races in lockstep, invincibility.
+- `core/progress.test.ts`, `core/medals.test.ts`, `levels/levels.test.ts`: deaths and markers, medals, first-try clears, assist and checkpoint rules, zone runs, achievements; all 19 trap kinds used, one Second-Try trap per zone, unlock order.
+- `src/engine/*.test.ts`: the loop's tick counts at any refresh rate, input latching, the replay codecs, pixel physics, coyote time and jump buffering.
+- `audio/*.test.ts`: every sound builds, is short and doesn't clip; every song has whole bars.
+- `tests/e2e/trapsprint.spec.ts`: the real build in Chromium on a desktop and a phone (the falling START, deaths and restart, winning and saving, the All-Deaths Replay, pause and assist, locks and Remix, zone speedruns, touch controls).
+

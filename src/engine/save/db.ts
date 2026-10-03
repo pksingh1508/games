@@ -24,6 +24,8 @@ export interface ReplayRecord {
   inputs: Uint8Array;
   timeMs: number;
   at: number;
+  /** Game-specific: which version of the level it ran through (e.g. a layout that changes after a death). */
+  variant?: number;
 }
 
 export interface LevelRecord {

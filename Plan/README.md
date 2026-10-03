@@ -105,17 +105,20 @@ src/
     shared/                   # what every game reuses: one-tab guard, achievements, sharing, comfort hooks (built)
     nope/                     # NOPE!: the first playable game (built)
     one-tap-chaos/            # One Tap Chaos: the second playable game, on canvas (built)
+    trapsprint/               # TrapSprint: the first platformer; levels are proven by a solver (built)
     one-more-step/ ...        # one folder per game; entry file: index.tsx
   engine/                     # shared, framework-free TypeScript
-    loop.ts                   # fixed-timestep loop (60 Hz) on requestAnimationFrame; auto-pauses on hidden tab
-    input.ts                  # keyboard / pointer / touch / gamepad → game actions
+    loop.ts                   # fixed-timestep loop (60 Hz accumulator) on requestAnimationFrame (built)
+    input.ts                  # keyboard / touch buttons / gamepad → game actions, remappable (built)
+    replay.ts                 # input recordings: run-length encoded, for ghosts and replays (built)
+    sprites.ts                # pixel art as code: rows of palette letters → cached canvases (built)
     audio/engine.ts           # Web Audio engine: buses, volumes, unlock on first gesture (built)
     save/                     # local saves: localStorage + IndexedDB, versioned, backups, run history (built)
     rng.ts                    # seeded random numbers: daily challenges, procedural levels (built)
     settings.ts               # global comfort settings, see below (built)
     meta.ts achievements.ts   # visits, arcade achievements (built)
     audio/ui-sound.ts         # ZzFX interface sounds (built)
-    platformer/               # tile collisions, jump physics, camera (shared by 6 games)
+    platformer/               # tile collisions, jump physics, camera (shared by 6 games; built)
     postfx/                   # optional WebGL2 screen effects (glitch, CCTV noise, scanlines)
     browser/                  # tab title, favicon, visibility, fullscreen, pointer lock helpers
   components/
@@ -157,7 +160,7 @@ tests/e2e/                    # Playwright: games played end to end on desktop a
 | 0 | Hub page, `GameShell`, registry, `engine` basics | Everything depends on it |
 | 1 | ✅ **NOPE!** (playable) | Pure React/DOM. Ships fast and tests the shell. |
 | 2 | ✅ **One Tap Chaos** (playable) | Adds the canvas game, one-button input and audio-synced timing |
-| 3 | **TrapSprint** | Builds the shared platformer kit |
+| 3 | ✅ **TrapSprint** (playable) | Builds the shared platformer kit |
 | 4 | **Fake Floor**, **Almost There**, **Gravity Is Lying**, **Glitch Run** | Reuse and extend the platformer kit |
 | 5 | **Cursor Escape**, **Last Pixel** | Pointer-driven games, browser helpers |
 | 6 | **One More Step**, **Wrong Door** | Logic engines with automated solvers |

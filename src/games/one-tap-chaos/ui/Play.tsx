@@ -9,7 +9,7 @@ import { Dialog } from "@/components/ui/Dialog";
 import { cn } from "@/lib/cn";
 import type { Planner } from "../core/practice";
 import { initialHud, Session, type HudState, type RoundReport, type RunSummary, type SessionMode, type SessionSettings } from "../core/session";
-import { Store } from "../core/store";
+import { Store } from "@/games/shared/store";
 import { BOSSES } from "../microgames";
 import { RULES, type RuleId } from "../rules";
 import styles from "../otc.module.css";

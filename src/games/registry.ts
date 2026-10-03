@@ -350,10 +350,10 @@ const DATA: Record<GameSlug, GameData> = {
     ],
     goal: "Reach the door. Then reach it faster.",
     controls: [
-      { action: "Move", desktop: "← → / A D", mobile: "Left / right buttons" },
-      { action: "Jump (hold for higher)", desktop: "Space / ↑ / W", mobile: "Jump button" },
-      { action: "Quick restart", desktop: "R", mobile: "Restart button" },
-      { action: "Pause", desktop: "Esc", mobile: "Pause button" },
+      { action: "Move", desktop: "← → / A D / stick or D-pad", mobile: "Left / right pad (bottom left)" },
+      { action: "Jump (hold for higher)", desktop: "Space / ↑ / W / gamepad A", mobile: "Jump button (bottom right)" },
+      { action: "Quick restart", desktop: "R / gamepad Y", mobile: "Restart button (top right)" },
+      { action: "Pause", desktop: "Esc / P / Start", mobile: "Pause button (top right)" },
     ],
     tricks: [
       {
@@ -376,18 +376,18 @@ const DATA: Record<GameSlug, GameData> = {
       },
     ],
     features: [
-      "30 levels in 3 zones, plus Remix mode",
+      "30 levels in 3 zones, plus 30 Remix levels",
       "20 trap types, each with a tell",
       "Instant respawn in under 0.3 seconds",
-      "Medal times and your own ghost",
+      "Medal times, and the ghost of your best run",
       "The All-Deaths Replay",
-      "Ghost challenge links for friends",
+      "Zone speedruns with splits",
     ],
-    comfort: ["Assist mode: slow motion and trap reveal", "Reduce screen shake", "Colourblind palette", "Remappable keys"],
+    comfort: ["Assist mode: slow motion, trap reveal, invincibility", "No screen shake with reduced motion", "Traps read by shape, not colour", "Remappable keys and big touch buttons"],
     inspirations: ["Level Devil", "Syobon Action", "Super Meat Boy", "Celeste"],
     session: "30 s – 3 min per level",
     inputs: ["keyboard", "gamepad", "touch"],
-    status: "workshop",
+    status: "playable",
   },
 
   "glitch-run": {

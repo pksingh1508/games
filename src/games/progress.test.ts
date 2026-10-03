@@ -5,6 +5,9 @@ import { OTC_ACHIEVEMENTS } from "./one-tap-chaos/achievements";
 import { MICROGAME_IDS, unlockedMicrogames } from "./one-tap-chaos/microgames";
 import { defaultOtcSave } from "./one-tap-chaos/save";
 import { summarizeProgress } from "./progress";
+import { TRAPSPRINT_ACHIEVEMENTS } from "./trapsprint/achievements";
+import { MAIN_LEVELS } from "./trapsprint/levels";
+import { defaultTrapSprintSave, emptyLevelRecord } from "./trapsprint/save";
 
 describe("cabinet progress", () => {
   it("summarizes a NOPE! save", () => {
@@ -40,7 +43,24 @@ describe("cabinet progress", () => {
     }
   });
 
+  it("summarizes a TrapSprint save (Remix levels don't count toward the 30)", () => {
+    const save = defaultTrapSprintSave();
+    save.levels["1-01"] = { ...emptyLevelRecord(), clears: 3, medal: "dev" };
+    save.levels["1-02"] = { ...emptyLevelRecord(), clears: 1, medal: "gold" };
+    save.levels["1-03"] = { ...emptyLevelRecord(), clears: 1, medal: "silver" };
+    save.levels["1-04"] = { ...emptyLevelRecord(), deaths: 9 };
+    save.levels["R1-01"] = { ...emptyLevelRecord(), clears: 1, medal: "gold" };
+    save.deaths = 4321;
+    save.achievements = { "fresh-meat": 1 };
+    expect(summarizeProgress("trapsprint", JSON.stringify(save))).toEqual([
+      { label: "Levels cleared", value: `3/${MAIN_LEVELS.length}` },
+      { label: "Gold medals", value: `2/${MAIN_LEVELS.length}` },
+      { label: "Deaths", value: "4,321" },
+      { label: "Trophies", value: `1/${TRAPSPRINT_ACHIEVEMENTS.length}` },
+    ]);
+  });
+
   it("has nothing to say about games without a summary", () => {
-    expect(summarizeProgress("trapsprint", "{}")).toBeNull();
+    expect(summarizeProgress("glitch-run", "{}")).toBeNull();
   });
 });
