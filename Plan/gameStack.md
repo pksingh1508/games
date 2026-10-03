@@ -1083,14 +1083,20 @@ mindfuckgame/
 │  └─ encode-audio.sh             ffmpeg presets
 ├─ src/
 │  ├─ app/
-│  │  ├─ layout.tsx               fonts, settings script, service worker registration
-│  │  ├─ page.tsx                 the arcade hub
+│  │  ├─ layout.tsx               fonts, settings script, palettes, service worker registration
+│  │  ├─ page.tsx                 the landing page
 │  │  ├─ manifest.ts              web app manifest
 │  │  ├─ apple-icon.png           iOS home screen icon
+│  │  ├─ settings/page.tsx        comfort settings
 │  │  ├─ data/page.tsx            "Your Data": storage, backups, deleting data
-│  │  └─ games/[slug]/
-│  │     ├─ page.tsx              prerendered once per game (generateStaticParams)
-│  │     └─ GameLoader.tsx        client-only loader (next/dynamic with ssr: false)
+│  │  └─ games/
+│  │     ├─ page.tsx              the game library
+│  │     └─ [slug]/
+│  │        ├─ layout.tsx         game palette; generateStaticParams for every game route
+│  │        ├─ page.tsx           the game's cabinet page
+│  │        └─ play/
+│  │           ├─ page.tsx        where the game runs
+│  │           └─ GameLoader.tsx  client-only loader (next/dynamic with ssr: false)
 │  ├─ components/                 GameShell, PauseMenu, SettingsPanel, ShareSheet, InstallSheet…
 │  ├─ engine/                     loop, input, audio, save/, rng, tween, particles, camera,
 │  │                              canvas, assets, platformer/, postfx/, browser/, share/, debug/
