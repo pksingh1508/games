@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { ALMOST_THERE_ACHIEVEMENTS } from "./almost-there/achievements";
+import { defaultAlmostThereSave } from "./almost-there/save";
 import { FAKE_FLOOR_ACHIEVEMENTS } from "./fake-floor/achievements";
 import { ROOM_IDS } from "./fake-floor/rooms";
 import { defaultFakeFloorSave, emptyRoomRecord } from "./fake-floor/save";
@@ -76,6 +78,26 @@ describe("cabinet progress", () => {
       { label: "Medals", value: `4/${ROOM_IDS.length * 3}` },
       { label: "Falls", value: "2,048" },
       { label: "Trophies", value: `2/${FAKE_FLOOR_ACHIEVEMENTS.length}` },
+    ]);
+  });
+
+  it("summarizes an Almost There save", () => {
+    const save = defaultAlmostThereSave();
+    save.climbs = { started: 3, finished: 1, mirrorStarted: 1, mirrorFinished: 1 };
+    save.best.normal = { ticks: (1 * 3600 + 2 * 60 + 3) * 60 + 30, falls: 40, splits: {}, at: 0 };
+    save.totals.fallen = 76_240;
+    save.achievements = { "fooled-once": 1, "never-again": 2 };
+    expect(summarizeProgress("almost-there", JSON.stringify(save))).toEqual([
+      { label: "Real summits", value: "2" },
+      { label: "Best climb", value: "1:02:03" },
+      { label: "Fallen", value: "3,812 m" },
+      { label: "Trophies", value: `2/${ALMOST_THERE_ACHIEVEMENTS.length}` },
+    ]);
+    expect(summarizeProgress("almost-there", JSON.stringify(defaultAlmostThereSave()))).toEqual([
+      { label: "Real summits", value: "0" },
+      { label: "Best climb", value: "—" },
+      { label: "Fallen", value: "0 m" },
+      { label: "Trophies", value: `0/${ALMOST_THERE_ACHIEVEMENTS.length}` },
     ]);
   });
 

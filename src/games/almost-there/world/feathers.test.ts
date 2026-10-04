@@ -1,0 +1,156 @@
+// Every Lost Feather can be reached, fairly (Plan/08-almost-there.md §7: "hidden in risky spots").
+//
+// UPDATE_FEATHERS=1 pnpm vitest run src/games/almost-there/world/feathers.test.ts
+// finds a detour to each feather from a spot on the climb's route (the same fairness rules as the
+// route: 4 px either way, a tick of charge either way) and rewrites feather-runs.ts.
+import { writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { describe, expect, it } from "vitest";
+import { logFromText, logToText, type InputLog } from "@/engine/replay";
+import { collapseSummit, newClimb, tickClimb, type Climb } from "../core/climb";
+import { LEFT, RIGHT, TILE, VIEW_H } from "../core/constants";
+import { rowTop, screenAt, type Mountain } from "../core/mountain";
+import { cloneClimb, step } from "../core/sim";
+import { play, solveLeg } from "../core/solver";
+import { FEATHER_RUNS, type FeatherRun } from "./feather-runs";
+import { getMountain } from "./index";
+import { ROUTES } from "./routes";
+
+const UPDATE = process.env.UPDATE_FEATHERS === "1";
+
+/** The climb, replayed to tick `at` of a phase of the route. */
+function climbTo(m: Mountain, which: "normal" | "mirror", phase: "up" | "down", at: number): Climb {
+  const route = ROUTES[which];
+  const c = newClimb(m);
+  const run = (text: string, limit: number) => {
+    let i = 0;
+    for (const [bits, n] of logFromText(text)) {
+      for (let k = 0; k < n && i < limit; k++, i++) tickClimb(m, c, bits);
+      if (i >= limit) break;
+    }
+  };
+  if (phase === "up") {
+    run(route.up, at);
+    return c;
+  }
+  run(route.up, Infinity);
+  collapseSummit(c);
+  for (let i = 0; i < route.fell; i++) tickClimb(m, c, 0);
+  run(route.down, at);
+  return c;
+}
+
+function findRuns(which: "normal" | "mirror"): FeatherRun[] {
+  const m = getMountain(which === "mirror");
+  const route = ROUTES[which];
+  // Every spot on the route where Pip stands still (and when).
+  const stances: Array<{ phase: "up" | "down"; at: number; c: Climb }> = [];
+  const c = newClimb(m);
+  const record = (phase: "up" | "down", at: number) => {
+    const p = c.sim.pip;
+    if (!p.grounded || p.charge !== 0 || p.vx !== 0 || p.stun !== 0) return;
+    const last = stances[stances.length - 1];
+    if (last && last.c.sim.pip.x === p.x && last.c.sim.pip.y === p.y) return;
+    stances.push({ phase, at, c: { ...c, sim: cloneClimb(c.sim) } });
+  };
+  let i = 0;
+  for (const [bits, n] of logFromText(route.up)) for (let k = 0; k < n; k++) {
+    tickClimb(m, c, bits);
+    record("up", ++i);
+  }
+  collapseSummit(c);
+  for (let k = 0; k < route.fell; k++) tickClimb(m, c, 0);
+  i = 0;
+  for (const [bits, n] of logFromText(route.down)) for (let k = 0; k < n; k++) {
+    tickClimb(m, c, bits);
+    record("down", ++i);
+  }
+
+  const runs: FeatherRun[] = [];
+  for (const f of m.feathers) {
+    const fs = screenAt(f.x, f.y);
+    const ground = f.y - 1 + TILE;
+    const near = stances
+      .filter((s) => {
+        const sc = screenAt(s.c.sim.pip.x + 4, s.c.sim.pip.y + 6);
+        return sc.col === fs.col && (sc.row === fs.row || sc.row === fs.row - 1);
+      })
+      .sort((a, b) => Math.hypot(a.c.sim.pip.x - f.x, a.c.sim.pip.y - f.y) - Math.hypot(b.c.sim.pip.x - f.x, b.c.sim.pip.y - f.y));
+    let found: FeatherRun | null = null;
+    for (const s0 of near.slice(0, 6)) {
+      const got = (_s: unknown, e: readonly { type: string; index?: number }[]) => e.some((x) => x.type === "feather" && x.index === f.index);
+      const leg = solveLeg(m, s0.c.sim, {
+        // Picked up in the air, or landed on its ledge (then it's a walk).
+        goal: (s, e) => got(s, e) || (s.pip.grounded && s.pip.y + s.pip.h === ground && Math.abs(s.pip.x - f.x) < 72),
+        budget: 150,
+        floor: rowTop(fs.row) + VIEW_H * 2,
+      });
+      if (!leg) continue;
+      const end = cloneClimb(s0.c.sim);
+      const events = play(m, end, leg.log);
+      const log: InputLog = leg.log.map(([b, n]) => [b, n]);
+      if (!got(null, events)) {
+        // Walk to it.
+        const dir = f.x + 3 < end.pip.x + 4 ? LEFT : RIGHT;
+        let n = 0;
+        while (n < 120 && !step(m, end, dir).some((e) => e.type === "feather" && e.index === f.index)) n++;
+        if (n >= 120) continue;
+        log.push([dir, n + 1]);
+      }
+      found = { index: f.index, phase: s0.phase, at: s0.at, log: logToText(log) };
+      break;
+    }
+    if (!found) throw new Error(`${which}: no fair way to feather ${f.index} (${f.zone})`);
+    runs.push(found);
+  }
+  return runs;
+}
+
+if (UPDATE) {
+  it("finds a way to every feather", { timeout: 3_600_000 }, () => {
+    const normal = findRuns("normal");
+    const mirror = findRuns("mirror");
+    const fmt = (runs: FeatherRun[]) => runs.map((r) => `    { index: ${r.index}, phase: "${r.phase}", at: ${r.at}, log: "${r.log}" },`).join("\n");
+    writeFileSync(
+      join(process.cwd(), "src/games/almost-there/world/feather-runs.ts"),
+      `// Generated by world/feathers.test.ts (UPDATE_FEATHERS=1): a fair detour to each Lost Feather, from a
+// spot on the climb's route (on the mountain and on Mirror Mountain).
+export interface FeatherRun {
+  index: number;
+  /** Where on the route it starts: the climb up, or after the summit falls. */
+  phase: "up" | "down";
+  /** Ticks into that part of the route. */
+  at: number;
+  /** The detour (engine/replay logToText). */
+  log: string;
+}
+
+export const FEATHER_RUNS: Record<"normal" | "mirror", FeatherRun[]> = {
+  normal: [
+${fmt(normal)}
+  ],
+  mirror: [
+${fmt(mirror)}
+  ],
+};
+`,
+    );
+  });
+} else {
+  describe("the Lost Feathers", () => {
+    it.each([
+      ["the mountain", "normal"],
+      ["Mirror Mountain", "mirror"],
+    ] as const)("on %s, every one can be reached", (_name, which) => {
+      const m = getMountain(which === "mirror");
+      const runs = FEATHER_RUNS[which];
+      expect(runs.map((r) => r.index).sort((a, b) => a - b)).toEqual(m.feathers.map((f) => f.index));
+      for (const run of runs) {
+        const c = climbTo(m, which, run.phase, run.at);
+        let got = false;
+        for (const [bits, n] of logFromText(run.log)) for (let k = 0; k < n; k++) for (const e of tickClimb(m, c, bits)) if (e.type === "feather" && e.index === run.index) got = true;
+        expect(got, `feather ${run.index}`).toBe(true);
+      }
+    });
+  });
+}

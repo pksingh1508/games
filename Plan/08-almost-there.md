@@ -329,11 +329,11 @@ src/games/almost-there/
 
 ## 13. Build Roadmap
 
-- [ ] **M1: Feel.** Charge-jump physics, wall bounces, screen camera, one test screen
-- [ ] **M2: First half.** Zones 1–5 greyboxed, autosave, progress bar + pause altitude
-- [ ] **M3: The twist.** Fake summit sequence, fake credits, Inside the Mountain
-- [ ] **M4: Second half.** Sky Ladder, final zone, real ending, Chirp's full script
-- [ ] **M5: Polish.** Final art, music per zone, assist mode, feathers, achievements, New Game+
+- [x] **M1: Feel.** Charge-jump physics, wall bounces, screen camera, one test screen
+- [x] **M2: First half.** Zones 1–5 greyboxed, autosave, progress bar + pause altitude
+- [x] **M3: The twist.** Fake summit sequence, fake credits, Inside the Mountain
+- [x] **M4: Second half.** Sky Ladder, final zone, real ending, Chirp's full script
+- [x] **M5: Polish.** Final art, music per zone, assist mode, feathers, achievements, New Game+
 - [ ] **Later:** speedrun history, ghosts and ghost challenge links, Fall Cam
 
 ---
@@ -346,3 +346,62 @@ src/games/almost-there/
 - The pause menu altitude is always accurate.
 - Physics gives the same result at 60 Hz and 120 Hz.
 - At least one playtester shouts at the screen during the fake credits. (Then laughs.)
+
+---
+
+## 15. As Built
+
+Almost There is playable at `/games/almost-there/play`: one continuous climb of 45 screens in nine zones, the fake summit with its credits and collapse, the way inside the mountain, the real summit, Chirp (sincere and trolling), the lying progress bar and the honest altitude, a continuous save that makes every fall stick (mid-air included), 12 Lost Feathers that are hats, seven achievements, assist mode, Mirror Mountain, remappable keys, gamepads and touch. The art (Resurrect 64 pixel art), the music (a different instrument per zone) and the sounds (ZzFX, plus a live charge tone and fall whoosh) are all generated in code: there are no asset files.
+
+It reuses the platformer kit (`engine/loop`, `input`, `replay`, `sprites`, `platformer/physics`, `audio/sfx-bank`, `games/shared/*`). The mountain, the charge-jump physics, the solver and the climb's bookkeeping are in `core/`, the screens in `world/zone*.ts`.
+
+### The mountain
+
+The world is a grid of screens two columns wide and forty rows tall. Column 0 is the outside face; column 1 is the inside of the mountain, the sky above it and the summit. The fake summit's collapse opens the seal between them.
+
+| # | Zone | Screens | What's new | Music |
+|---|---|---|---|---|
+| 1 | The Foothills | outside, rows 0–3 | the tutorial signs, wall bounces | plucked guitar |
+| 2 | Old Town Rooftops | outside, rows 4–8 | lying signs, a plank, the joke checkpoint, a so-close ledge with footprints on the real route | accordion |
+| 3 | The Clocktower | outside, rows 9–14 | five brass gear platforms on timers, the Express Elevator (it goes down two screens) | music box |
+| 4 | Windy Cliffs | outside, rows 15–19 | steady winds and gusts; pennants on the walls show which way and how hard | flute |
+| 5 | Ice Cavern | outside, rows 20–24 | ice (with lips that stop the slide), snow, crumbling ledges; a hollow behind the right-hand wall | glass bells |
+| 6 | The Summit | outside, rows 25–26 | "Last jump!", the flag, the fake credits (the sky above, rows 27–29, is only seen by them) | brass |
+| 7 | Inside the Mountain | inside, rows 22–28 | dark (a lamp, and ledges whose edges glow), mushrooms that throw you up, crumbling ledges | cello |
+| 8 | The Sky Ladder | inside, rows 29–35 | clouds that hold you for a second, gusts | harp |
+| 9 | Almost There | inside, rows 36–39 | everything at once, and the real summit | piano |
+
+### Differences from the draft
+
+- **Screens are text, not LDtk**: each one is a 48 × 27 character map (`world/zone*.ts`; the legend is in `core/mountain.ts`), with gears and wind defined next to it. A screen is 384 × 216 pixels of 8 px tiles, scaled up in whole pixels where it fits.
+- **The physics, measured**: a charge of up to 0.6 s (36 ticks), a jump from 1.9 to 5.6 px/tick up (one tile to nine and a half), 1.6 px/tick sideways, gravity 0.2, falls capped at 6 px/tick. Walls send you back at half speed; ceilings stop you. A full charge goes by itself. Snow takes 15% off a jump. A mushroom throws you up at 6.4 px/tick, once: land on it again and you stay (no bouncing forever). Crumbling ledges and clouds go a second after you land and come back three seconds later. A fall of over 144 px at full speed ends in a faceplant (a third of a second).
+- **A solver proves the climb is fair**, on the mountain and on Mirror Mountain: a best-first search over places Pip can stand, trying every jump (walk, wait for the gears or the gusts, charge, let go) on the real simulation. A jump only counts if it still lands on the same ledge with the take-off 4 px either way and a tick more or less of charge, which is the plan's 4 px margin. The routes (`world/routes.ts`, regenerated with `UPDATE_ROUTES=1`) are replayed by the tests: a perfect climb takes about 5 minutes 40 seconds and 250 jumps.
+- **Planned falls are a test.** From every ledge on both mountains, every step off and jumps at six strengths in three directions land within one zone of where they started: floors at the bottom of the Rooftops, the Ice Cavern and Almost There catch anything that falls far, with a gap over the ledge you come up on (and a wide ledge under the gap). The two biggest falls are the top of the Windy Cliffs (back to the Clocktower) and the Sky Ladder (back to the caves), and both have a warning sign. Every ledge has room for Pip to stand.
+- **The fake summit sequence** takes 18 seconds: the flag goes up to a fanfare, Chirp says "We did it! We actually did it!" (looking at the camera), THE END, then the credits ("Thanks for playing… so far"). Halfway through, the camera pans up two screens to the rest of the mountain, rising out of the clouds to a peak whose flag is a speck. "…just kidding." The music stops with a scratch, the summit's ledge shakes, and it falls: Pip drops about four screens into a cave next to the seal, which has cracked open (Chirp: "…I didn't know. Honest. But look: a way in!"). The credits can be skipped after the first time. The collapse isn't counted as a fall.
+- **The progress bar** runs ahead of the truth (90% of `t^0.8` of the way to the fake summit, so 90% there), says 99.9% for the whole second half, and from the last zone on says "Progress bar broke. Sorry." (it stays broken). The pause menu shows the honest altitude in metres (20 px to the metre: the climb is 427 m), the highest you've been, the time, jumps, falls, metres fallen and feathers.
+- **Saving** (no save-scumming): the climb is written on every jump (the moment you leave the ground), every landing, every screen change, four times a second while anything moves, and when the tab is hidden or closed. Everything about the simulation is in the save, velocity included, so a reload mid-fall carries on the same fall. A charge in progress is let go of on reload (that was your thumb, not Pip's momentum). The previous good climb is kept every five seconds as a backup in case the main slot is damaged. A climb saved with older physics goes back to the last place Pip stood still. A new climb over an old one asks first.
+- **Chirp** has 49 lines for 28 moments (falls by size, near misses, nice jumps, bonks, idling, signs, the elevator, the joke flag, feathers, each zone, the summits). Sincere lines face Pip; trolling lines face the camera (and have a warmer bubble). It waits about nine seconds between remarks, except for the story. Its lines can be shown larger. Mirror Mountain has no Chirp.
+- **The Express Elevator** waits half a second, then goes down two screens. Its display shows ▲, and for a single frame every 3.1 s, ▼. You climb back from a ledge at the bottom of its shaft (with a feather on it).
+- **Inside the Mountain** is dark: Pip's lamp lights about 100 px, mushrooms, signs and feathers glow, and the tops of the ledges glow faintly, so the next ledge is always visible (no falls that can't be seen coming).
+- **Lost Feathers** (12, one or two per zone, in risky spots) are hats: an acorn cap, a flat cap, a bobble hat, a top hat, a propeller cap, an aviator's cap, earmuffs, an ice crown, a miner's helmet, a party hat, a halo and a golden plume. The first one you find goes straight on. Each can be reached fairly from the route (`world/feather-runs.ts`).
+- **Assist mode**: checkpoint flags (up to three per zone; C plants, R goes back to the newest), a dotted preview of where the jump will land while you charge, and 75% speed. A climb that ever had assist on is marked, and doesn't set best times.
+- **The ending**: "You climbed 427 m. You fell … m.", time (and best), jumps, falls, biggest fall, feathers, zone splits beside your best climb's, and a share card. Then Mirror Mountain (every screen flipped, the wind reversed, no Chirp), which opens after the first real summit.
+- **Camera**: an instant cut to the screen Pip's middle is in; the background's far mountains (with the Summit Mirage, a painted peak with a flag) move only a little when it cuts.
+- **Music** never restarts on a fall: the whole climb shares one slow D minor chord loop, and each zone changes only the instrument and its melody, at the next bar. Each zone also has its air (wind outside, ticking in the tower, drips in the ice and the caves).
+- **Phones**: arrows on one side and a big jump button on the other (they can swap), the screen kept awake (Wake Lock), and a small buzz on landing where vibration exists (Android).
+- **Screen readers** hear Chirp's lines, the signs, falls and their size, the feathers and the story, from a live region over the canvas.
+- **Achievements**: the seven from §7.
+
+### Testing (as built)
+
+- `world/route.test.ts`: the mountain and Mirror Mountain replay the solver's route to the real summit, through the credits and the collapse, reaching every zone in order.
+- `world/world.test.ts`: the zones and their screen counts, the flags and the seal, twelve feathers, the tricks (lying and warning signs, the joke flag, footprints, the elevator, gears, wind), Mirror Mountain is the mountain flipped, every ledge has room to stand, and no fall passes a whole zone.
+- `world/feathers.test.ts`: every Lost Feather can be reached, on both mountains.
+- `core/sim.test.ts`: charge jumps, direction on release, no air control, wall bounces at half speed, ceilings, ice, snow, crumbling ledges, clouds, mushrooms (once), the elevator, faceplants, the summit's fall, determinism.
+- `core/climb.test.ts`: jumps, falls and metres fallen (the collapse isn't one), zone splits, a reload mid-fall carrying on identically, 60, 120 and 144 Hz giving the same climb, reloads while charging, older saves, assist checkpoints.
+- `core/progress.test.ts`, `core/chirp.test.ts`, `core/records.test.ts`, `save.test.ts`, `audio/audio.test.ts`: the lying bar and the honest altitude, Chirp's script and timing, every achievement and best times, saves (mid-air round trips, the backup), every sound and every zone's tune.
+- `tests/e2e/almost-there.spec.ts`: the real build in Chromium on a desktop and a phone (the first screen and the bar, a jump saved at take-off, refreshing mid-fall, the honest pause menu, the fake summit's credits and collapse, the real summit and Mirror Mountain, a new climb over an old one, touch controls).
+
+### Not built yet
+
+The plan's "Later" list: speedrun history and ghosts, ghost challenge links, and the Fall Cam.

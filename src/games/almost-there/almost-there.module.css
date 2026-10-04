@@ -1,0 +1,422 @@
+/* Almost There: a long, quiet climb (Plan/08-almost-there.md §9). Silkscreen for signs and Chirp's
+   bubbles, Pixelify Sans for the rest, mountain navy and sunset peach. */
+
+.root {
+  --at-navy: #1e2a44;
+  --at-night: #2e222f;
+  --at-cream: #f7f4ef;
+  --at-peach: #f2b880;
+  --at-deep: #9d7853;
+  --at-snow: #ffffff;
+  --at-hot: #f04f78;
+  --at-aqua: #30e1b9;
+  --at-sign: var(--font-g-silkscreen), ui-monospace, monospace;
+  --at-font: var(--font-pixelify), ui-monospace, monospace;
+  color: var(--at-cream);
+}
+
+.pixel {
+  font-family: var(--at-font);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.silk {
+  font-family: var(--at-sign);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+/* A box with a stepped pixel border. */
+.panel {
+  position: relative;
+  background: var(--at-cream);
+  color: var(--at-navy);
+  box-shadow:
+    0 -4px 0 0 var(--at-navy),
+    0 4px 0 0 var(--at-navy),
+    -4px 0 0 0 var(--at-navy),
+    4px 0 0 0 var(--at-navy),
+    0 10px 0 0 rgb(0 0 0 / 0.35);
+}
+
+/* ---------------------------------------------------------------------------------------------
+   The title: Pip at the foot of the mountain, the summit far above.
+   --------------------------------------------------------------------------------------------- */
+
+.title {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  background: var(--at-navy);
+}
+
+.scene {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 100%;
+  image-rendering: pixelated;
+}
+
+.fade {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(ellipse 60% 38% at 50% 44%, rgb(30 42 68 / 0.5), rgb(30 42 68 / 0) 100%),
+    linear-gradient(rgb(30 42 68 / 0.15), rgb(30 42 68 / 0) 30%, rgb(30 42 68 / 0) 55%, rgb(30 42 68 / 0.75));
+}
+
+.logo {
+  font-family: var(--at-sign);
+  font-weight: 700;
+  font-size: clamp(2.4rem, 9.5vw, 5.6rem);
+  line-height: 0.95;
+  letter-spacing: 0.02em;
+  color: var(--at-snow);
+  text-transform: uppercase;
+  text-shadow:
+    4px 0 0 var(--at-navy),
+    -4px 0 0 var(--at-navy),
+    0 4px 0 var(--at-navy),
+    0 -4px 0 var(--at-navy),
+    4px 4px 0 var(--at-navy),
+    -4px 4px 0 var(--at-navy),
+    4px -4px 0 var(--at-navy),
+    -4px -4px 0 var(--at-navy),
+    0 9px 0 var(--at-deep),
+    4px 9px 0 var(--at-deep),
+    -4px 9px 0 var(--at-deep);
+}
+
+.start {
+  font-family: var(--at-sign);
+  font-weight: 700;
+  font-size: clamp(1rem, 3vw, 1.4rem);
+  padding: 0.85rem 2rem 0.8rem;
+  color: var(--at-navy);
+  background: var(--at-peach);
+  box-shadow:
+    0 -4px 0 0 var(--at-navy),
+    0 4px 0 0 var(--at-navy),
+    -4px 0 0 0 var(--at-navy),
+    4px 0 0 0 var(--at-navy),
+    0 10px 0 0 var(--at-deep),
+    0 14px 0 0 var(--at-navy);
+  cursor: pointer;
+  outline-offset: 10px;
+}
+
+.start:hover {
+  background: #f8c897;
+}
+
+.start:active {
+  transform: translateY(4px);
+}
+
+.start:focus-visible {
+  outline: 4px solid var(--at-snow);
+}
+
+.blink {
+  animation: blink 1.1s steps(2, jump-none) infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Climbing: the whole viewport, the header hidden underneath.
+   --------------------------------------------------------------------------------------------- */
+
+.area {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #0d0b14;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+.frame {
+  position: relative;
+}
+
+.canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+
+.hud {
+  font-family: var(--at-font);
+  font-weight: 700;
+  color: #fff;
+  text-shadow:
+    2px 0 0 var(--at-night),
+    -2px 0 0 var(--at-night),
+    0 2px 0 var(--at-night),
+    0 -2px 0 var(--at-night),
+    2px 2px 0 var(--at-night),
+    -2px -2px 0 var(--at-night),
+    2px -2px 0 var(--at-night),
+    -2px 2px 0 var(--at-night);
+}
+
+/* Sized with utilities (size-10): unlayered module CSS would beat them. */
+.hudButton {
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: rgb(46 34 47 / 0.7);
+  box-shadow:
+    0 -2px 0 0 #fff,
+    0 2px 0 0 #fff,
+    -2px 0 0 0 #fff,
+    2px 0 0 0 #fff;
+}
+
+.hudButton:hover {
+  background: rgb(157 120 83 / 0.9);
+}
+
+.hudButton:focus-visible {
+  outline: 3px solid var(--at-peach);
+  outline-offset: 4px;
+}
+
+/* The progress bar (it lies). */
+.bar {
+  position: absolute;
+  right: calc(var(--at-scale, 2) * 5px);
+  top: 18%;
+  bottom: 18%;
+  width: calc(var(--at-scale, 2) * 6px);
+  background: rgb(46 34 47 / 0.55);
+  box-shadow:
+    0 -2px 0 0 #fff,
+    0 2px 0 0 #fff,
+    -2px 0 0 0 #fff,
+    2px 0 0 0 #fff;
+}
+
+.barFill {
+  position: absolute;
+  inset: auto 0 0 0;
+  background: linear-gradient(var(--at-peach), #f9c22b);
+  transition: height 0.6s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+.barLabel {
+  position: absolute;
+  right: calc(100% + var(--at-scale, 2) * 3px);
+  white-space: nowrap;
+  font-size: clamp(0.62rem, calc(var(--at-scale, 2) * 5px), 1.05rem);
+  transform: translateY(50%);
+}
+
+.barBroken {
+  background: repeating-linear-gradient(135deg, rgb(240 79 120 / 0.6) 0 4px, rgb(46 34 47 / 0.6) 4px 8px);
+}
+
+/* Chirp's speech bubble, and a sign's words: anchored by the runtime (left/top in %). */
+.bubble {
+  position: absolute;
+  z-index: 3;
+  max-width: min(46%, 22rem);
+  padding: 0.35em 0.6em 0.3em;
+  transform: translate(-50%, calc(-100% - 0.6em));
+  font-family: var(--at-sign);
+  font-size: clamp(0.58rem, calc(var(--at-scale, 2) * 4.4px), 0.95rem);
+  line-height: 1.35;
+  color: var(--at-navy);
+  background: var(--at-cream);
+  box-shadow:
+    0 -2px 0 0 var(--at-navy),
+    0 2px 0 0 var(--at-navy),
+    -2px 0 0 0 var(--at-navy),
+    2px 0 0 0 var(--at-navy);
+  pointer-events: none;
+  text-align: center;
+  /* Shown once the runtime has put it in place (the next frame). */
+  visibility: hidden;
+  animation: pop 0.22s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+}
+
+.bubble::after {
+  content: "";
+  position: absolute;
+  left: calc(50% - 4px + var(--tail, 0px));
+  bottom: -8px;
+  border: 4px solid transparent;
+  border-top-color: var(--at-navy);
+}
+
+.big {
+  font-size: clamp(0.8rem, calc(var(--at-scale, 2) * 6px), 1.3rem);
+}
+
+.troll {
+  background: #fff3d6;
+}
+
+.signBubble {
+  background: #f3e1c7;
+  color: #4c3e24;
+}
+
+.warningBubble {
+  background: #fff;
+  color: #ae2334;
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-100% - 0.2em)) scale(0.85);
+  }
+}
+
+.touch {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: rgb(255 255 255 / 0.15);
+  border: 3px solid rgb(255 255 255 / 0.55);
+  border-radius: 1.1rem;
+  touch-action: none;
+  backdrop-filter: blur(2px);
+}
+
+.touch[data-held] {
+  background: rgb(242 184 128 / 0.5);
+  border-color: var(--at-peach);
+}
+
+/* The charge meter on the jump button. */
+.touchCharge {
+  position: absolute;
+  inset: auto 0 0 0;
+  border-radius: 0 0 0.8rem 0.8rem;
+  background: rgb(249 194 43 / 0.55);
+  pointer-events: none;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   The fake credits (Plan §5): THE END, the credits roll, and then the camera looks up.
+   --------------------------------------------------------------------------------------------- */
+
+.creditsLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  overflow: hidden;
+  pointer-events: none;
+  display: grid;
+  place-items: center;
+}
+
+.theEnd {
+  font-family: var(--at-sign);
+  font-weight: 700;
+  font-size: clamp(1.6rem, calc(var(--at-scale, 2) * 18px), 4.5rem);
+  letter-spacing: 0.06em;
+  color: #fff;
+  text-shadow:
+    3px 3px 0 var(--at-night),
+    -3px 3px 0 var(--at-night),
+    3px -3px 0 var(--at-night),
+    -3px -3px 0 var(--at-night);
+  animation: fadeUp 1.4s ease both;
+}
+
+.roll {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.6em;
+  padding-top: 10%;
+  font-family: var(--at-sign);
+  font-size: clamp(0.62rem, calc(var(--at-scale, 2) * 5px), 1.15rem);
+  color: #fff;
+  text-align: center;
+  text-shadow:
+    2px 2px 0 var(--at-night),
+    -2px 2px 0 var(--at-night),
+    2px -2px 0 var(--at-night),
+    -2px -2px 0 var(--at-night);
+  will-change: transform;
+}
+
+.roll dt {
+  color: var(--at-peach);
+  font-size: 0.8em;
+}
+
+.kidding {
+  font-family: var(--at-sign);
+  font-weight: 700;
+  font-size: clamp(1.1rem, calc(var(--at-scale, 2) * 11px), 2.6rem);
+  color: #fff;
+  text-shadow:
+    3px 3px 0 var(--at-night),
+    -3px 3px 0 var(--at-night),
+    3px -3px 0 var(--at-night),
+    -3px -3px 0 var(--at-night);
+  animation: fadeUp 0.6s ease both;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+/* The ending's stats card. */
+.card {
+  animation: drop 0.45s cubic-bezier(0.2, 1.5, 0.4, 1) both;
+}
+
+@keyframes drop {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+}
+
+.stat {
+  font-family: var(--at-sign);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bubble,
+  .theEnd,
+  .kidding,
+  .card {
+    animation: none;
+  }
+
+  .barFill {
+    transition: none;
+  }
+}
