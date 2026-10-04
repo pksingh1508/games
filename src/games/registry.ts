@@ -899,7 +899,7 @@ const DATA: Record<GameSlug, GameData> = {
     inspirations: ["VVVVVV", "Super Mario Galaxy", "And Yet It Moves", "Fez"],
     session: "1–4 min per room",
     inputs: ["keyboard", "gamepad", "touch"],
-    status: "workshop",
+    status: "playable",
   },
 };
 

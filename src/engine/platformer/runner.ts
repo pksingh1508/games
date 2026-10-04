@@ -79,6 +79,38 @@ export function createRunner(x: number, y: number, w: number, h: number): Runner
  * (a conveyor belt under its feet).
  */
 export function stepRunner(r: Runner, input: RunnerInput, solids: Solids, t: Tuning = DEFAULT_TUNING, carry = 0): RunnerEvents {
+  const events = steerRunner(r, input, t, carry);
+
+  if (moveX(r, r.vx + carry, solids)) r.vx = 0;
+  const falling = r.vy;
+  if (moveY(r, r.vy, solids)) {
+    if (falling > 0) {
+      events.landed = !r.grounded;
+      events.impact = falling;
+    } else {
+      events.bonked = true;
+      r.rising = false;
+    }
+    r.vy = 0;
+  }
+
+  const wasGrounded = r.grounded;
+  r.grounded = onGround(r, solids);
+  if (r.grounded) {
+    r.coyote = t.coyoteTicks;
+    if (!wasGrounded && !events.landed) events.landed = true;
+  } else if (r.coyote > 0) {
+    r.coyote--;
+  }
+  return events;
+}
+
+/**
+ * The speeds half of a tick: running, jumping (buffered, with coyote time and a variable height)
+ * and gravity, without moving. For games that move the runner their own way (round planets).
+ * The caller moves it, then keeps `grounded` and `coyote` up to date.
+ */
+export function steerRunner(r: Runner, input: RunnerInput, t: Tuning = DEFAULT_TUNING, carry = 0): RunnerEvents {
   const events: RunnerEvents = { jumped: false, landed: false, bonked: false, impact: 0 };
   const dir = (input.right ? 1 : 0) - (input.left ? 1 : 0);
   if (dir !== 0) r.facing = dir as 1 | -1;
@@ -119,27 +151,5 @@ export function stepRunner(r: Runner, input: RunnerInput, solids: Solids, t: Tun
   // Gravity, gentler at the top of a held jump.
   const hang = input.jump && Math.abs(r.vy) < t.apexSpeed ? t.apexGravity : 1;
   r.vy = Math.min(t.maxFall, r.vy + t.gravity * hang);
-
-  if (moveX(r, r.vx + carry, solids)) r.vx = 0;
-  const falling = r.vy;
-  if (moveY(r, r.vy, solids)) {
-    if (falling > 0) {
-      events.landed = !r.grounded;
-      events.impact = falling;
-    } else {
-      events.bonked = true;
-      r.rising = false;
-    }
-    r.vy = 0;
-  }
-
-  const wasGrounded = r.grounded;
-  r.grounded = onGround(r, solids);
-  if (r.grounded) {
-    r.coyote = t.coyoteTicks;
-    if (!wasGrounded && !events.landed) events.landed = true;
-  } else if (r.coyote > 0) {
-    r.coyote--;
-  }
   return events;
 }

@@ -108,6 +108,7 @@ src/
     trapsprint/               # TrapSprint: the first platformer; levels are proven by a solver (built)
     fake-floor/               # Fake Floor: rooms proven by a solver, and fair by a test of every tell (built)
     almost-there/             # Almost There: one 45-screen climb, proven fair by a solver on both mountains (built)
+    gravity-is-lying/         # Gravity Is Lying: 44 rooms with four-way gravity and planets, each proven by a solver (built)
     one-more-step/ ...        # one folder per game; entry file: index.tsx
   engine/                     # shared, framework-free TypeScript
     loop.ts                   # fixed-timestep loop (60 Hz accumulator) on requestAnimationFrame (built)
@@ -137,7 +138,7 @@ tests/e2e/                    # Playwright: games played end to end on desktop a
 | Shared piece | Used by |
 |---|---|
 | `engine/loop` (canvas game loop) | Every canvas game: One More Step, Fake Floor, TrapSprint, Glitch Run, Almost There, Last Pixel, Panic Stack, Cursor Escape, Don't Blink, Gravity Is Lying, Don't Trust The Game (platform scenes). One Tap Chaos runs on its own beat clock instead: everything in it is measured in beats |
-| `engine/platformer` | **TrapSprint** (built first), **Fake Floor** (built), **Almost There** (built), Gravity Is Lying, Glitch Run, Don't Trust The Game |
+| `engine/platformer` | **TrapSprint** (built first), **Fake Floor** (built), **Almost There** (built), **Gravity Is Lying** (built), Glitch Run, Don't Trust The Game |
 | `engine/postfx` | Glitch Run, Don't Blink, Don't Trust The Game |
 | `engine/browser` | Don't Trust The Game, Last Pixel, Cursor Escape, 99 Seconds |
 | `engine/rng` | One Tap Chaos, Glitch Run, Wrong Door, Panic Stack, Don't Blink, One More Step (daily puzzle) |
@@ -165,7 +166,7 @@ tests/e2e/                    # Playwright: games played end to end on desktop a
 | 1 | ✅ **NOPE!** (playable) | Pure React/DOM. Ships fast and tests the shell. |
 | 2 | ✅ **One Tap Chaos** (playable) | Adds the canvas game, one-button input and audio-synced timing |
 | 3 | ✅ **TrapSprint** (playable) | Builds the shared platformer kit |
-| 4 | ✅ **Fake Floor** (playable), ✅ **Almost There** (playable), then **Gravity Is Lying**, **Glitch Run** | Reuse and extend the platformer kit |
+| 4 | ✅ **Fake Floor** (playable), ✅ **Almost There** (playable), ✅ **Gravity Is Lying** (playable), then **Glitch Run** | Reuse and extend the platformer kit |
 | 5 | **Cursor Escape**, **Last Pixel** | Pointer-driven games, browser helpers |
 | 6 | **One More Step**, **Wrong Door** | Logic engines with automated solvers |
 | 7 | **Panic Stack** | Adds a physics library |
