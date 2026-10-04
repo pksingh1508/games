@@ -24,6 +24,7 @@ const GAMES: Partial<Record<GameSlug, ComponentType>> = {
   "gravity-is-lying": dynamic(() => import("@/games/gravity-is-lying"), { ssr: false, loading: Loading }),
   "glitch-run": dynamic(() => import("@/games/glitch-run"), { ssr: false, loading: Loading }),
   "cursor-escape": dynamic(() => import("@/games/cursor-escape"), { ssr: false, loading: Loading }),
+  "last-pixel": dynamic(() => import("@/games/last-pixel"), { ssr: false, loading: Loading }),
 };
 
 export function GameLoader({ slug }: { slug: GameSlug }) {

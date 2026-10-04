@@ -307,11 +307,11 @@ src/games/last-pixel/
 
 ## 13. Build Roadmap
 
-- [ ] **M1: Satisfying core.** Coverage grid, stroke filling, roller + brush + sponge, progress display
-- [ ] **M2: Pix v1.** The switch moment, flee + camouflage, click + net + magnifier + detector, World 1
-- [ ] **M3: More tools + tricks.** Mower, shovel, washer; decoys, burrow; World 2
-- [ ] **M4: Meta tricks.** Draggable HUD, dead pixel gambit, mimic cursor, DOM escape, tab escape; Worlds 3–4
-- [ ] **M5: Finale + polish.** Pix's Revenge, logo ending, achievements, accessibility options
+- [x] **M1: Satisfying core.** Coverage grid, stroke filling, roller + brush + sponge, progress display
+- [x] **M2: Pix v1.** The switch moment, flee + camouflage, click + net + magnifier + detector, World 1
+- [x] **M3: More tools + tricks.** Mower, shovel, washer; decoys, burrow; World 2
+- [x] **M4: Meta tricks.** Draggable HUD, dead pixel gambit, mimic cursor, DOM escape, tab escape; Worlds 3–4
+- [x] **M5: Finale + polish.** Pix's Revenge, logo ending, achievements, accessibility options
 - [ ] **Later:** Zen mode, daily canvas, time attack
 
 ---
@@ -324,3 +324,201 @@ src/games/last-pixel/
 - The favicon and tab title are always restored after the bonus level.
 - 60 fps while painting with fast strokes on a mid-range phone.
 - Progress and stars survive page reloads.
+
+---
+
+## 15. As Built
+
+Last Pixel is playable at `/games/last-pixel/play`. It has:
+
+- 40 levels in four worlds, then the finale, Pix's Revenge;
+- all eight clean-up tools;
+- all ten of Pix's behaviours;
+- the click, the net, the magnifier, bait, freeze and the pixel detector;
+- stars, best times and six achievements;
+- hunt assist, the magnifier's strength, the detector's beeps and reduce motion;
+- the ending, where Pix becomes the dot on the logo's "i", with a share line.
+
+Everything is made in code, with no asset files:
+
+- **Art:** the pictures are pixel art drawn cell by cell (rooms, windows, lawns, driveways, patios, lottery cards, a computer's desktop). The tools and Pix are sprites.
+- **Music:** calm music for the clean-up, a 120 bpm chase for the hunt, and a menu tune.
+- **Sounds:** each tool's own voice (filtered noise that follows how hard you're working), and ZzFX effects.
+
+It reuses `engine/loop`, `engine/sprites`, `engine/rng`, the audio engine and sound bank, and `games/shared`.
+
+It adds to the shared engine:
+
+- `engine/browser/tab.ts`: borrow the tab's title and icon, always give them back, and know when the player looks away.
+- An export of the pixel font's glyphs, so pictures can carry words.
+
+### The levels
+
+The canvas is 128 × 72 cells. The clean-up star's target is the bot's own clean-up plus 30%, rounded up to half a second (`levels/targets.ts`).
+
+| Level | Name | Tools | Pix | Target |
+|---|---|---|---|---|
+| 1-01 | Fresh Coat | Roller | Flees (slowly) | 33.5 s |
+| 1-02 | Around the Window | Roller | Flees · the net | 33.5 s |
+| 1-03 | Trim | Brush | Flees | 47.5 s |
+| 1-04 | Spring Clean | Sponge | Flees | 69 s |
+| 1-05 | Magnolia | Roller | **Camouflage** on its own · the magnifier | 33.5 s |
+| 1-06 | Nursery | Roller | Flees, camouflaged | 33.5 s |
+| 1-07 | Bay Window | Sponge | Flees, camouflaged | 69 s |
+| 1-08 | Feature Wall | Roller | Flees, fast | 33.5 s |
+| 1-09 | Picture Rail | Brush | Flees, camouflaged | 57.5 s |
+| 1-10 | Open House | Roller, sponge | Flees, camouflaged | 44.5 s |
+| 2-01 | Front Lawn | Mower | Flees · freeze | 88 s |
+| 2-02 | First Snow | Shovel | Flees | 48 s |
+| 2-03 | Patio Day | Washer | Flees · bait | 56 s |
+| 2-04 | Fireflies | Mower (at dusk) | **Decoys** on their own, among fireflies | 88 s |
+| 2-05 | Moss | Washer | **Burrows** | 56 s |
+| 2-06 | Stripes | Mower | Flees, with decoys | 88 s |
+| 2-07 | Snowed In | Shovel | Flees, burrows | 54 s |
+| 2-08 | Garden Path | Washer | Flees, with decoys | 56 s |
+| 2-09 | Night Mow | Mower (at night) | Decoys, burrows | 88 s |
+| 2-10 | Garden Party | Mower, washer | Flees, decoys, burrows | 104 s |
+| 3-01 | Doodle | Eraser | Flees | 37 s |
+| 3-02 | Smudges | Sponge | **Under the HUD** | 76 s |
+| 3-03 | Stuck Pixel | Eraser | **A dead pixel** | 35.5 s |
+| 3-04 | Two Cursors | Sponge | **A second cursor** (mirrored left–right) | 60.5 s |
+| 3-05 | Wallpaper | Eraser | Flees, under the HUD | 37.5 s |
+| 3-06 | Screensaver | Sponge | Camouflaged, a dead pixel | 59.5 s |
+| 3-07 | Desktop Icons | Eraser | Flees, a second cursor (mirrored up–down) | 38.5 s |
+| 3-08 | Fingerprints | Sponge | Flees, decoys, under the HUD | 60.5 s |
+| 3-09 | Blue Screen | Eraser | Flees, a dead pixel, a second cursor | 38.5 s |
+| 3-10 | Clean Install | Eraser, sponge | Flees; the HUD, a dead pixel, a second cursor | 120.5 s |
+| 4-01 | Lucky Pixel | Scratch coin | Flees, **out of the canvas** (into the "%") | 72 s |
+| 4-02 | Wet Paint | Roller | Flees, **un-paints a trail** | 33.5 s |
+| 4-03 | Logo | Shovel | Flees, into the logo's "i" | 55.5 s |
+| 4-04 | Undo | Washer | Flees, camouflaged, a trail | 56 s |
+| 4-05 | Toolbar | Scratch coin | Decoys, onto the pause button | 79 s |
+| 4-06 | Backwards | Sponge | Flees, a trail, under the HUD | 69 s |
+| 4-07 | Jackpot | Scratch coin | Flees, a dead pixel, out of the canvas | 72 s |
+| 4-08 | Snow Day | Shovel | Flees, a trail, burrows | 62.5 s |
+| 4-09 | Everything | Roller, sponge | Flees, a trail, the HUD, out of the canvas | 41.5 s |
+| 4-10 | Tab Escape (bonus) | Sponge | Flees, **into the tab** | 69 s |
+| ★ | Pix's Revenge | Roller, brush | See below | 51 s |
+
+**Bold** marks a trick's first appearance: each comes in on its own, and only running away goes with it. The hunt tools come in the same way: the net at 1-02, the magnifier at 1-05, freeze at 2-01, bait at 2-03. Every camouflage level has the magnifier.
+
+The finale works like this:
+
+1. **Revenge:** the wall has "LAST PıXEL" painted on it. Pix tears through 2,600 cells of it while you repaint, and can't be caught while it does ("not yet!").
+2. **The dive:** it dives into the gaps and is the last pixel again once you've repainted.
+3. **Three catches:** it has to be caught three times. First it flees camouflaged and leaves a trail. Then it flees with four decoys and hides under the HUD. Last, it plays a dead pixel, then a second cursor, then escapes into the logo's "i". That's where it belonged all along.
+4. **The ending:** the ending screen flies Pix up into the logo's "i". From then on the logo has its dot everywhere.
+
+### How the truth is kept
+
+| Lie | The tell |
+|---|---|
+| The last 0.01% | A "!" over it, and the music cuts |
+| Camouflage | Within 2% of the background's brightness (brightness, not hue, so it's the same trick for every eye), with a shimmer every 2 s (every second when tired, or with the assist). The magnifier boosts local contrast, so nothing blends in under it, and shows Pix's face |
+| Decoys | The real one blinks on every beat of the chase music; decoys blink when they like, and ignore bait |
+| Under the HUD | The panel wobbles (or gets a dashed outline, with reduce motion); drag it aside |
+| A dead pixel | A pin-prick of pure green somewhere off the canvas. Pause, and it's gone: a real one would still be there |
+| A second cursor | It moves mirrored to your hand; touch it with yours and it drops the act |
+| Burrowed | The detector beeps faster as you get close; any stroke of your tool over it digs it out |
+| Out of the canvas | An arrow at the canvas's edge points to it (in the "%", the logo's "i", on the pause button) |
+| Into the tab | The tab's title and icon become Pix; look away and come back |
+| The repaint trail | The trail it leaves is plain to see, and the progress goes down |
+| Always | The detector's ring round your pointer turns hot and pulses faster as you get close; Pix tires at 30 s and gives up at 60 s ("fine."), coming out of any hiding place |
+
+### Differences from the draft
+
+- **Coverage is 0–255 per cell, not 0/1.** So the sponge and the scratch coin reveal a little at a time, and the roller's edges only part-paint, so strokes want to overlap ("slower at the edges"). A cell counts once it's full, and the count is kept as cells fill. Nothing ever scans the canvas's pixels: the renderer puts only the changed box of cells.
+- **The last cell can't be covered by a tool.** When a stroke would finish everything at once, the last cell it reaches refuses. That's Pix. Near the end (98.5%), the cells you missed sparkle.
+- **The grid is 128 × 72**, chunkier than the draft's 160 × 90, so Pix and the art read on a phone.
+- **The tools as built:**
+  - the roller is wide with soft edges;
+  - the brush is small;
+  - the sponge wipes at a fixed rate per cell, up to 2.6× faster when you circle or scrub;
+  - the scratch coin's reveal is speckled;
+  - the mower drives itself towards your pointer, with momentum and a turning circle, and stripes the lawn by the way it went;
+  - the shovel's load is capped; push it off the drive (onto the lawn) or it's left as a heap where you let go;
+  - the washer has a narrow full-strength jet in a fine mist;
+  - the eraser only works on doodles.
+- **Pix's traits and tricks are separate:**
+  - Traits are always on: fleeing, camouflage, decoys, the repaint trail.
+  - Tricks come one at a time, in order. Each lasts until you see through it, then Pix is stunned for 1.3 s and runs free for 4 s before the next.
+- **Fleeing as built:**
+  - Pix runs from your cursor within 15 cells, faster the closer you get, and dodges sideways when you're right on it.
+  - It gets winded after a few seconds of hard running (which isn't in the draft), so cornering it or chasing it down works.
+- **Waking:** when Pix wakes it can't be caught during its "!" (1.1 s) or the quick dash that follows (under a second).
+- **Burrowing:** any tool digs Pix out, not only the sponge or scratch coin, since World 2 has neither.
+- **The mimic** moves by your movement, mirrored left–right or up–down. Walk towards it along the mirrored axis, and pin it against an edge for the other.
+- **The net** is three per level and catches whatever's inside when you let go. Draw it for more than half a second and Pix slips out.
+- **Bait:** Pix rushes to it for 2 seconds (decoys don't care).
+- **Freeze** stops everything for a second.
+- **The magnifier** is a lens about 22 cells across that trails your hand a little ("it slows you down"). Its strength (2×, 3× or 4×) is in Options.
+- **The HUD** is three panels over the canvas: progress, tools, pause.
+  - They're draggable at any time by their grip, and anywhere on the panel during the hunt.
+  - While you paint, they fade and let your strokes through, so you can see what's under them.
+- **The play screen covers the whole window** (the site's header too), so the canvas gets every pixel. "The page" Pix escapes into is the game's own logo bar and HUD.
+- **Level 4-10 is the bonus.** It's the tab escape, and the finale opens once 4-09 is done. The scratch coin first appears in World 4, which is where the draft's world table first lists all the tools.
+- **Hunt assist:** the third star (Pix in under 10 seconds) and Gotcha need it off.
+- **Colour-blind players:** no separate option is needed, because camouflage is by brightness for everyone.
+- **Performance:** fast strokes and the busiest hunts (fireflies, five glowing pixels, the lens) hold 60 fps on a phone profile with the CPU slowed 4×.
+- **Not built yet** (Later): Zen mode, the daily canvas, time attack.
+
+### The bot
+
+Every level is played through by a bot made of code (`core/bot.ts`), using the real simulation:
+
+- **The clean-up:** rows across each job at a steady hand's speed, scrubbing zig-zags for the sponge, and two passes for the scratch coin. It steers the mower with a carrot held about 8 cells ahead, and pushes snow off the nearer edge of the drive. Then it mops up whatever's left.
+- **The hunt:** it plays like a person:
+  - it sees Pix a fifth of a second late and half-guesses where it's going;
+  - its hand accelerates to about 70 cells a second, and it pauses between clicks;
+  - it only sees a camouflaged Pix when it shimmers or is under the lens, and takes a couple of beats to pick the real one out of the decoys;
+  - it drags the wobbling panel, pauses on a dead pixel, pins a mimic, follows the arrow, and looks away from the tab.
+  - With the net and freeze it usually catches Pix in 2 to 9 seconds; without them, in 3 to 13.
+- **Targets:** `UPDATE_TARGETS=1 pnpm vitest run src/games/last-pixel/levels/runs.test.ts` re-plays every level's clean-up and rewrites the targets.
+
+### Testing (as built)
+
+- **`core/coverage.test.ts`** covers:
+  - the running count always matching a full scan;
+  - each tool only working on its own job;
+  - the last cell refusing;
+  - un-doing and re-doing cells;
+  - the dirty box.
+- **`core/tools.test.ts`** covers:
+  - no gaps in a flick, and the same paint for the same path at any speed;
+  - the roller's edges, the sponge's scrubbing and circling, the speckled scratch, and the washer's jet and mist;
+  - the mower's momentum, turning circle, coasting and stripes;
+  - the shovel's load, its dump off the drive, the heap where you let go, and a full blade.
+- **`core/world.test.ts`** covers:
+  - the switch and the progress display;
+  - "!" and the dash;
+  - catching and missing, fleeing, the net (quick and slow), freeze and bait, the stars;
+  - tiring and giving up;
+  - camouflage (2% and the shimmer), decoys (only the real one keeps the beat), the trail;
+  - every trick and how it's seen through;
+  - the finale;
+  - determinism.
+- **`core/progress.test.ts` and `save.test.ts`** cover stars, best times, every trophy, the unlock order (the bonus is optional), and the save's schema.
+- **`levels/levels.test.ts`** checks:
+  - four worlds of ten, then the finale;
+  - every picture is a full canvas, and the job visibly changes it;
+  - the bot cleans up every level within its own target and catches Pix, for exactly 100%;
+  - each trick comes in on its own, in the order above;
+  - the hunt tools arrive a level at a time, and there's a magnifier wherever Pix camouflages;
+  - page spots exist;
+  - only the bonus uses the tab;
+  - the finale is shaped as described.
+- **`levels/runs.test.ts`** checks there's a target for every level.
+- **`engine/browser/tab.test.ts`** checks:
+  - the title and every icon are borrowed and put back exactly;
+  - an icon is added and removed when there's none;
+  - what the site changed in the meantime is left alone;
+  - everything comes back when the page goes away;
+  - looking away and back is noticed.
+- **`games/progress.test.ts`** checks the cabinet's summary.
+- **`tests/e2e/last-pixel.spec.ts`** covers, on a computer and a phone:
+  - the logo's missing dot;
+  - painting the whole of Fresh Coat with real mouse strokes until the last pixel wakes, then finding Pix on the canvas and clicking it for a saved 100%;
+  - Esc pausing;
+  - the levels opening in order;
+  - options being saved;
+  - a finger painting on a phone.

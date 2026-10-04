@@ -60,6 +60,9 @@ const GLYPHS: Record<string, string> = {
 export const GLYPH_W = 3;
 export const GLYPH_H = 5;
 
+/** A glyph's pixels, row by row (15 "0"/"1"s), for drawing without a canvas (Last Pixel's pictures). */
+export const glyphBits = (ch: string): string => GLYPHS[ch.toUpperCase()] ?? GLYPHS["?"]!;
+
 /** Width in pixels of `text` at `scale` (1 px between letters). */
 export const textWidth = (text: string, scale = 1) => Math.max(0, text.length * (GLYPH_W + 1) - 1) * scale;
 

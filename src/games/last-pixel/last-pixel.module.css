@@ -1,0 +1,435 @@
+/* Last Pixel (Plan/10-last-pixel.md §8–§9): soft, colourful, satisfying. Cream paper, chunky ink outlines,
+   Baloo for words, and the canvas's own pixels crisp at any size. */
+
+.root {
+  --lp-ink: #3b3355;
+  --lp-cream: #fdf6ec;
+  --lp-violet: #6f5bf2;
+  --lp-lavender: #b7abff;
+  --lp-coral: #ff9e7d;
+  --lp-sun: #ffd23f;
+  font-family: var(--font-g-baloo), system-ui, sans-serif;
+  color: var(--lp-ink);
+}
+
+/* -- The logo ------------------------------------------------------------------------------------ */
+
+.logo {
+  font-family: var(--font-g-baloo), system-ui, sans-serif;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.i {
+  position: relative;
+  display: inline-block;
+}
+
+/* Where the i's dot should be: empty (Pix took it) until the finale puts it back. */
+.dot {
+  position: absolute;
+  left: 50%;
+  top: 0.06em;
+  width: 0.2em;
+  height: 0.2em;
+  translate: -50% 0;
+  border-radius: 0.02em;
+}
+
+.dot[data-on] {
+  background: var(--lp-cream);
+  box-shadow:
+    0 0 0 0.03em var(--lp-ink),
+    0 0 0.25em 0.05em rgb(255 244 214 / 0.9);
+}
+
+/* -- The play area ------------------------------------------------------------------------------- */
+
+/* The play screen covers the whole window (the site's header too): every pixel for the canvas. */
+.area {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--lp-cream);
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.35rem 0.75rem;
+}
+
+/* Sized by the window, never by the canvas inside it (the canvas is fitted to it). */
+.stageWrap {
+  position: relative;
+  display: grid;
+  flex: 1 1 0;
+  place-items: center;
+  min-height: 0;
+  overflow: hidden;
+  padding: 0 0.5rem 0.5rem;
+}
+
+.stage {
+  position: relative;
+  touch-action: none;
+  border-radius: 12px;
+  box-shadow:
+    0 0 0 3px var(--lp-ink),
+    0 8px 0 3px rgb(59 51 85 / 0.18);
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  image-rendering: pixelated;
+  cursor: crosshair;
+}
+
+.stage[data-hide-cursor] .canvas {
+  cursor: none;
+}
+
+/* -- The HUD: panels over the canvas (Pix hides under them; you can drag them about) -------------- */
+
+.panel {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.6rem;
+  border: 3px solid var(--lp-ink);
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 4px 0 rgb(59 51 85 / 0.9);
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.panel > * {
+  pointer-events: auto;
+}
+
+/* While you paint, panels fade and let strokes through, so you can see what's under them. */
+.stage[data-painting] .panel {
+  opacity: 0.28;
+}
+
+.stage[data-painting] .panel > * {
+  pointer-events: none;
+}
+
+/* In the hunt the whole panel's a handle. */
+.panel[data-grab] {
+  pointer-events: auto;
+  cursor: grab;
+}
+
+.panel[data-dragging] {
+  cursor: grabbing;
+  box-shadow: 0 8px 0 rgb(59 51 85 / 0.9);
+}
+
+/* Pix is under this one: it wobbles (the tell). */
+.panel[data-wobble] {
+  animation: wobble 0.5s ease-in-out infinite;
+}
+
+@keyframes wobble {
+  0%,
+  100% {
+    rotate: 0deg;
+  }
+  25% {
+    rotate: -1.6deg;
+  }
+  75% {
+    rotate: 1.6deg;
+  }
+}
+
+.handle {
+  display: grid;
+  width: 1.1rem;
+  place-items: center;
+  align-self: stretch;
+  margin-left: -0.2rem;
+  color: rgb(59 51 85 / 0.55);
+  cursor: grab;
+  touch-action: none;
+}
+
+.progress {
+  font-size: clamp(1rem, calc(var(--lp-scale, 8) * 2.4px), 1.9rem);
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.meter {
+  width: clamp(4rem, calc(var(--lp-scale, 8) * 11px), 8rem);
+  height: 0.45rem;
+  overflow: hidden;
+  border: 2px solid var(--lp-ink);
+  border-radius: 999px;
+  background: #ece6f9;
+}
+
+.meter > span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--lp-violet), var(--lp-coral));
+}
+
+.tool {
+  position: relative;
+  display: grid;
+  min-width: 2.6rem;
+  height: 2.6rem;
+  place-items: center;
+  padding: 0 0.35rem;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.tool:hover {
+  background: #f4f0ff;
+}
+
+.tool[aria-pressed="true"] {
+  border-color: var(--lp-ink);
+  background: var(--lp-lavender);
+}
+
+.tool:disabled {
+  opacity: 0.35;
+}
+
+.count {
+  position: absolute;
+  right: -0.25rem;
+  bottom: -0.2rem;
+  min-width: 1.05rem;
+  padding: 0 0.2rem;
+  border: 2px solid var(--lp-ink);
+  border-radius: 999px;
+  background: var(--lp-sun);
+  font-size: 0.7rem;
+  line-height: 0.95rem;
+}
+
+.key {
+  position: absolute;
+  top: -0.25rem;
+  left: -0.15rem;
+  font-size: 0.6rem;
+  font-weight: 700;
+  opacity: 0.6;
+}
+
+/* -- Cards over the canvas (start, pause, 100%) --------------------------------------------------- */
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  padding: 0.75rem;
+  border-radius: 12px;
+  background: rgb(253 246 236 / 0.55);
+  backdrop-filter: blur(2px);
+}
+
+.card {
+  width: min(28rem, 100%);
+  max-height: 100%;
+  overflow: auto;
+  padding: 1rem 1.25rem 1.1rem;
+  border: 3px solid var(--lp-ink);
+  border-radius: 1.4rem;
+  background: #fff;
+  box-shadow: 0 6px 0 var(--lp-ink);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  border: 3px solid var(--lp-ink);
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 3px 0 var(--lp-ink);
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.button:hover {
+  background: #f4f0ff;
+}
+
+.button:active {
+  translate: 0 2px;
+  box-shadow: 0 1px 0 var(--lp-ink);
+}
+
+.primary {
+  background: var(--lp-violet);
+  color: #fff;
+}
+
+.primary:hover {
+  background: #5d48e6;
+}
+
+.star {
+  display: inline-block;
+  color: #d9d3e8;
+  font-size: 1.9rem;
+  line-height: 1;
+  -webkit-text-stroke: 2px var(--lp-ink);
+}
+
+.star[data-on] {
+  color: var(--lp-sun);
+}
+
+.card[data-cleared] .star[data-on] {
+  animation: pop 0.45s cubic-bezier(0.3, 1.6, 0.6, 1) both;
+}
+
+.card[data-cleared] .star:nth-child(2) {
+  animation-delay: 0.25s;
+}
+
+.card[data-cleared] .star:nth-child(3) {
+  animation-delay: 0.5s;
+}
+
+@keyframes pop {
+  from {
+    scale: 0.2;
+    opacity: 0;
+  }
+}
+
+/* -- Pix off the canvas (in the page; a "dead pixel" on your monitor) ----------------------------- */
+
+.pix {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 80;
+  pointer-events: none;
+}
+
+.pix[data-kind="running"] {
+  background: #fff4d6;
+  box-shadow:
+    0 0 0 1px var(--lp-ink),
+    0 0 10px 3px rgb(255 244 214 / 0.9);
+}
+
+/* Sitting in the page, it wears the page's ink (it's being a dot, or a badge). */
+.pix[data-kind="hiding"] {
+  background: var(--lp-ink);
+  border-radius: 1px;
+}
+
+/* A stuck pixel: pure colour, crisp, no glow. */
+.pix[data-kind="dead"] {
+  background: #3dff6a;
+}
+
+/* -- Level select --------------------------------------------------------------------------------- */
+
+.thumb {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 10px;
+  image-rendering: pixelated;
+}
+
+.levelCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.45rem;
+  border: 3px solid var(--lp-ink);
+  border-radius: 1.1rem;
+  background: #fff;
+  box-shadow: 0 4px 0 var(--lp-ink);
+  text-align: left;
+}
+
+.levelCard:disabled {
+  border-style: dashed;
+  box-shadow: none;
+  opacity: 0.55;
+}
+
+.levelCard[aria-current="true"] {
+  outline: 3px solid var(--lp-violet);
+  outline-offset: 2px;
+}
+
+.float {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  50% {
+    translate: 0 -6px;
+  }
+}
+
+/* The ending: Pix floats up into the logo. */
+.homecoming {
+  position: absolute;
+  width: 0.2em;
+  height: 0.2em;
+  border-radius: 0.02em;
+  background: #fff4d6;
+  box-shadow:
+    0 0 0 0.03em var(--lp-ink),
+    0 0 0.4em 0.1em rgb(255 244 214 / 0.9);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel[data-wobble] {
+    animation: none;
+    outline: 3px dashed var(--lp-violet);
+    outline-offset: 3px;
+  }
+
+  .float,
+  .card[data-cleared] .star[data-on] {
+    animation: none;
+  }
+}
+
+:global(html[data-motion="reduce"]) .panel[data-wobble] {
+  animation: none;
+  outline: 3px dashed var(--lp-violet);
+  outline-offset: 3px;
+}

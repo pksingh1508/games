@@ -98,6 +98,23 @@ const SUMMARIES: Partial<Record<GameSlug, Summarize>> = {
       { label: "Trophies", value: `${Object.keys(record(save.achievements)).length}/6` },
     ];
   },
+  "last-pixel"(save) {
+    // Levels "1-01" to "4-10", then the finale ("5-01"): 41, up to three stars each (bits).
+    const levels = Object.entries(record(save.levels))
+      .filter(([id]) => /^[1-4]-(0[1-9]|10)$|^5-01$/.test(id))
+      .map(([, l]) => record(l));
+    const cleared = levels.filter((l) => count(l.clears) > 0).length;
+    const stars = levels.reduce((n, l) => {
+      const bits = count(l.stars) & 7;
+      return n + (bits & 1) + ((bits >> 1) & 1) + ((bits >> 2) & 1);
+    }, 0);
+    return [
+      { label: "At 100%", value: `${cleared}/41` },
+      { label: "Stars", value: `${stars}/123` },
+      { label: "Pix caught", value: `${count(record(save.stats).catches).toLocaleString("en-US")}×` },
+      { label: "Trophies", value: `${Object.keys(record(save.achievements)).length}/6` },
+    ];
+  },
   "cursor-escape"(save) {
     // Windows "C-01" to "F-10", then The Uninstaller ("X-01"): 41, a medal each.
     const levels = Object.entries(record(save.levels))
