@@ -146,6 +146,16 @@ const SUMMARIES: Partial<Record<GameSlug, Summarize>> = {
       { label: "Trophies", value: `${Object.keys(record(save.achievements)).length}/7` },
     ];
   },
+  "wrong-door"(save) {
+    const stats = record(save.stats);
+    const best = count(stats.bestEndless);
+    return [
+      { label: "Escapes", value: count(stats.escapes).toLocaleString("en-US") },
+      { label: "Best Endless floor", value: best ? String(best) : "—" },
+      { label: "Wrong doors", value: count(stats.wrongDoors).toLocaleString("en-US") },
+      { label: "Trophies", value: `${Object.keys(record(save.achievements)).length}/6` },
+    ];
+  },
   "one-tap-chaos"(save) {
     const best = count(save.best);
     // Mirrors the game's unlocks: 12 to start, 3 + 3 + 2 + 2 + 2 more at 10, 20, 30, 40 and 50.

@@ -20,6 +20,8 @@ import { NOPE_ACHIEVEMENTS } from "./nope/achievements";
 import { OMS_ACHIEVEMENTS } from "./one-more-step/achievements";
 import { LEVEL_IDS as OMS_LEVELS } from "./one-more-step/levels";
 import { defaultOmsSave, emptyLevel as emptyOmsLevel } from "./one-more-step/save";
+import { WRONG_DOOR_ACHIEVEMENTS } from "./wrong-door/achievements";
+import { defaultWrongDoorSave } from "./wrong-door/save";
 import { defaultNopeSave } from "./nope/save";
 import { OTC_ACHIEVEMENTS } from "./one-tap-chaos/achievements";
 import { MICROGAME_IDS, unlockedMicrogames } from "./one-tap-chaos/microgames";
@@ -194,6 +196,19 @@ describe("cabinet progress", () => {
       { label: "Steps walked", value: "12,345" },
       { label: "Trophies", value: `2/${OMS_ACHIEVEMENTS.length}` },
     ]);
+  });
+
+  it("summarizes a Wrong Door save (escapes, the best Endless floor, wrong doors)", () => {
+    const save = defaultWrongDoorSave();
+    save.stats = { ...save.stats, escapes: 3, bestEndless: 24, wrongDoors: 1205 };
+    save.achievements = { believer: 1, "the-switch": 2 };
+    expect(summarizeProgress("wrong-door", JSON.stringify(save))).toEqual([
+      { label: "Escapes", value: "3" },
+      { label: "Best Endless floor", value: "24" },
+      { label: "Wrong doors", value: "1,205" },
+      { label: "Trophies", value: `2/${WRONG_DOOR_ACHIEVEMENTS.length}` },
+    ]);
+    expect(summarizeProgress("wrong-door", JSON.stringify(defaultWrongDoorSave()))![1]).toEqual({ label: "Best Endless floor", value: "—" });
   });
 
   it("has nothing to say about games without a summary", () => {

@@ -784,8 +784,8 @@ const DATA: Record<GameSlug, GameData> = {
     comfort: ["Captions for every sound clue", "No colour-only clues", "No time pressure", "No jump scares"],
     inspirations: ["The Lady or the Tiger?", "The Monty Hall problem", "The Exit 8", "Return of the Obra Dinn"],
     session: "10–20 min runs",
-    inputs: ["mouse", "touch"],
-    status: "workshop",
+    inputs: ["keyboard", "mouse", "touch"],
+    status: "playable",
   },
 
   "dont-blink": {

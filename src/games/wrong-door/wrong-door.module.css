@@ -1,0 +1,612 @@
+/* Wrong Door (Plan/13-wrong-door.md §8–§9): a whimsical but eerie grand hotel. Plum and cream, brass and
+   gold; headings and numbers in Limelight, signs in Fraunces. Floors get darker and stranger going up. */
+
+.root {
+  --wd-plum: #2a1e2f;
+  --wd-plum-2: #3b2c42;
+  --wd-cream: #f3e3d3;
+  --wd-gold: #c9a227;
+  --wd-gold-deep: #836919;
+  --wd-ink: #2a1e2f;
+  --wd-red: #b23a48;
+  color: var(--wd-cream);
+}
+
+.display {
+  font-family: var(--font-g-limelight), Georgia, serif;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+.serif {
+  font-family: var(--font-g-fraunces), Georgia, serif;
+}
+
+/* Buttons: brass, and cream. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 1.05rem;
+  border: 2px solid var(--wd-ink);
+  border-radius: 0.8rem;
+  background: var(--wd-cream);
+  color: var(--wd-ink);
+  font-weight: 700;
+  line-height: 1.15;
+  box-shadow: 0 3px 0 rgb(0 0 0 / 0.45);
+  transition: translate 0.08s;
+}
+
+.btn:hover {
+  background: #fff4e6;
+}
+
+.btn:active {
+  translate: 0 2px;
+  box-shadow: 0 1px 0 rgb(0 0 0 / 0.45);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  translate: none;
+}
+
+.gold {
+  background: linear-gradient(#e2be4a, var(--wd-gold));
+  color: var(--wd-ink);
+}
+
+.gold:hover {
+  background: linear-gradient(#ecc95a, #d2ab31);
+}
+
+.ghost {
+  background: transparent;
+  color: var(--wd-cream);
+  border-color: rgb(243 227 211 / 0.5);
+  box-shadow: none;
+}
+
+.ghost:hover {
+  background: rgb(243 227 211 / 0.08);
+}
+
+/* -- The floor screen ---------------------------------------------------------------------------- */
+
+.area {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--wd-plum);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.75rem;
+  background: rgb(0 0 0 / 0.25);
+}
+
+/* The brass plaque: the floor's rule. It never lies. */
+.plaque {
+  position: relative;
+  margin: 0.6rem auto 0;
+  width: min(44rem, calc(100% - 1.5rem));
+  padding: 0.55rem 1.1rem 0.65rem;
+  border-radius: 0.7rem;
+  background: linear-gradient(180deg, #e8c75a, var(--wd-gold) 55%, #a8861f);
+  color: var(--wd-ink);
+  text-align: center;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.5),
+    inset 0 -2px 0 rgb(0 0 0 / 0.25),
+    0 4px 10px rgb(0 0 0 / 0.35);
+}
+
+.plaque::before,
+.plaque::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 0.45rem;
+  height: 0.45rem;
+  margin-top: -0.225rem;
+  border-radius: 50%;
+  background: #7a5f14;
+  box-shadow: inset 0 1px 1px rgb(0 0 0 / 0.5);
+}
+
+.plaque::before {
+  left: 0.45rem;
+}
+
+.plaque::after {
+  right: 0.45rem;
+}
+
+/* The hall: wall, floor, doors, and what's in it. */
+.hall {
+  position: relative;
+  margin: 0.6rem auto 0;
+  width: min(62rem, 100%);
+  aspect-ratio: 16 / 8.6;
+  min-height: 15rem;
+  max-height: min(56vh, 30rem);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+@media (max-aspect-ratio: 1/1) {
+  .hall {
+    aspect-ratio: 4 / 2.9;
+    max-height: none;
+  }
+}
+
+.wall {
+  position: absolute;
+  inset: 0 0 24% 0;
+}
+
+.floorStrip {
+  position: absolute;
+  inset: 76% 0 0 0;
+  background:
+    repeating-linear-gradient(90deg, rgb(0 0 0 / 0.12) 0 2px, transparent 2px 9%),
+    linear-gradient(#4a3550, #2e2234);
+}
+
+.rug {
+  position: absolute;
+  left: 22%;
+  right: 22%;
+  top: 80%;
+  bottom: 3%;
+  border: 3px solid #c9a227;
+  border-radius: 0.4rem;
+  background: radial-gradient(ellipse at center, #a23a46, #7a2633 70%);
+  box-shadow: inset 0 0 0 4px #7a2633, inset 0 0 0 6px #c9a22788;
+  transform: perspective(300px) rotateX(38deg);
+  transform-origin: 50% 0;
+}
+
+.rug[data-blue] {
+  background: radial-gradient(ellipse at center, #3a5aa2, #263f7a 70%);
+  box-shadow: inset 0 0 0 4px #263f7a, inset 0 0 0 6px #c9a22788;
+}
+
+.skirting {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 74.5%;
+  height: 1.6%;
+  background: #1c1420;
+}
+
+/* A door: its frame stays put; its leaf swings open (perspective + rotateY), showing what's behind. */
+.door {
+  position: absolute;
+  bottom: 24%;
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  transition:
+    left 0.9s cubic-bezier(0.6, 0, 0.3, 1),
+    filter 0.2s;
+  touch-action: manipulation;
+}
+
+.door:focus-visible {
+  outline: 3px solid var(--wd-gold);
+  outline-offset: 4px;
+  border-radius: 0.4rem;
+}
+
+.door[data-selected] .doorFrame {
+  filter: drop-shadow(0 0 0.45rem #ffd48a);
+}
+
+.doorFrame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  perspective: 700px;
+}
+
+.behind {
+  position: absolute;
+  inset: 4% 8% 0;
+  overflow: hidden;
+  background: #07050a;
+}
+
+.behind[data-round] {
+  top: 5%;
+  border-radius: 50% 50% 0 0 / 22% 22% 0 0;
+}
+
+.behind[data-up] {
+  background:
+    repeating-linear-gradient(180deg, #ffe7b0 0 9%, #c69a4e 9% 12%),
+    #ffe7b0;
+  box-shadow: inset 0 0 1.5rem #fff3d0;
+}
+
+.leaf {
+  position: absolute;
+  inset: 0;
+  transform-origin: 8% 50%;
+  transition: transform 1.15s cubic-bezier(0.45, 0, 0.2, 1);
+  backface-visibility: hidden;
+}
+
+.door[data-open] .leaf {
+  transform: rotateY(-78deg);
+}
+
+/* The number above the door. */
+.number {
+  position: absolute;
+  left: 50%;
+  top: -1.35em;
+  translate: -50% 0;
+  min-width: 1.7em;
+  padding: 0.05em 0.35em;
+  border-radius: 0.3em;
+  background: linear-gradient(#e2be4a, #a8861f);
+  color: var(--wd-ink);
+  font-size: clamp(0.7rem, 1.6vw, 1rem);
+  line-height: 1.2;
+  text-align: center;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.5);
+}
+
+/* The sign plate on the door (the full words are on the board below). */
+.plate {
+  position: absolute;
+  left: 14%;
+  right: 14%;
+  top: 22%;
+  padding: 0.2em 0.15em;
+  border: 1px solid #2a1e2f;
+  border-radius: 0.2em;
+  background: var(--wd-cream);
+  color: var(--wd-ink);
+  font-size: clamp(0.42rem, 1.05vw, 0.72rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+  text-align: center;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.4);
+}
+
+.plate[data-fallen] {
+  opacity: 0;
+  translate: 0 300%;
+  rotate: 25deg;
+  transition:
+    opacity 0.4s 0.2s,
+    translate 0.6s,
+    rotate 0.6s;
+}
+
+/* A line of light under the door. */
+.light {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  bottom: -2px;
+  height: 4px;
+  border-radius: 2px;
+  background: #ffd48a;
+  box-shadow:
+    0 0 6px 2px #ffd48aaa,
+    0 6px 14px 4px #ffd48a55;
+}
+
+/* A wrong door you've opened, crossed out. */
+.cross {
+  position: absolute;
+  inset: 18% 10% 30%;
+  pointer-events: none;
+}
+
+.mark {
+  position: absolute;
+  font-size: clamp(0.7rem, 1.8vw, 1.15rem);
+  font-weight: 800;
+  pointer-events: none;
+}
+
+/* What you heard, as a caption bubble over the door. */
+.heard {
+  position: absolute;
+  left: 50%;
+  top: -3.1em;
+  z-index: 3;
+  translate: -50% 0;
+  padding: 0.2em 0.55em;
+  border-radius: 0.6em;
+  background: var(--wd-cream);
+  color: var(--wd-ink);
+  font-size: clamp(0.62rem, 1.4vw, 0.85rem);
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.4);
+  animation: pop 0.25s cubic-bezier(0.3, 1.5, 0.6, 1);
+}
+
+@keyframes pop {
+  from {
+    scale: 0.85;
+    opacity: 0;
+  }
+}
+
+/* Mr. Hinges. */
+.hinges {
+  position: absolute;
+  right: 1.5%;
+  bottom: 14%;
+  width: 9%;
+  height: 66%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.hinges:focus-visible {
+  outline: 3px solid var(--wd-gold);
+  outline-offset: 3px;
+  border-radius: 0.5rem;
+}
+
+.speech {
+  position: absolute;
+  right: 105%;
+  top: 6%;
+  padding: 0.35em 0.7em;
+  border-radius: 0.8em;
+  background: var(--wd-cream);
+  color: var(--wd-ink);
+  font-size: clamp(0.7rem, 1.6vw, 1rem);
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.4);
+  animation: pop 0.25s cubic-bezier(0.3, 1.5, 0.6, 1);
+}
+
+/* The way you came in (on the left): the anomaly floors' way back. */
+.backDoor {
+  position: absolute;
+  left: 1%;
+  bottom: 24%;
+  width: 8.5%;
+  height: 50%;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.backDoor:enabled {
+  cursor: pointer;
+}
+
+.backDoor:focus-visible,
+.painting:focus-visible {
+  outline: 3px solid var(--wd-gold);
+  outline-offset: 3px;
+}
+
+.painting {
+  position: absolute;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.painting:enabled {
+  cursor: pointer;
+}
+
+/* Dark floors: only the candle's glow. */
+.dark {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(circle at var(--x, 50%) 88%, rgb(255 190 110 / 0.18), rgb(4 3 6 / 0.9) 32%, rgb(4 3 6 / 0.96));
+}
+
+/* Mirror floors: the whole hall, flipped. */
+.mirrored {
+  transform: scaleX(-1);
+}
+
+.mirrorText {
+  display: inline-block;
+  transform: scaleX(-1);
+}
+
+/* Shifting doors: the lights flicker. */
+.flicker {
+  animation: flicker 1.1s steps(1) both;
+}
+
+@keyframes flicker {
+  0%,
+  100% {
+    filter: none;
+  }
+  10%,
+  30%,
+  55%,
+  75% {
+    filter: brightness(0.15);
+  }
+  20%,
+  45%,
+  65% {
+    filter: brightness(0.6);
+  }
+}
+
+/* -- The clue board --------------------------------------------------------------------------- */
+
+.board {
+  margin: 0.75rem auto 1rem;
+  width: min(62rem, calc(100% - 1.5rem));
+  padding: 0.85rem 1rem 1rem;
+  border-radius: 1rem;
+  background: var(--wd-cream);
+  color: var(--wd-ink);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.35);
+}
+
+.signs {
+  font-family: var(--font-g-fraunces), Georgia, serif;
+}
+
+.signs[data-big] {
+  font-size: 1.2rem;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  background: rgb(42 30 47 / 0.08);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.stamp {
+  display: inline-block;
+  padding: 0.05rem 0.4rem;
+  border: 2px solid currentColor;
+  border-radius: 0.3rem;
+  font-family: var(--font-g-limelight), Georgia, serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  rotate: -4deg;
+}
+
+.stamp[data-true] {
+  color: #1d6b45;
+}
+
+.stamp[data-false] {
+  color: #a3283a;
+}
+
+/* -- Cards and screens -------------------------------------------------------------------------- */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgb(10 6 12 / 0.72);
+  backdrop-filter: blur(2px);
+}
+
+.card {
+  width: min(34rem, 100%);
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  padding: 1.2rem 1.3rem 1.3rem;
+  border: 3px solid var(--wd-gold);
+  border-radius: 1.2rem;
+  background: var(--wd-cream);
+  color: var(--wd-ink);
+  box-shadow: 0 12px 40px rgb(0 0 0 / 0.5);
+  animation: pop 0.3s cubic-bezier(0.3, 1.4, 0.6, 1);
+}
+
+.transition {
+  position: fixed;
+  inset: 0;
+  z-index: 65;
+  display: grid;
+  place-items: center;
+  background: #0d0910;
+  color: var(--wd-gold);
+  animation: fadeOut 1.4s ease-in 0.5s forwards;
+  pointer-events: none;
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* The candle's flame. */
+.flame {
+  transform-origin: 50% 100%;
+  animation: flick 0.18s infinite alternate;
+}
+
+@keyframes flick {
+  from {
+    scale: 1 1;
+  }
+  to {
+    scale: 0.92 1.06;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flame,
+  .heard,
+  .speech,
+  .card {
+    animation: none;
+  }
+  .leaf {
+    transition-duration: 0.01s;
+  }
+  .door {
+    transition: none;
+  }
+  .flicker {
+    animation-duration: 0.01s;
+  }
+}
+
+:global(html[data-motion="reduce"]) .flame,
+:global(html[data-motion="reduce"]) .heard,
+:global(html[data-motion="reduce"]) .speech,
+:global(html[data-motion="reduce"]) .card {
+  animation: none;
+}
+
+:global(html[data-motion="reduce"]) .leaf {
+  transition-duration: 0.01s;
+}
+
+:global(html[data-motion="reduce"]) .door {
+  transition: none;
+}
+
+:global(html[data-motion="reduce"]) .flicker {
+  animation-duration: 0.01s;
+}
