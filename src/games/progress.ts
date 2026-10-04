@@ -98,6 +98,20 @@ const SUMMARIES: Partial<Record<GameSlug, Summarize>> = {
       { label: "Trophies", value: `${Object.keys(record(save.achievements)).length}/6` },
     ];
   },
+  "cursor-escape"(save) {
+    // Windows "C-01" to "F-10", then The Uninstaller ("X-01"): 41, a medal each.
+    const levels = Object.entries(record(save.levels))
+      .filter(([id]) => /^[C-F]-(0[1-9]|10)$|^X-01$/.test(id))
+      .map(([, l]) => record(l));
+    const cleared = levels.filter((l) => count(l.clears) > 0).length;
+    const golds = levels.filter((l) => l.medal === "gold").length;
+    return [
+      { label: "Windows closed", value: `${cleared}/41` },
+      { label: "Gold medals", value: `${golds}/41` },
+      { label: "Crashes", value: count(save.crashes).toLocaleString("en-US") },
+      { label: "Trophies", value: `${Object.keys(record(save.achievements)).length}/6` },
+    ];
+  },
   "one-tap-chaos"(save) {
     const best = count(save.best);
     // Mirrors the game's unlocks: 12 to start, 3 + 3 + 2 + 2 + 2 more at 10, 20, 30, 40 and 50.

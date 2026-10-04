@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { ALMOST_THERE_ACHIEVEMENTS } from "./almost-there/achievements";
 import { defaultAlmostThereSave } from "./almost-there/save";
+import { CURSOR_ACHIEVEMENTS } from "./cursor-escape/achievements";
+import { LEVEL_IDS as CURSOR_LEVELS } from "./cursor-escape/levels";
+import { defaultCursorSave, emptyLevel as emptyCursorLevel } from "./cursor-escape/save";
 import { FAKE_FLOOR_ACHIEVEMENTS } from "./fake-floor/achievements";
 import { GLITCH_ACHIEVEMENTS } from "./glitch-run/achievements";
 import { defaultGlitchSave, emptyStage } from "./glitch-run/save";
@@ -138,6 +141,22 @@ describe("cabinet progress", () => {
       { label: "Trophies", value: `2/${GLITCH_ACHIEVEMENTS.length}` },
     ]);
     expect(summarizeProgress("glitch-run", JSON.stringify(defaultGlitchSave()))?.[1]).toEqual({ label: "Furthest run", value: "—" });
+  });
+
+  it("summarizes a Cursor Escape save (41 windows, a medal each)", () => {
+    const save = defaultCursorSave();
+    save.levels["C-01"] = { ...emptyCursorLevel(), clears: 2, best: 600, medal: "gold" };
+    save.levels["F-10"] = { ...emptyCursorLevel(), clears: 1, best: 900, medal: "silver" };
+    save.levels["X-01"] = { ...emptyCursorLevel(), clears: 1, best: 1100, medal: "gold" };
+    save.levels["D-03"] = { ...emptyCursorLevel(), crashes: 12 };
+    save.crashes = 2048;
+    save.achievements = { "steady-hand": 1, "free-at-last": 2 };
+    expect(summarizeProgress("cursor-escape", JSON.stringify(save))).toEqual([
+      { label: "Windows closed", value: `3/${CURSOR_LEVELS.length}` },
+      { label: "Gold medals", value: `2/${CURSOR_LEVELS.length}` },
+      { label: "Crashes", value: "2,048" },
+      { label: "Trophies", value: `2/${CURSOR_ACHIEVEMENTS.length}` },
+    ]);
   });
 
   it("has nothing to say about games without a summary", () => {
