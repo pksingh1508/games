@@ -85,6 +85,7 @@ export function Toaster() {
     <ol
       className="pointer-events-none fixed inset-x-0 bottom-0 z-[60] flex flex-col items-center gap-3 p-4 sm:items-end sm:p-6"
       aria-live="polite"
+      data-toaster
     >
       <AnimatePresence initial={false}>
         {items.map((item) => (

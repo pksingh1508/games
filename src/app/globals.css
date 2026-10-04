@@ -158,6 +158,16 @@
 /* ==========================================================================
    Comfort settings (Plan/README.md: "Comfort settings always win")
    ========================================================================== */
+/* On a touch screen, a game playing full screen keeps its buttons at the bottom and its pause
+   button in a top corner: toasts go to the top middle. */
+@media (pointer: coarse) {
+  body:has([data-game-area]) [data-toaster] {
+    top: 0;
+    bottom: auto;
+    align-items: center;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html:not([data-motion="full"]) *,
   html:not([data-motion="full"]) *::before,

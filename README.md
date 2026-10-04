@@ -10,6 +10,7 @@ This repo holds the arcade website (the landing page, the game library, a cabine
 - [One Tap Chaos](Plan/09-one-tap-chaos.md), the one-button microgame gauntlet: 24 microgames, 8 Chaos Cards and 3 bosses on a music-synced clock, plus Daily Chaos and a practice room, at `/games/one-tap-chaos/play`.
 - [TrapSprint](Plan/06-trapsprint.md), the troll platformer: 30 levels in 3 zones (plus 30 Remix levels) full of traps that each have a tell, with medals, your own ghost, the All-Deaths Replay and zone speedruns, at `/games/trapsprint/play`.
 - [Fake Floor](Plan/05-fake-floor.md), the perception platformer: 50 rooms in 5 worlds and The Floor itself, where some floors are fake and the clues you learn eventually lie too; pebbles that never lie, medals, time trials and hidden pebbles, at `/games/fake-floor/play`.
+- [Almost There](Plan/08-almost-there.md), the vertical rage climber: one continuous climb of 45 screens in 9 zones with charge jumps and no air control, a lying progress bar, a sparrow who's sincere only half the time, a fake summit with fake credits, a save that makes every fall stick (mid-air included), 12 Lost Feathers that are hats, and Mirror Mountain, at `/games/almost-there/play`.
 
 "Mind Games" is a working title, set in `src/lib/site.ts`.
 
@@ -39,7 +40,7 @@ pnpm dev        # http://localhost:3000
 | `pnpm preview` | Serves `out/` on http://localhost:3000. The service worker only runs here, not in `dev` |
 | `pnpm lint` | ESLint |
 | `pnpm typecheck` | Generates route types, then type-checks the app and the service worker |
-| `pnpm test` | Unit tests (Vitest), including a scripted player that solves every NOPE! question, bots that win every One Tap Chaos microgame under every allowed rule combination, and replays of a solver's run through every TrapSprint level and every Fake Floor room (plus a check that every Fake Floor lie has a tell) |
+| `pnpm test` | Unit tests (Vitest), including a scripted player that solves every NOPE! question, bots that win every One Tap Chaos microgame under every allowed rule combination, replays of a solver's run through every TrapSprint level and every Fake Floor room (plus a check that every Fake Floor lie has a tell), and a solver's fair climb of Almost There's mountain and Mirror Mountain (plus checks that every feather can be reached and that no fall passes a whole zone) |
 | `pnpm e2e` | End-to-end tests (Playwright) against the static build. Run `pnpm build` first; `pnpm exec playwright install chromium` once |
 | `pnpm icons` | Regenerates the app icons and favicon from the logo |
 

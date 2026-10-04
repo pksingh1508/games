@@ -491,7 +491,7 @@ const DATA: Record<GameSlug, GameData> = {
       },
     ],
     features: [
-      "One continuous climb, 45 screens",
+      "One continuous climb, 45 screens, nine zones",
       "Charge jumps with no air control",
       "Continuous save: no undoing a fall",
       "Fake credits, real summit",
@@ -502,7 +502,7 @@ const DATA: Record<GameSlug, GameData> = {
     inspirations: ["Jump King", "Getting Over It", "Only Up!", "Celeste"],
     session: "1–4 h first climb",
     inputs: ["keyboard", "gamepad", "touch"],
-    status: "workshop",
+    status: "playable",
   },
 
   "one-tap-chaos": {

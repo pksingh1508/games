@@ -51,6 +51,22 @@ const SUMMARIES: Partial<Record<GameSlug, Summarize>> = {
       { label: "Trophies", value: `${Object.keys(record(save.achievements)).length}/7` },
     ];
   },
+  "almost-there"(save) {
+    const climbs = record(save.climbs);
+    const best = record(record(save.best).normal);
+    const ticks = count(best.ticks);
+    // The clock runs at 60 ticks a second.
+    const seconds = Math.floor(ticks / 60);
+    const time = `${Math.floor(seconds / 3600)}:${String(Math.floor(seconds / 60) % 60).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
+    // 20 px to the metre.
+    const fallen = Math.round(count(record(save.totals).fallen) / 20);
+    return [
+      { label: "Real summits", value: (count(climbs.finished) + count(climbs.mirrorFinished)).toLocaleString("en-US") },
+      { label: "Best climb", value: ticks ? time : "—" },
+      { label: "Fallen", value: `${fallen.toLocaleString("en-US")} m` },
+      { label: "Trophies", value: `${Object.keys(record(save.achievements)).length}/7` },
+    ];
+  },
   "one-tap-chaos"(save) {
     const best = count(save.best);
     // Mirrors the game's unlocks: 12 to start, 3 + 3 + 2 + 2 + 2 more at 10, 20, 30, 40 and 50.
