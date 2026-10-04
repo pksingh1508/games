@@ -4,16 +4,17 @@
 import { FastForward } from "lucide-react";
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { useComfort } from "@/games/shared/device";
+import { useFitCanvas } from "@/games/shared/fit";
 import { cn } from "@/lib/cn";
+import { HEIGHT, WIDTH } from "../core/constants";
 import { levelTitle } from "../core/level";
 import { getLevel, levelLabel } from "../levels";
 import { DeathsReplay } from "../play/deaths-replay";
 import styles from "../trapsprint.module.css";
 import { CompleteCard, type CompleteInfo } from "./Complete";
-import { useFitCanvas } from "./fit";
 
 export function ReplayScreen({ info, hasNext, onNext, onRetry, onLevels }: { info: CompleteInfo; hasNext: boolean; onNext: () => void; onRetry: () => void; onLevels: () => void }) {
-  const { area, frame } = useFitCanvas();
+  const { area, frame } = useFitCanvas(WIDTH, HEIGHT, "--ts-scale");
   const canvas = useRef<HTMLCanvasElement | null>(null);
   const counter = useRef<HTMLSpanElement | null>(null);
   const [round, setRound] = useState(0);

@@ -8,7 +8,7 @@ import type { Level } from "../core/level";
 import { anchorOf, followerPosition, ghostPosition, squeezeWalls, trapRect, triggerArea, type GameEvent, type World } from "../core/world";
 import { COIN, flagCloth, PAL, RUNNER, SIDE_SPRING, SKULL, SPRING, STALACTITE, sawBlade, silhouette, spikeBall, sprite } from "./art";
 import { Effects } from "./effects";
-import { pixelText, textWidth } from "./font";
+import { pixelText, textWidth } from "@/engine/pixel-font";
 import { buildScene, cloud, hash, paintGround, spikeTile, THEMES, type Scene, type ZoneLook } from "./scene";
 
 export interface Frame {

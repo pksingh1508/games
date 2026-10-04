@@ -1,4 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { FAKE_FLOOR_ACHIEVEMENTS } from "./fake-floor/achievements";
+import { ROOM_IDS } from "./fake-floor/rooms";
+import { defaultFakeFloorSave, emptyRoomRecord } from "./fake-floor/save";
 import { NOPE_ACHIEVEMENTS } from "./nope/achievements";
 import { defaultNopeSave } from "./nope/save";
 import { OTC_ACHIEVEMENTS } from "./one-tap-chaos/achievements";
@@ -57,6 +60,22 @@ describe("cabinet progress", () => {
       { label: "Gold medals", value: `2/${MAIN_LEVELS.length}` },
       { label: "Deaths", value: "4,321" },
       { label: "Trophies", value: `1/${TRAPSPRINT_ACHIEVEMENTS.length}` },
+    ]);
+  });
+
+  it("summarizes a Fake Floor save (three medals a room)", () => {
+    const save = defaultFakeFloorSave();
+    save.rooms["1-01"] = { ...emptyRoomRecord(), clears: 2, clean: true, barefoot: true, quick: true };
+    save.rooms["1-02"] = { ...emptyRoomRecord(), clears: 1, barefoot: true };
+    save.rooms["6-01"] = { ...emptyRoomRecord(), clears: 1 };
+    save.rooms["1-03"] = { ...emptyRoomRecord(), falls: 12 };
+    save.falls = 2048;
+    save.achievements = { "trust-issues": 1, grounded: 2 };
+    expect(summarizeProgress("fake-floor", JSON.stringify(save))).toEqual([
+      { label: "Rooms crossed", value: `3/${ROOM_IDS.length}` },
+      { label: "Medals", value: `4/${ROOM_IDS.length * 3}` },
+      { label: "Falls", value: "2,048" },
+      { label: "Trophies", value: `2/${FAKE_FLOOR_ACHIEVEMENTS.length}` },
     ]);
   });
 

@@ -4,6 +4,7 @@
 // deaths / Share. Enter goes on, R retries; a gamepad's A and Y do the same.
 import { ArrowRight, Check, Grid3x3, RotateCcw, Share2, Skull } from "lucide-react";
 import { useEffect, useEffectEvent, useState } from "react";
+import { useGamepadButtons } from "@/games/shared/gamepad";
 import { toast } from "@/components/ui/toast-store";
 import { shareResult } from "@/games/shared/share";
 import { cn } from "@/lib/cn";
@@ -36,25 +37,6 @@ const LADDER = ["bronze", "silver", "gold", "dev"] as const;
 export function shareTextFor(info: Pick<CompleteInfo, "levelId" | "deaths" | "ticks" | "medal">): string {
   const medal = info.medal ? ` ${MEDAL_EMOJI[info.medal]}` : "";
   return `TrapSprint ${levelLabel(info.levelId)} — ${info.deaths} ${info.deaths === 1 ? "death" : "deaths"}, ${formatTime(info.ticks)}${medal}\n${SITE.url}/games/trapsprint`;
-}
-
-/** Gamepad buttons on a menu: fires once per press (buttons held when it opens must be let go first). */
-export function useGamepadButtons(handlers: Partial<Record<number, () => void>>) {
-  const fire = useEffectEvent((button: number) => {
-    handlers[button]?.();
-  });
-  useEffect(() => {
-    if (typeof navigator.getGamepads !== "function") return;
-    const held = new Set<number>([0, 1, 2, 3, 9]);
-    const timer = setInterval(() => {
-      const down = new Set<number>();
-      for (const pad of navigator.getGamepads()) pad?.buttons.forEach((b, i) => b.pressed && down.add(i));
-      for (const i of down) if (!held.has(i)) fire(i);
-      held.clear();
-      down.forEach((i) => held.add(i));
-    }, 50);
-    return () => clearInterval(timer);
-  }, []);
 }
 
 export function CompleteCard({
