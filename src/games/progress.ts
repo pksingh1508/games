@@ -129,6 +129,23 @@ const SUMMARIES: Partial<Record<GameSlug, Summarize>> = {
       { label: "Trophies", value: `${Object.keys(record(save.achievements)).length}/6` },
     ];
   },
+  "one-more-step"(save) {
+    // Levels "1-1" to "5-8", then the finale ("6-1"): 41, up to three stars each (bits).
+    const levels = Object.entries(record(save.levels))
+      .filter(([id]) => /^[1-5]-[1-8]$|^6-1$/.test(id))
+      .map(([, l]) => record(l));
+    const cleared = levels.filter((l) => count(l.clears) > 0).length;
+    const stars = levels.reduce((n, l) => {
+      const bits = count(l.stars) & 7;
+      return n + (bits & 1) + ((bits >> 1) & 1) + ((bits >> 2) & 1);
+    }, 0);
+    return [
+      { label: "Doors caught", value: `${cleared}/41` },
+      { label: "Stars", value: `${stars}/123` },
+      { label: "Steps walked", value: count(record(save.stats).steps).toLocaleString("en-US") },
+      { label: "Trophies", value: `${Object.keys(record(save.achievements)).length}/7` },
+    ];
+  },
   "one-tap-chaos"(save) {
     const best = count(save.best);
     // Mirrors the game's unlocks: 12 to start, 3 + 3 + 2 + 2 + 2 more at 10, 20, 30, 40 and 50.

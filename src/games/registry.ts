@@ -101,7 +101,7 @@ const DATA: Record<GameSlug, GameData> = {
     inspirations: ["Circle the Cat", "Hoplite", "SUPERHOT", "Baba Is You"],
     session: "1–4 min per level",
     inputs: ["keyboard", "touch"],
-    status: "workshop",
+    status: "playable",
   },
 
   nope: {
