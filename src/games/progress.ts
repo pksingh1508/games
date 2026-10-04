@@ -84,6 +84,20 @@ const SUMMARIES: Partial<Record<GameSlug, Summarize>> = {
       { label: "Trophies", value: `${Object.keys(record(save.achievements)).length}/6` },
     ];
   },
+  "glitch-run"(save) {
+    // Stages "01" to "20"; endless keeps its best distance (metres).
+    const stages = Object.entries(record(save.stages))
+      .filter(([id]) => /^(0[1-9]|1\d|20)$/.test(id))
+      .map(([, s]) => record(s));
+    const cleared = stages.filter((s) => count(s.clears) > 0).length;
+    const metres = count(record(save.endless).metres);
+    return [
+      { label: "Stages cleared", value: `${cleared}/20` },
+      { label: "Furthest run", value: metres ? `${metres.toLocaleString("en-US")} m` : "—" },
+      { label: "Times patched", value: count(record(save.totals).deaths).toLocaleString("en-US") },
+      { label: "Trophies", value: `${Object.keys(record(save.achievements)).length}/6` },
+    ];
+  },
   "one-tap-chaos"(save) {
     const best = count(save.best);
     // Mirrors the game's unlocks: 12 to start, 3 + 3 + 2 + 2 + 2 more at 10, 20, 30, 40 and 50.

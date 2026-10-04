@@ -444,8 +444,8 @@ const DATA: Record<GameSlug, GameData> = {
     comfort: ["Photosensitivity warning", "Reduce flashing (WCAG safe)", "Gentle glitches mode", "Reduce screen shake"],
     inspirations: ["Canabalt", "Bit.Trip Runner", "Geometry Dash"],
     session: "1–5 min runs",
-    inputs: ["keyboard", "touch"],
-    status: "workshop",
+    inputs: ["keyboard", "gamepad", "touch"],
+    status: "playable",
   },
 
   "almost-there": {
