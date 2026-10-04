@@ -110,6 +110,7 @@ src/
     almost-there/             # Almost There: one 45-screen climb, proven fair by a solver on both mountains (built)
     gravity-is-lying/         # Gravity Is Lying: 44 rooms with four-way gravity and planets, each proven by a solver (built)
     glitch-run/               # Glitch Run: 20 stages and endless; every stage and chunk proven by a reference run (built)
+    cursor-escape/            # Cursor Escape: 41 windows on DeskOS 98, each proven by a solver through the real simulation (built)
     one-more-step/ ...        # one folder per game; entry file: index.tsx
   engine/                     # shared, framework-free TypeScript
     loop.ts                   # fixed-timestep loop (60 Hz accumulator) on requestAnimationFrame (built)
@@ -126,7 +127,7 @@ src/
     audio/sfx-bank.ts         # a game's ZzFX sound effects, through the audio engine's buses (built)
     platformer/               # tile collisions, jump physics, camera (shared by 6 games; built)
     postfx/                   # optional WebGL2 screen effects (glitch, CCTV noise, scanlines)
-    browser/                  # tab title, favicon, visibility, fullscreen, pointer lock helpers
+    browser/                  # tab title, favicon, visibility, fullscreen, pointer lock helpers (pointer lock built)
   components/
     site/ landing/ games/ ui/ settings/ data/ pwa/   # the website (built)
     GameShell.tsx             # not needed after all: a DOM quiz and a canvas rhythm game share little of their
@@ -141,7 +142,7 @@ tests/e2e/                    # Playwright: games played end to end on desktop a
 | `engine/loop` (canvas game loop) | Every canvas game: One More Step, Fake Floor, TrapSprint, Glitch Run, Almost There, Last Pixel, Panic Stack, Cursor Escape, Don't Blink, Gravity Is Lying, Don't Trust The Game (platform scenes). One Tap Chaos runs on its own beat clock instead: everything in it is measured in beats |
 | `engine/platformer` | **TrapSprint** (built first), **Fake Floor** (built), **Almost There** (built), **Gravity Is Lying** (built), **Glitch Run** (built: its vertical physics), Don't Trust The Game |
 | `engine/postfx` | Don't Blink, Don't Trust The Game. (Glitch Run, built, does its screen effects in Canvas 2D itself) |
-| `engine/browser` | Don't Trust The Game, Last Pixel, Cursor Escape, 99 Seconds |
+| `engine/browser` | **Cursor Escape** (built: pointer lock), Don't Trust The Game, Last Pixel, 99 Seconds |
 | `engine/rng` | One Tap Chaos, Glitch Run, Wrong Door, Panic Stack, Don't Blink, One More Step (daily puzzle) |
 | Pure React/DOM (no canvas) | NOPE!, 99 Seconds, Wrong Door |
 | Physics library (Planck.js) | Panic Stack only |
@@ -168,7 +169,7 @@ tests/e2e/                    # Playwright: games played end to end on desktop a
 | 2 | ✅ **One Tap Chaos** (playable) | Adds the canvas game, one-button input and audio-synced timing |
 | 3 | ✅ **TrapSprint** (playable) | Builds the shared platformer kit |
 | 4 | ✅ **Fake Floor** (playable), ✅ **Almost There** (playable), ✅ **Gravity Is Lying** (playable), ✅ **Glitch Run** (playable) | Reuse and extend the platformer kit |
-| 5 | **Cursor Escape**, **Last Pixel** | Pointer-driven games, browser helpers |
+| 5 | ✅ **Cursor Escape** (playable), **Last Pixel** | Pointer-driven games, browser helpers |
 | 6 | **One More Step**, **Wrong Door** | Logic engines with automated solvers |
 | 7 | **Panic Stack** | Adds a physics library |
 | 8 | **Don't Blink**, **99 Seconds** | Art-heavy scene games |

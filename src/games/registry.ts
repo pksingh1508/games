@@ -724,11 +724,11 @@ const DATA: Record<GameSlug, GameData> = {
       "Touch trackpad mode for phones",
       "An ending that sets you free",
     ],
-    comfort: ["Steady mode: gentler sabotage", "Sensitivity calibration", "Large hitbox assist", "Every sabotage announced"],
+    comfort: ["Steady mode: gentler sabotage", "Sensitivity calibration", "Forgiving hitbox assist", "Every sabotage announced"],
     inspirations: ["Cursor*10", "The World's Hardest Game", "Windowkill", "Desktop Goose"],
     session: "30 s – 2 min per level",
     inputs: ["mouse", "touch"],
-    status: "workshop",
+    status: "playable",
   },
 
   "wrong-door": {

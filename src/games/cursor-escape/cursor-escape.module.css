@@ -1,0 +1,500 @@
+/* Cursor Escape: DeskOS 98 (Plan/12-cursor-escape.md §8, §9). A teal desktop, grey bevelled windows,
+   blue title bars, VT323 for everything the OS says. Fictional and original: its own retro OS. */
+
+.root {
+  --ce-teal: #0f7f7f;
+  --ce-face: #c3c3c3;
+  --ce-light: #ffffff;
+  --ce-shadow: #7e7e7e;
+  --ce-dark: #111111;
+  --ce-title: #0a2a8a;
+  --ce-title-end: #1b5fbf;
+  --ce-yellow: #ffe14d;
+  --ce-note: #fffbd6;
+  --ce-font: var(--font-g-vt323), ui-monospace, monospace;
+  font-family: var(--ce-font);
+  color: var(--ce-dark);
+}
+
+/* The desktop: teal, dithered. */
+.desk {
+  position: relative;
+  isolation: isolate;
+  background-color: var(--ce-teal);
+  background-image: radial-gradient(#0c7272 0.9px, transparent 1px);
+  background-size: 4px 4px;
+}
+
+.raised {
+  background: var(--ce-face);
+  box-shadow:
+    inset -1px -1px var(--ce-dark),
+    inset 1px 1px var(--ce-light),
+    inset -2px -2px var(--ce-shadow),
+    inset 2px 2px #dfdfdf;
+}
+
+.sunken {
+  background: var(--ce-light);
+  box-shadow:
+    inset 1px 1px var(--ce-shadow),
+    inset -1px -1px var(--ce-light),
+    inset 2px 2px var(--ce-dark),
+    inset -2px -2px #dfdfdf;
+}
+
+.window {
+  padding: 3px;
+}
+
+.titlebar {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.15em 0.2em 0.15em 0.45em;
+  color: var(--ce-light);
+  background: linear-gradient(90deg, var(--ce-title), var(--ce-title-end));
+  font-size: 1.15em;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+}
+
+.titlebar[data-idle] {
+  background: linear-gradient(90deg, #7b7b9a, #a8a8c0);
+}
+
+/* A DeskOS button. */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+  min-width: 6.5em;
+  padding: 0.25em 0.9em;
+  font-family: var(--ce-font);
+  font-size: 1.15em;
+  line-height: 1.1;
+  color: var(--ce-dark);
+  background: var(--ce-face);
+  border: 0;
+  cursor: pointer;
+  box-shadow:
+    inset -1px -1px var(--ce-dark),
+    inset 1px 1px var(--ce-light),
+    inset -2px -2px var(--ce-shadow),
+    inset 2px 2px #dfdfdf;
+}
+
+.button:active:not(:disabled) {
+  box-shadow:
+    inset 1px 1px var(--ce-dark),
+    inset -1px -1px var(--ce-light),
+    inset 2px 2px var(--ce-shadow),
+    inset -2px -2px #dfdfdf;
+}
+
+.button:focus-visible {
+  outline: 1px dotted var(--ce-dark);
+  outline-offset: -5px;
+}
+
+.button:disabled {
+  color: var(--ce-shadow);
+  text-shadow: 1px 1px var(--ce-light);
+  cursor: not-allowed;
+}
+
+/* A title bar's little square buttons. */
+.tiny {
+  display: grid;
+  place-items: center;
+  width: 1.3em;
+  height: 1.15em;
+  padding: 0;
+  color: var(--ce-dark);
+  background: var(--ce-face);
+  border: 0;
+  cursor: pointer;
+  box-shadow:
+    inset -1px -1px var(--ce-dark),
+    inset 1px 1px var(--ce-light),
+    inset -2px -2px var(--ce-shadow),
+    inset 2px 2px #dfdfdf;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Playing: the desktop fills the window; everything's sized in desktop pixels × the scale.
+   --------------------------------------------------------------------------------------------- */
+
+.area {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #063b3b;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+
+.area[data-hide-cursor] {
+  cursor: none;
+}
+
+.stage {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Sizes in desktop px. */
+.px {
+  font-size: calc(var(--ce-scale, 2) * 11px);
+}
+
+.taskbar {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: calc(var(--ce-scale, 2) * 22px);
+  display: flex;
+  align-items: center;
+  gap: calc(var(--ce-scale, 2) * 3px);
+  padding: 0 calc(var(--ce-scale, 2) * 3px);
+  background: var(--ce-face);
+  box-shadow:
+    inset 0 1px var(--ce-face),
+    inset 0 2px var(--ce-light);
+  font-size: calc(var(--ce-scale, 2) * 9px);
+  line-height: 1;
+}
+
+.start {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  height: calc(var(--ce-scale, 2) * 17px);
+  padding: 0 0.5em;
+  font-family: var(--ce-font);
+  font-size: 1.1em;
+  font-weight: 700;
+  color: var(--ce-dark);
+  background: var(--ce-face);
+  border: 0;
+  cursor: pointer;
+  box-shadow:
+    inset -1px -1px var(--ce-dark),
+    inset 1px 1px var(--ce-light),
+    inset -2px -2px var(--ce-shadow),
+    inset 2px 2px #dfdfdf;
+}
+
+.task {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  min-width: 0;
+  max-width: 40%;
+  height: calc(var(--ce-scale, 2) * 17px);
+  padding: 0 0.5em;
+  font-size: 1.05em;
+  background: #dcdcdc;
+  box-shadow:
+    inset 1px 1px var(--ce-dark),
+    inset -1px -1px var(--ce-light),
+    inset 2px 2px var(--ce-shadow);
+}
+
+.tray {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7em;
+  margin-left: auto;
+  height: calc(var(--ce-scale, 2) * 17px);
+  padding: 0 0.6em;
+  font-size: 1.05em;
+  box-shadow:
+    inset 1px 1px var(--ce-shadow),
+    inset -1px -1px var(--ce-light);
+}
+
+.trayIcon {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.4em;
+  height: 1.4em;
+  padding: 0 0.2em;
+  color: var(--ce-light);
+  background: var(--ce-title);
+  font-size: 0.85em;
+}
+
+/* Notification balloons, above the tray. */
+.balloons {
+  position: absolute;
+  right: calc(var(--ce-scale, 2) * 6px);
+  bottom: calc(var(--ce-scale, 2) * 26px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: calc(var(--ce-scale, 2) * 4px);
+  pointer-events: none;
+  font-size: calc(var(--ce-scale, 2) * 9px);
+}
+
+.balloon {
+  position: relative;
+  max-width: calc(var(--ce-scale, 2) * 190px);
+  padding: 0.45em 0.7em 0.5em;
+  background: #ffffe1;
+  border: 1px solid var(--ce-dark);
+  border-radius: 0.5em;
+  box-shadow: 2px 2px 0 rgb(0 0 0 / 0.35);
+  line-height: 1.15;
+  animation: pop 160ms ease-out both;
+}
+
+.balloon::after {
+  content: "";
+  position: absolute;
+  right: 1.4em;
+  bottom: -0.55em;
+  width: 0.9em;
+  height: 0.9em;
+  background: #ffffe1;
+  border-right: 1px solid var(--ce-dark);
+  border-bottom: 1px solid var(--ce-dark);
+  transform: skewX(35deg) rotate(45deg);
+}
+
+.balloon strong {
+  display: block;
+  font-size: 1.12em;
+}
+
+.balloon[data-kind="end"] {
+  background: #e9ffe9;
+}
+
+.balloon[data-kind="end"]::after {
+  background: #e9ffe9;
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.96);
+  }
+}
+
+/* The windows over the game: start, paused, cleared. */
+.overlay {
+  position: absolute;
+  inset: 0 0 calc(var(--ce-scale, 2) * 22px) 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgb(6 59 59 / 0.35);
+  font-size: calc(var(--ce-scale, 2) * 8.5px);
+}
+
+.dialog {
+  width: min(94%, calc(var(--ce-scale, 2) * 300px));
+  font-size: max(15px, 1.15em);
+}
+
+.medal {
+  display: inline-grid;
+  place-items: center;
+  width: 2.2em;
+  height: 2.2em;
+  border-radius: 999px;
+  border: 2px solid var(--ce-dark);
+  /* Its own ink: a picked file's row turns white. */
+  color: var(--ce-dark);
+  font-weight: 700;
+}
+
+.medal[data-medal="gold"] {
+  background: #ffd84a;
+}
+
+.medal[data-medal="silver"] {
+  background: #dfe3ea;
+}
+
+.medal[data-medal="bronze"] {
+  background: #e3a76a;
+}
+
+.medal[data-medal="none"] {
+  background: var(--ce-face);
+}
+
+.hint {
+  position: absolute;
+  left: 50%;
+  top: calc(var(--ce-scale, 2) * 40px);
+  translate: -50% 0;
+  max-width: 90%;
+  padding: 0.35em 0.7em;
+  background: #ffffe1;
+  border: 1px solid var(--ce-dark);
+  font-size: calc(var(--ce-scale, 2) * 9px);
+  text-align: center;
+  pointer-events: none;
+}
+
+/* Touch: the trackpad's buttons in the taskbar. */
+.tray button {
+  font-family: var(--ce-font);
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Menus: boot, the desktop (level select), the ending.
+   --------------------------------------------------------------------------------------------- */
+
+.boot {
+  background: #000;
+  color: #c0c0c0;
+}
+
+.bootLogo {
+  font-size: clamp(3rem, 11vw, 6.5rem);
+  line-height: 0.9;
+  color: var(--ce-light);
+  text-shadow: 3px 3px 0 var(--ce-title);
+}
+
+.bootBar {
+  width: min(70vw, 22rem);
+  height: 1.1rem;
+  padding: 2px;
+  border: 2px solid #c0c0c0;
+}
+
+.bootBar > span {
+  display: block;
+  height: 100%;
+  background: repeating-linear-gradient(90deg, var(--ce-title-end) 0 12px, transparent 12px 15px);
+  animation: boot 1.6s steps(12, end) both;
+}
+
+@keyframes boot {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  width: 6.5rem;
+  padding: 0.35rem 0.2rem;
+  color: var(--ce-light);
+  font-family: var(--ce-font);
+  font-size: 1.1rem;
+  line-height: 1.05;
+  text-align: center;
+  background: transparent;
+  border: 1px dotted transparent;
+  cursor: pointer;
+}
+
+.icon:hover:not(:disabled) > span,
+.icon[aria-current="true"] > span {
+  background: var(--ce-title);
+}
+
+.icon:focus-visible {
+  border-color: var(--ce-light);
+  outline: none;
+}
+
+.icon:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.icon > span {
+  padding: 0 0.2em;
+}
+
+.file {
+  display: grid;
+  grid-template-columns: 1.6rem minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.25rem 0.5rem;
+  font-family: var(--ce-font);
+  font-size: 1.15rem;
+  text-align: left;
+  color: var(--ce-dark);
+  background: transparent;
+  border: 1px dotted transparent;
+  cursor: pointer;
+}
+
+.file:hover:not(:disabled) {
+  background: #e8e8f4;
+}
+
+.file[aria-current="true"] {
+  color: var(--ce-light);
+  background: var(--ce-title);
+}
+
+.file:focus-visible {
+  border-color: var(--ce-dark);
+  outline: none;
+}
+
+.file:disabled {
+  cursor: not-allowed;
+  color: var(--ce-shadow);
+}
+
+/* The ending: the screen goes dark, and you're free. */
+.shutdown {
+  background: #000;
+  color: #f0a020;
+}
+
+.free {
+  animation: fadeIn 1.6s ease-out both;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+}
+
+:global([data-motion="reduce"]) .balloon,
+:global([data-motion="reduce"]) .bootBar > span,
+:global([data-motion="reduce"]) .free {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :global(html:not([data-motion="full"])) .balloon,
+  :global(html:not([data-motion="full"])) .bootBar > span,
+  :global(html:not([data-motion="full"])) .free {
+    animation: none;
+  }
+}
