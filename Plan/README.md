@@ -106,18 +106,21 @@ src/
     nope/                     # NOPE!: the first playable game (built)
     one-tap-chaos/            # One Tap Chaos: the second playable game, on canvas (built)
     trapsprint/               # TrapSprint: the first platformer; levels are proven by a solver (built)
+    fake-floor/               # Fake Floor: rooms proven by a solver, and fair by a test of every tell (built)
     one-more-step/ ...        # one folder per game; entry file: index.tsx
   engine/                     # shared, framework-free TypeScript
     loop.ts                   # fixed-timestep loop (60 Hz accumulator) on requestAnimationFrame (built)
     input.ts                  # keyboard / touch buttons / gamepad → game actions, remappable (built)
     replay.ts                 # input recordings: run-length encoded, for ghosts and replays (built)
     sprites.ts                # pixel art as code: rows of palette letters → cached canvases (built)
+    pixel-font.ts             # a 3 × 5 pixel font for words drawn on canvas (built)
     audio/engine.ts           # Web Audio engine: buses, volumes, unlock on first gesture (built)
     save/                     # local saves: localStorage + IndexedDB, versioned, backups, run history (built)
     rng.ts                    # seeded random numbers: daily challenges, procedural levels (built)
     settings.ts               # global comfort settings, see below (built)
     meta.ts achievements.ts   # visits, arcade achievements (built)
     audio/ui-sound.ts         # ZzFX interface sounds (built)
+    audio/sfx-bank.ts         # a game's ZzFX sound effects, through the audio engine's buses (built)
     platformer/               # tile collisions, jump physics, camera (shared by 6 games; built)
     postfx/                   # optional WebGL2 screen effects (glitch, CCTV noise, scanlines)
     browser/                  # tab title, favicon, visibility, fullscreen, pointer lock helpers
@@ -133,7 +136,7 @@ tests/e2e/                    # Playwright: games played end to end on desktop a
 | Shared piece | Used by |
 |---|---|
 | `engine/loop` (canvas game loop) | Every canvas game: One More Step, Fake Floor, TrapSprint, Glitch Run, Almost There, Last Pixel, Panic Stack, Cursor Escape, Don't Blink, Gravity Is Lying, Don't Trust The Game (platform scenes). One Tap Chaos runs on its own beat clock instead: everything in it is measured in beats |
-| `engine/platformer` | **TrapSprint** (built first), Fake Floor, Almost There, Gravity Is Lying, Glitch Run, Don't Trust The Game |
+| `engine/platformer` | **TrapSprint** (built first), **Fake Floor** (built), Almost There, Gravity Is Lying, Glitch Run, Don't Trust The Game |
 | `engine/postfx` | Glitch Run, Don't Blink, Don't Trust The Game |
 | `engine/browser` | Don't Trust The Game, Last Pixel, Cursor Escape, 99 Seconds |
 | `engine/rng` | One Tap Chaos, Glitch Run, Wrong Door, Panic Stack, Don't Blink, One More Step (daily puzzle) |
@@ -161,7 +164,7 @@ tests/e2e/                    # Playwright: games played end to end on desktop a
 | 1 | ✅ **NOPE!** (playable) | Pure React/DOM. Ships fast and tests the shell. |
 | 2 | ✅ **One Tap Chaos** (playable) | Adds the canvas game, one-button input and audio-synced timing |
 | 3 | ✅ **TrapSprint** (playable) | Builds the shared platformer kit |
-| 4 | **Fake Floor**, **Almost There**, **Gravity Is Lying**, **Glitch Run** | Reuse and extend the platformer kit |
+| 4 | ✅ **Fake Floor** (playable), then **Almost There**, **Gravity Is Lying**, **Glitch Run** | Reuse and extend the platformer kit |
 | 5 | **Cursor Escape**, **Last Pixel** | Pointer-driven games, browser helpers |
 | 6 | **One More Step**, **Wrong Door** | Logic engines with automated solvers |
 | 7 | **Panic Stack** | Adds a physics library |

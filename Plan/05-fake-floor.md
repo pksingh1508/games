@@ -303,11 +303,11 @@ src/games/fake-floor/
 
 ## 13. Build Roadmap
 
-- [ ] **M1: Movement + floors.** Platformer kit integration, solid/fake/crumbling floors, pebbles, World 1 greybox
-- [ ] **M2: Rain world.** Particle rain, splashes, invisible floors, World 2
-- [ ] **M3: Lantern world.** Lighting, shadows, return-trip floors, World 3
-- [ ] **M4: Betrayal + painting.** Mimic floors, parallax painted floors, Worlds 4–5, final room
-- [ ] **M5: Polish.** Medals, achievements, accessibility options, mobile controls tuning
+- [x] **M1: Movement + floors.** Platformer kit integration, solid/fake/crumbling floors, pebbles, World 1
+- [x] **M2: Rain world.** Particle rain, splashes, invisible floors, World 2
+- [x] **M3: Lantern world.** Lighting, shadows, return-trip floors, World 3
+- [x] **M4: Betrayal + painting.** Mimic floors, parallax painted floors, Worlds 4–5, final room
+- [x] **M5: Polish.** Medals, achievements, accessibility options, mobile controls tuning
 - [ ] **Later:** room editor, Daily Room, Blindfold mode
 
 ---
@@ -319,3 +319,113 @@ src/games/fake-floor/
 - Tells are readable on a 6-inch phone screen (checked with 3+ testers).
 - Steady 60 fps on a mid-range phone in the rain and lantern worlds.
 - Progress and medals survive page reloads.
+
+---
+
+## 15. As Built
+
+Fake Floor is playable at `/games/fake-floor/play`: 50 rooms in five worlds and The Floor (51), all seven floor kinds plus the Floor's flipping tiles, pebbles that never lie, every tell from §3 (grout, rain, lantern shadows, dust, parallax, and World 4's faked ones), look-ahead, safety nets, the three medals, time trials, ten hidden pebbles, seven achievements, high-contrast tells, assist mode, remappable keys, gamepads and touch. The art (Endesga 32 pixel art), the music (marimba and pads, a tune per world) and the sounds (ZzFX) are all generated in code: there are no asset files.
+
+It reuses the platformer kit TrapSprint built (`engine/loop`, `input`, `replay`, `sprites`, `platformer/`) and adds a few shared pieces: `engine/pixel-font.ts` (the 3 × 5 font, moved from TrapSprint), `engine/audio/sfx-bank.ts` (ZzFX sounds through the arcade's audio engine, now used by both games), `games/shared/fit.ts` (whole-pixel canvas scaling) and `games/shared/gamepad.ts` (gamepad buttons on menus).
+
+### The rooms
+
+| Room | Name | Floors | Tells there | Pebbles | Par (s) |
+|---|---|---|---|---|---|
+| 1-01 | Welcome Mat | fake (nets) | grout | 0 | 7.0 |
+| 1-02 | Grout Expectations | fake (nets) | grout | 0 | 9.0 |
+| 1-03 | Pebble Pusher | fake (nets) | grout | 3 | 7.0 |
+| 1-04 | Crumble Zone | crumbling (nets) | grout | 1 | 9.0 |
+| 1-05 | Showroom Floor | fake | grout | 2 | 11.0 |
+| 1-06 | Steps | fake (hidden pebble) | grout | 2 | 10.5 |
+| 1-07 | Checkerboard | fake | grout | 2 | 9.5 |
+| 1-08 | Clearance Sale | crumbling, fake | grout | 2 | 11.0 |
+| 1-09 | Odd One Out | fake (hidden pebble) | grout | 1 | 12.5 |
+| 1-10 | Grand Opening | fake, crumbling | grout | 3 | 17.0 |
+| 2-01 | The Dry Tile | fake (nets) | rain | 0 | 7.0 |
+| 2-02 | Puddle Jumping | fake (nets) | rain | 1 | 9.0 |
+| 2-03 | Splash Zone | invisible (nets) | rain | 1 | 9.0 |
+| 2-04 | Bridge of Nothing | invisible | rain | 1 | 11.0 |
+| 2-05 | Skylights | invisible, fake, crumbling | rain | 2 | 11.0 |
+| 2-06 | Fire Escape | invisible, fake (hidden pebble) | rain | 2 | 9.5 |
+| 2-07 | Downpour | fake, invisible, crumbling | heavy rain | 2 | 13.0 |
+| 2-08 | Drizzle | fake, invisible | light rain | 3 | 11.0 |
+| 2-09 | Leap of Faith | invisible (hidden pebble) | rain | 2 | 12.0 |
+| 2-10 | Storm | crumbling, fake, invisible | heavy rain | 3 | 17.0 |
+| 3-01 | Shadowless | fake (nets) | lanterns, dust | 0 | 6.5 |
+| 3-02 | Swing Shift | fake (nets) | lanterns, dust | 1 | 9.0 |
+| 3-03 | Dust Bowl | invisible, fake (nets) | lanterns, dust | 1 | 9.0 |
+| 3-04 | Plank Walk | fake, crumbling | lanterns, dust | 2 | 11.0 |
+| 3-05 | Two Lanterns | fake | lanterns, dust | 2 | 11.0 |
+| 3-06 | Cave-In | crumbling, invisible, fake (hidden pebble) | lanterns, dust | 2 | 11.5 |
+| 3-07 | Round Trip | return-trip, fake (nets, key) | lanterns, dust | 1 | 18.0 |
+| 3-08 | Echo | return-trip, fake, crumbling (key, hidden pebble) | lanterns, dust | 2 | 23.5 |
+| 3-09 | Pitch Black | fake, invisible | lanterns, dust | 3 | 11.0 |
+| 3-10 | Deep Shaft | return-trip, fake, crumbling, invisible (key) | lanterns, dust | 3 | 25.0 |
+| 4-01 | Betrayal | fake, mimic (nets) | chandeliers | 1 | 7.0 |
+| 4-02 | Off-Beat | fake, mimic (nets) | rain | 1 | 8.0 |
+| 4-03 | Still Life | mimic, fake (nets) | chandeliers | 1 | 9.0 |
+| 4-04 | Reflections | mimic, fake, invisible | rain | 2 | 11.0 |
+| 4-05 | Chandelier | mimic, fake (hidden pebble) | chandeliers | 2 | 11.0 |
+| 4-06 | Smoke and Mirrors | invisible, mimic, fake | chandeliers, dust | 2 | 11.5 |
+| 4-07 | Funhouse | mimic, fake, invisible | rain, chandeliers | 2 | 12.0 |
+| 4-08 | Double Take | return-trip, mimic, fake (key) | chandeliers | 2 | 20.5 |
+| 4-09 | Trust Nothing | fake, mimic, invisible (hidden pebble) | rain, chandeliers | 2 | 11.5 |
+| 4-10 | Mirror, Mirror | invisible, mimic, fake, crumbling | rain, chandeliers | 3 | 17.0 |
+| 5-01 | Wet Paint | painted (nets) | paint (depth 0.88) | 0 | 9.5 |
+| 5-02 | Brushwork | painted (nets) | paint (depth 0.88) | 1 | 11.0 |
+| 5-03 | Landscape | painted, invisible, fake (nets) | rain, paint (depth 0.9) | 1 | 11.5 |
+| 5-04 | Crackle Glaze | crumbling, painted | paint (depth 0.9) | 2 | 11.5 |
+| 5-05 | Starry Night | painted, fake | lanterns, paint (depth 0.9) | 2 | 12.0 |
+| 5-06 | Gallery | painted (hidden pebble) | paint (depth 0.92) | 3 | 12.5 |
+| 5-07 | Mosaic | fake, painted | grout, paint (depth 0.9) | 2 | 11.5 |
+| 5-08 | Restoration | return-trip, painted (key) | paint (depth 0.9) | 2 | 22.0 |
+| 5-09 | Perspective | painted (hidden pebble) | paint (depth 0.95) | 2 | 13.0 |
+| 5-10 | The Frame | painted, crumbling, invisible, fake | rain, paint (depth 0.93) | 3 | 17.5 |
+| ★ | The Floor | flipping, fake, invisible, mimic | grout, rain, lanterns, dust | 3 | 19.5 |
+
+Par is the solver's time from your first step to the door, plus a third and a second and a half, rounded up to half a second.
+
+### The tells, as drawn
+
+| Floor | Tell |
+|---|---|
+| Fake (Showroom, The Floor) | Its grout grid is shifted 3 px across and 2 px down, so the lines jog where it meets a real tile |
+| Fake (rain) | Raindrops fall straight through it: no splashes, while every real floor splashes |
+| Fake (lanterns) | No shadow on the back wall; real floors' shadows swing with the lantern |
+| Invisible | Rain splashes on nothing; dust settles on nothing; a pebble makes it "tink" and glow for 3 s |
+| Crumbling | Honestly cracked; it shakes and sheds dust for 0.4 s once you're on it |
+| Return-trip | Holds you once; when you've left it, a faint crack appears and it behaves like a fake (no splashes, no shadow, shifted grout) |
+| Mimic (rain) | It splashes, but between the gusts: the rain (and its sound) swells every 2.4 s, and its splashes come in the lulls |
+| Mimic (lanterns) | It has a shadow, but it's painted on: it stays put while the lantern swings |
+| Painted | It's on the background, a little deeper than the floors, so it slides when the view moves (it lines up where you'd stand to look at it); in the rain it stays dry; under a lantern its shadow is still. With reduce motion on it doesn't slide, it wears a dashed frame |
+| Flipping (The Floor) | Whatever it is right now shows every tell at once, and a bright shimmer sweeps across it in the half second before it flips |
+
+### Differences from the draft
+
+- **Rooms are text, not LDtk**, like TrapSprint's: a few rows of characters per room (`rooms/world*.ts`); rock carries on down as pillars (`rooms/build.ts`), so a map is just the rows where something happens. Rooms are 17 rows tall and 30 to 100 columns wide; the view is 480 × 272 (TrapSprint's), not 480 × 270.
+- **A solver proves every room**, like TrapSprint's: a beam search on the real simulation (`core/solver.ts`, with a navigation map for direction). Its runs (`rooms/dev-runs.ts`, regenerated with `UPDATE_DEV_RUNS=1`) set the par times and are replayed by the tests.
+- **The design review is a test.** `rooms/rooms.test.ts` checks, room by room, that every floor that lies has at least one honest tell (`core/tells.ts`, the same rules the renderer draws), that every world's tell and every new floor is introduced over a safety net, that lanterns light every floor that lies, that paint only appears where the view can move, and that every hidden pebble can be reached (the solver goes and gets it).
+- **Safety nets put you back on the last safe floor** (and mend any crumbled floors) instead of restarting the room; they still count as a fall. They're under the whole pit in each world's first rooms. Assist can put them everywhere.
+- **Painted floors line up from where you'd stand to look at them** (the camera settled just before them), rather than from the room's start: on long rooms the slide would otherwise be far too big. Their depth varies by room (0.88 in the first rooms, 0.95 in Perspective).
+- **Mimic splashes are off the beat of the gusts.** The rain comes in gusts every 2.4 s, which you can see (more drops) and hear (the rain swells); real floors splash most in the gusts, mimics in the lulls.
+- **Return-trip floors turn as soon as you've stepped off them**, not on a second crossing, and they hold as long as you're on them. Five rooms (3-07, 3-08, 3-10, 4-08 and 5-08) put the key at the far end, so you come back over them.
+- **The Floor** has breathing tiles (all flip together), two rolling waves (a little slower than you can walk) and a checkerboard that swaps every 0.75 s, among plain fakes, mimics and invisible floors, under rain and lanterns, with eyes in its rock that follow you.
+- **Medals are per visit and kept once earned**: Clean (no falls in the visit, safety nets included), Barefoot (no pebbles thrown in the visit) and Quick (under par). The clock starts on your first step: looking ahead and throwing pebbles are free. R restarts the room but doesn't forget the visit's falls and pebbles.
+- **The room-complete card** is a toast over the next room, which is already running. A world's last room ends on a "world complete" card; The Floor ends on the closing line.
+- **Time trials** play a world's ten rooms on one clock (from your first step, falls included) with splits. **Barefoot Champion** is a time trial without a pebble, **Eagle Eye** is the Hall of Mirrors' time trial without a fall. Two achievements were added to the plan's five: **Leap of Faith** (stepping onto an invisible floor no pebble has tested) and **Grounded** (crossing The Floor).
+- **Assist** is slow motion (75%), unlimited pebbles and safety nets everywhere; any of them turns medals off for the room but still opens the next. **High-contrast tells** isn't an assist: thicker grout and a bigger jog, bigger and more splashes, darker and longer shadows.
+- **Aiming**: click (or tap) any floor to lob a pebble at it; the arc is shown while you aim. With a keyboard or gamepad, tap F (X) to throw at the floor two tiles ahead, or hold it to walk the target out to eight tiles and back; the right stick aims freely.
+- **Screen readers** hear the signs, the pebble's answer ("Tok", "Tink", "Silence") and every fall, from a live region over the canvas.
+
+### Testing (as built)
+
+- `rooms/dev-runs.test.ts`: every room replays the solver's run to the door, tick for tick, within a minute.
+- `rooms/rooms.test.ts`: the design review above, plus the room count, unique names, unlock order, and which room introduces each kind of floor.
+- `core/world.test.ts`: each floor behaves as described; a pebble at each kind of floor gives the true answer; lobs land where aimed; nets, keys, pickups.
+- `core/session.test.ts`: the clock starts on your first step (not on looking or throwing), falls restart the room in 22 ticks, R isn't a fall, nets don't restart, time trials' clock, assist mid-room.
+- `core/progress.test.ts`: falls and pebble counts, medals and their rules, assist, time trials and every achievement, par times.
+- `audio/audio.test.ts`: every sound builds, is short and doesn't clip; the pebble's three answers differ; each world's footsteps; every tune has whole bars and stays calm.
+- `tests/e2e/fake-floor.spec.ts`: the real build in Chromium on a desktop and a phone (the logo falling through the floor, the Welcome Mat's net and a clear with its medal card, pebbles by key, click and tap, a fall and a restart, pause and assist, unlocks, time trials, touch controls).
+- Frame rate: 60 fps in the heaviest rooms (heavy rain, rain under chandeliers, The Floor), also with the CPU slowed 4×.
+

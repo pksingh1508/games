@@ -1,5 +1,5 @@
-// A 3 × 5 pixel font for words painted inside the levels ("LEVEL COMPLETE!" on the banner, the
-// Follower's "Z"s). Web fonts would blur at this size; these are crisp at any scale.
+// A 3 × 5 pixel font for words painted inside canvas games (TrapSprint's "LEVEL COMPLETE!" banner,
+// Fake Floor's signs and its "TOK"). Web fonts would blur at this size; these are crisp at any scale.
 
 const GLYPHS: Record<string, string> = {
   A: "010101111101101",
@@ -41,9 +41,19 @@ const GLYPHS: Record<string, string> = {
   "!": "010010010000010",
   "?": "110001010000010",
   ".": "000000000000010",
+  ",": "000000000010100",
   ":": "000010000010000",
   "-": "000000111000000",
   "+": "000010111010000",
+  "'": "010010000000000",
+  '"': "101101000000000",
+  "/": "001001010100100",
+  "(": "010100100100010",
+  ")": "010001001001010",
+  "=": "000111000111000",
+  "<": "001010100010001",
+  ">": "100010001010100",
+  "*": "000101010101000",
   " ": "000000000000000",
 };
 
@@ -64,4 +74,21 @@ export function pixelText(g: CanvasRenderingContext2D, text: string, x: number, 
     }
     cx += (GLYPH_W + 1) * scale;
   }
+}
+
+/** Break `text` into lines no wider than `maxWidth` pixels (at scale 1). */
+export function wrapPixelText(text: string, maxWidth: number): string[] {
+  const perLine = Math.max(1, Math.floor((maxWidth + 1) / (GLYPH_W + 1)));
+  const lines: string[] = [];
+  let line = "";
+  for (const word of text.split(/\s+/).filter(Boolean)) {
+    if (!line) line = word;
+    else if (line.length + 1 + word.length <= perLine) line += ` ${word}`;
+    else {
+      lines.push(line);
+      line = word;
+    }
+  }
+  if (line) lines.push(line);
+  return lines;
 }

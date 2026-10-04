@@ -10,7 +10,9 @@ import { expandLog } from "@/engine/replay";
 import { useSave } from "@/engine/save";
 import { useCoarsePointer, useComfort, usePortrait } from "@/games/shared/device";
 import { Store } from "@/games/shared/store";
+import { useFitCanvas } from "@/games/shared/fit";
 import { cn } from "@/lib/cn";
+import { HEIGHT, WIDTH } from "../core/constants";
 import { loadBestRun } from "../core/ghosts";
 import { levelTitle } from "../core/level";
 import { unpackMark } from "../core/progress";
@@ -22,7 +24,6 @@ import { assistOn, trapSprintSave } from "../save";
 import styles from "../trapsprint.module.css";
 import { CompleteCard, type CompleteInfo } from "./Complete";
 import { SkullIcon } from "./icons";
-import { useFitCanvas } from "./fit";
 import { OptionsPanel } from "./Menus";
 
 export interface ZoneRunInfo {
@@ -55,7 +56,7 @@ export function PlayScreen({ levelId, zoneRun, result, hasNext, onDeath, onFakeH
   const comfort = useComfort();
   const coarse = useCoarsePointer();
   const portrait = usePortrait();
-  const { area, frame } = useFitCanvas();
+  const { area, frame } = useFitCanvas(WIDTH, HEIGHT, "--ts-scale");
   const canvas = useRef<HTMLCanvasElement | null>(null);
   const timer = useRef<HTMLSpanElement | null>(null);
   const runtime = useRef<Runtime | null>(null);

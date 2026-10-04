@@ -295,14 +295,15 @@ const DATA: Record<GameSlug, GameData> = {
     controls: [
       { action: "Move", desktop: "← → / A D", mobile: "Arrow buttons" },
       { action: "Jump", desktop: "Space / ↑", mobile: "Jump button" },
-      { action: "Throw a pebble", desktop: "Mouse aim + click", mobile: "Tap the floor to test" },
+      { action: "Throw a pebble", desktop: "Click a floor, or F (hold to aim further)", mobile: "Tap the floor to test" },
       { action: "Look ahead", desktop: "Hold Shift", mobile: "Hold the eye button" },
+      { action: "Restart the room", desktop: "R", mobile: "Restart button" },
     ],
     tricks: [
       {
         name: "Welcome Mat",
         expect: "The first tile is safe.",
-        actually: "It's fake. You fall in the first second (onto a net, just this once).",
+        actually: "It's fake. You fall in the first second (onto a safety net).",
         tell: "Its grout lines don't line up with its neighbours.",
       },
       {
@@ -319,18 +320,18 @@ const DATA: Record<GameSlug, GameData> = {
       },
     ],
     features: [
-      "51 short rooms in 5 worlds",
+      "50 short rooms in 5 worlds, then The Floor itself",
       "Pebbles that never lie",
       "Rain, lantern-light and parallax tells",
-      "A betrayal world where tells are faked",
-      "Medals for clean and barefoot runs",
-      "Instant restart",
+      "A betrayal world where the tells are faked",
+      "Clean, Barefoot and Quick medals",
+      "Time trials and hidden pebbles",
     ],
-    comfort: ["High-contrast tells option", "Slow-motion assist", "Tells never rely on colour", "Remappable keys"],
+    comfort: ["High-contrast tells option", "Slow motion, unlimited pebbles or safety nets (assist)", "Tells never rely on colour", "Remappable keys"],
     inspirations: ["Squid Game's glass bridge", "Level Devil", "Hollow Knight", "Spot the difference"],
     session: "15–40 s per room",
     inputs: ["keyboard", "gamepad", "touch"],
-    status: "workshop",
+    status: "playable",
   },
 
   trapsprint: {

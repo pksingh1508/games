@@ -37,6 +37,20 @@ const SUMMARIES: Partial<Record<GameSlug, Summarize>> = {
       { label: "Trophies", value: `${Object.keys(record(save.achievements)).length}/7` },
     ];
   },
+  "fake-floor"(save) {
+    // Rooms are "1-01" to "5-10", plus The Floor ("6-01"): 51, three medals each.
+    const rooms = Object.entries(record(save.rooms))
+      .filter(([id]) => /^[1-5]-\d\d$|^6-01$/.test(id))
+      .map(([, r]) => record(r));
+    const cleared = rooms.filter((r) => count(r.clears) > 0).length;
+    const medals = rooms.reduce((n, r) => n + [r.clean, r.barefoot, r.quick].filter((m) => m === true).length, 0);
+    return [
+      { label: "Rooms crossed", value: `${cleared}/51` },
+      { label: "Medals", value: `${medals}/153` },
+      { label: "Falls", value: count(save.falls).toLocaleString("en-US") },
+      { label: "Trophies", value: `${Object.keys(record(save.achievements)).length}/7` },
+    ];
+  },
   "one-tap-chaos"(save) {
     const best = count(save.best);
     // Mirrors the game's unlocks: 12 to start, 3 + 3 + 2 + 2 + 2 more at 10, 20, 30, 40 and 50.

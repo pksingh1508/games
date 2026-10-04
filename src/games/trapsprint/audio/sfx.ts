@@ -1,12 +1,7 @@
 // TrapSprint's sound effects (Plan/06-trapsprint.md §9): comedic bonks, splats and boings, and a
 // clear cue for every trap (saws "shing" before they fly in). Made with ZzFX's sample builder and
 // played through the arcade's audio engine, so the sound switch and volumes apply.
-import { getAudio } from "@/engine/audio/engine";
-
-// ZzFX parameters: volume, randomness, frequency, attack, sustain, release, shape, shapeCurve,
-// slide, deltaSlide, pitchJump, pitchJumpTime, repeatTime, noise, modulation, bitCrush, delay,
-// sustainVolume, decay, tremolo, filter.
-type Params = ReadonlyArray<number | undefined>;
+import { createSfxBank, type ZzfxParams } from "@/engine/audio/sfx-bank";
 
 export const SOUNDS = {
   jump: [0.6, 0.05, 250, 0, 0.03, 0.09, 5, 0.5, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0.8],
@@ -33,63 +28,16 @@ export const SOUNDS = {
   whoosh: [0.5, 0, 200, 0.05, 0.1, 0.2, 4, 1, -5, 0, 0, 0, 0, 0.3, 0, 0, 0, 0.8, 0, 0, -1500],
   crack: [0.6, 0.05, 300, 0, 0.02, 0.1, 4, 1, -10, 0, 0, 0, 0, 1],
   respawn: [0.3, 0, 600, 0, 0.02, 0.05, 1, 1, 20],
-} as const satisfies Record<string, Params>;
+} as const satisfies Record<string, ZzfxParams>;
 
 export type SfxName = keyof typeof SOUNDS;
 export const SFX_NAMES = Object.keys(SOUNDS) as SfxName[];
 
-let buffers: Partial<Record<SfxName, AudioBuffer>> | null = null;
-let loading: Promise<void> | null = null;
+const bank = createSfxBank(SOUNDS);
 
-/**
- * Build every sound once. ZzFX creates its own AudioContext when imported, so it's only loaded
- * after a tap or key press, and that context is closed straight away: only its sample builder is
- * used.
- */
-export function loadSfx(): Promise<void> {
-  loading ??= (async () => {
-    const audio = getAudio();
-    if (!audio) {
-      loading = null;
-      return;
-    }
-    const { ZZFX } = await import("zzfx");
-    void ZZFX.audioContext?.close?.().catch(() => {});
-    const built: Partial<Record<SfxName, AudioBuffer>> = {};
-    for (const name of SFX_NAMES) {
-      const samples = ZZFX.buildSamples(...SOUNDS[name]);
-      const buffer = audio.ctx.createBuffer(1, Math.max(1, samples.length), ZZFX.sampleRate);
-      buffer.getChannelData(0).set(samples);
-      built[name] = buffer;
-    }
-    buffers = built;
-  })().catch(() => {
-    loading = null;
-  });
-  return loading;
-}
+/** Build every sound once (after a tap or key press: ZzFX makes an AudioContext when imported). */
+export const loadSfx = bank.load;
 
-const lastPlayed = new Map<SfxName, number>();
-
-export function playSfx(name: SfxName, { volume = 1, rate = 1 }: { volume?: number; rate?: number } = {}) {
-  const audio = getAudio();
-  if (!audio) return;
-  if (!buffers) {
-    void loadSfx();
-    return;
-  }
-  const buffer = buffers[name];
-  if (!buffer) return;
-  // The same sound twice within 30 ms just sounds louder: skip it.
-  const now = audio.ctx.currentTime;
-  if (now - (lastPlayed.get(name) ?? -1) < 0.03) return;
-  lastPlayed.set(name, now);
-  const source = audio.ctx.createBufferSource();
-  source.buffer = buffer;
-  source.playbackRate.value = rate;
-  const gain = audio.ctx.createGain();
-  gain.gain.value = volume * 0.45;
-  source.connect(gain).connect(audio.buses.sfx);
-  source.onended = () => gain.disconnect();
-  source.start();
+export function playSfx(name: SfxName, options: { volume?: number; rate?: number } = {}) {
+  bank.play(name, options);
 }
