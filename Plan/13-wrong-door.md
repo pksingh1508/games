@@ -362,11 +362,11 @@ src/games/wrong-door/
 
 ## 13. Build Roadmap
 
-- [ ] **M1: Logic core.** Statements, rules, solver, generator, plain signs + knights & knaves floors
-- [ ] **M2: Playable run.** Floor view, door choice, keys, consequences, Truth Reveal, Story Run floors 1–6
-- [ ] **M3: More clues.** Doorman, knocking + sound, light, candle, footprints, sequence floors
-- [ ] **M4: Special floors.** Mirror, anomaly, Monty Hall, memory, dark, shifting, Liar's Banquet, the Final Floor
-- [ ] **M5: Modes + polish.** Items, Endless, Daily Door, codex, achievements, accessibility
+- [x] **M1: Logic core.** Statements, rules, solver, generator, plain signs + knights & knaves floors
+- [x] **M2: Playable run.** Floor view, door choice, keys, consequences, Truth Reveal, Story Run floors 1–6
+- [x] **M3: More clues.** Doorman, knocking + sound, light, candle, footprints, sequence floors
+- [x] **M4: Special floors.** Mirror, anomaly, Monty Hall, memory, dark, shifting, Liar's Banquet, the Final Floor
+- [x] **M5: Modes + polish.** Items, Endless, Daily Door, codex, achievements, accessibility
 - [ ] **Later:** floor editor, Detective mode, run history, daily challenge links
 
 ---
@@ -379,3 +379,136 @@ src/games/wrong-door/
 - Every sound clue has a working caption.
 - The same daily seed produces the same run on every device.
 - A full run is playable by touch on a phone.
+
+---
+
+## 15. As Built
+
+Wrong Door is playable at `/games/wrong-door/play`. It has:
+
+- three ways to play: the Story Run (13 hand-made floors), the Endless Hotel, and the Daily Door (one hotel a day for everyone, by the UTC date, with a share card);
+- all 13 kinds of floor;
+- every kind of clue: signs and the plaque, Mr. Hinges (his red hat has a feather), knocking (every sound with a caption), light under the doors, the candle, footprints, room numbers and memory;
+- keys, the four misfortunes, and the Truth Reveal after every wrong door;
+- six things to find: the stethoscope, the lantern, the Truth Coin, the crowbar, chalk and spare keys;
+- the codex (26 pages), six achievements, a Detective score, and Relaxed mode and bigger signs in Options.
+
+Everything is made in code, with no asset files:
+
+- **Art:** DOM and SVG. Five door styles, Mr. Hinges, the lobby's furniture, the candle and footprints. The floors get darker going up.
+- **Sound:** the sounds behind the doors are synthesized and panned to the door's side of the hall. ZzFX makes the knocks, creaks, the slam, the tumble down the stairs, the curse and the coin. A door swells as it opens, and the lobby plays elevator muzak (there are no elevators).
+
+It reuses:
+
+- `engine/rng`: the run's seed, the daily hotel, and which door the host opens;
+- the audio engine and sound bank, whose stereo pan places each door's sound;
+- `engine/save`;
+- `games/shared`: achievements, the one-tab guard, sharing, device hooks;
+- the arcade's `Dialog`.
+
+It has no game loop and no canvas: it's turn-based DOM.
+
+The code is in these folders:
+
+- `logic/`: what signs say (`statements.ts`), which doors could be the way up (`solver.ts`), Mr. Hinges (`doorman.ts`), `sequences.ts` and `monty-hall.ts`.
+- `floors/`:
+  - `archetypes.ts`: a generator per kind of floor;
+  - `check.ts`: the fairness check;
+  - `story.ts`: the Story Run;
+  - `schedule.ts`: which kinds come when in Endless and the Daily Door, what's lying around, curses, the daily seed.
+- `run/`: the run (`state.ts`: knocks, the question, tools, choosing, misfortunes, score), and a careful player (`reasoner.ts`) for the tests and QA.
+- `content/`: the codex, and the words of the Truth Reveal.
+- `ui/`: the lobby, a floor (the hall and the clue board), the Truth Reveal, the Wrong Room, the summary and the menus.
+
+### The Story Run
+
+| Floor | Kind | What it teaches | The way up |
+|---|---|---|---|
+| 1 | Plain Signs | Read the plaque. “One of these doors is the way up” can't be false, so the confident sign is the liar | Door 2 |
+| 2 | Knights & Knaves | For each door, count which signs would be true | Door 2 |
+| 3 | The Doorman | The sign leaves two doors. Mr. Hinges wears his red hat, so his answer means the opposite | Door 1 |
+| 4 | Sound | The lying sign leaves three doors; the plaque promises wind. Two knocks always find it | Door 3 |
+| 5 | Sequence | 2, 3, 5, 7… | Room 11 |
+| 6 | Anomaly | The painting hangs upside down: go back the way you came | Back |
+| 7 | Mirror | “Right of” is to the left, as you see it. Only door 1 makes exactly one sign true | Door 1 |
+| 8 | Lucky 🎲 | He opens a wrong door and offers the switch. Switch | Luck |
+| 9 | Memory | The same kind of door you went through on floor 4 | The wooden one |
+| 10 | Dark | The flame leans right; knock for the wind, or ask the double question (you can't see his hat) | Door 4 |
+| 11 | Shifting | Solve it, then follow the ring scratch when the doors move | Door 2 |
+| 12 | Liar's Banquet | Only the candle tells the truth; the lit door is a dead end | Door 1 |
+| 13 | The Final Floor | “None of these doors is the way out.” It's true | The painting |
+
+Each floor is hand-made on your first visit. Go down the stairs, and the floor you land on is a new puzzle of the same kind, from the story's own seed.
+
+### Endless and the Daily Door
+
+- **Which floors come when:** each kind of floor turns up from the floor the plan says it usually appears on:
+  - signs on floor 1, knights and knaves from 2;
+  - the doorman and sound floors from 3;
+  - room numbers from 4, anomalies from 5, mirrors from 6;
+  - memory from 7, dark floors from 8, shifting doors from 9, Liar's Banquet from 10.
+- **The Lucky Floor** comes once in every 13 floors, somewhere from the 5th to the 11th.
+- **Variety:** the same kind never comes twice in a row, and a kind gets its turn soon after it opens.
+- **The Daily Door** ends on the Final Floor at 13. Endless never ends.
+- **Higher up is harder:**
+  - more doors (three, then up to five);
+  - trickier claims, from “This is the way up” to “The sign on door 2 is lying”;
+  - trickier rules, from “Exactly one sign tells the truth” to “The sign on the way up lies; every other sign tells the truth”;
+  - from floor 7, Mr. Hinges sometimes takes his hat off.
+- **Things to find:** something is lying on the floor about one floor in three. You're never offered a tool you keep (the stethoscope, lantern or chalk) twice.
+
+### How it's proven fair
+
+- **Every floor is checked as it's made**, by the kind of floor (`floors/check.ts`):
+  - Signs, numbers, memory, mirrors, shifting doors and Liar's Banquet: what's on show leaves exactly one door, and the signs fit the plaque in exactly one way (so the Truth Reveal can stamp each one).
+  - The doorman: what's on show leaves two doors, and the double question about either settles it, whatever his hat.
+  - Sound and dark floors: what's on show leaves two or three doors, and the plaque promises wind, so two knocks always settle it. A dark floor's signs can't be read (without a lantern).
+- **The tests generate 10,000 floors of every kind** and check each one (about six seconds).
+- **A careful player climbs whole runs.** It reads only what's on show, asks the double question, knocks for the wind, goes back when something's changed, and switches on the Lucky Floor. It escapes the Story Run, 200 Daily Doors and 25 Endless climbs of 40 floors, and only ever opens a wrong door by luck.
+- **The rest:**
+  - 100,000 Lucky Floors win two times in three by switching, and one in three by staying.
+  - Mr. Hinges is tested on every door, honest and lying, including the double question.
+  - Every sound behind a door has a caption.
+  - The same day gives the same hotel on every device.
+  - The end-to-end tests play the whole Story Run by touch on a phone.
+
+### How the truth is kept
+
+| Lie | The tell |
+|---|---|
+| Signs | The plaque says how many tell the truth, or how they lie. It never lies |
+| Mr. Hinges | His red hat, with a feather: he lies. His black hat: he doesn't. Hat off, or too dark to see: only the double question works |
+| Behind the doors | Wind is only ever behind the way up. Footsteps, ticking and whispers never are. Silence could be either, unless the plaque promises wind |
+| Light | On honest floors, the way up is always lit |
+| The candle | It leans towards the way up's side |
+| Footprints | Follow the toes. Toes pointing back at you mean someone came out of a dead end |
+| Mirror floors | The writing is mirrored, and the plaque says so |
+| Anomalies | The lobby's furniture is on every floor and listed in the codex; the Truth Reveal says what changed |
+| The Lucky Floor | Marked 🎲. Losing only sends you down a floor; it never costs a key |
+| Shifting doors | Every door has its own scratch |
+| Liar's Banquet | The plaque says which kind of clue is honest tonight |
+| The Final Floor | The plaque |
+
+### Differences from the draft
+
+- **One solver for every clue.** Signs are brute-forced as planned. Light, the candle, footprints, room numbers, memory, knocks, the doorman's answer, the Truth Coin and the crowbar each rule doors in or out of the same set.
+- **More claims and rules.** Signs can also say “somewhere right of”, “door 1 or door 3”, “right next to”, “the sign on door 2 tells the truth” and “one of these doors is the way up”. Plaques can also say “the sign on the way up tells the truth, and every other sign lies” (and the opposite).
+- **What you hear is what's waiting:**
+  - footsteps: down the stairs;
+  - ticking: the Wrong Room;
+  - whispers: a curse (whispers are a fifth sound, added for it);
+  - silence: a lost key, or the way up, unless the plaque promises wind.
+- **Wrong doors:**
+  - A wrong door you open gets an X, and you stay on the floor. Down the stairs is the exception.
+  - Down the stairs from floor 1 is a new puzzle on floor 1.
+  - A cursed door's curse lands on the next floor you reach. It's never one that floor needs: no knocking on a sound floor, or a silent doorman on his own floor.
+- **The Wrong Room:** a row of seven wall sections in the dark. Your candle leans towards the draft, and the wind sounds from that side. Walk, then push, within 20 seconds.
+- **The lantern** makes dark floors light for you, so you can read the signs and see the hat. (In the draft it showed the light under all doors, but that light is always on show here.)
+- **Tools are used on the door you're looking at.** In the draft you picked the tool first, then the target. Chalk also notes the kind of door you go through on every floor from then on, which helps on memory floors.
+- **The Lucky Floor** has no knocking and no tools, which would give it away. Mr. Hinges is there to host, but takes no questions.
+- **The Final Floor:** the way out is the painting or the door you came in by. The seed decides, and only that one opens.
+- **Anomaly floors** have one door ahead and the door you came in by. The plaque says “This hall is furnished like the lobby”. Changes are obvious low down and subtle higher up.
+- **The Daily Door** can be played again for fun, but your first finished run of the day is the one kept.
+- **Score:** each floor is worth 100 Detective points, minus 15 a knock, 20 for the question, 25 a tool and 40 a wrong door (never less than 10). Getting out adds 300, plus 50 for every key left.
+- **The codex** pages open as you meet things. The Lucky Floor's maths and the Final Floor's page only open after you've played them.
+- **The play screen covers the whole window.** Every floor shows the brass plaque, the hall and a clue board that writes every sign and clue out in full (readable on a phone, and to screen readers).

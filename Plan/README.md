@@ -113,7 +113,8 @@ src/
     cursor-escape/            # Cursor Escape: 41 windows on DeskOS 98, each proven by a solver through the real simulation (built)
     last-pixel/               # Last Pixel: 41 canvases to clean up, then catch the last pixel; a bot plays every one to 100% (built)
     one-more-step/            # One More Step: 41 levels on a turn-based grid; a solver proves each one and sets its par (built)
-    wrong-door/ ...           # one folder per game; entry file: index.tsx
+    wrong-door/               # Wrong Door: 13 kinds of floor, generated from seeds and checked by a solver as they're made (built)
+    panic-stack/ ...          # one folder per game; entry file: index.tsx
   engine/                     # shared, framework-free TypeScript
     loop.ts                   # fixed-timestep loop (60 Hz accumulator) on requestAnimationFrame (built)
     input.ts                  # keyboard / touch buttons / gamepad → game actions, remappable (built)
@@ -145,10 +146,10 @@ tests/e2e/                    # Playwright: games played end to end on desktop a
 | `engine/platformer` | **TrapSprint** (built first), **Fake Floor** (built), **Almost There** (built), **Gravity Is Lying** (built), **Glitch Run** (built: its vertical physics), Don't Trust The Game |
 | `engine/postfx` | Don't Blink, Don't Trust The Game. (Glitch Run, built, does its screen effects in Canvas 2D itself) |
 | `engine/browser` | **Cursor Escape** (built: pointer lock), **Last Pixel** (built: the tab's title and icon, visibility), Don't Trust The Game, 99 Seconds |
-| `engine/rng` | One Tap Chaos, Glitch Run, Wrong Door, Panic Stack, Don't Blink, **One More Step** (built: each level's footstep tune; a daily puzzle later) |
-| Pure React/DOM (no canvas) | NOPE!, 99 Seconds, Wrong Door |
+| `engine/rng` | One Tap Chaos, Glitch Run, Panic Stack, Don't Blink, **One More Step** (built: each level's footstep tune; a daily puzzle later), **Wrong Door** (built: every floor, the Daily Door's hotel, the Lucky Floor's host) |
+| Pure React/DOM (no canvas) | NOPE!, 99 Seconds, **Wrong Door** (built: DOM and SVG, doors that swing open in CSS 3D) |
 | Physics library (Planck.js) | Panic Stack only |
-| Level solvers / generators (Node scripts + tests) | **One More Step** (built: a breadth-first search through the real rules, run by the unit tests, sets every par), Wrong Door |
+| Level solvers / generators (Node scripts + tests) | **One More Step** (built: a breadth-first search through the real rules, run by the unit tests, sets every par), **Wrong Door** (built: a generator per kind of floor; the solver checks every floor as it's made, and the tests check 10,000 of each kind) |
 
 ### Global settings (stored once, respected everywhere)
 
@@ -172,7 +173,7 @@ tests/e2e/                    # Playwright: games played end to end on desktop a
 | 3 | ✅ **TrapSprint** (playable) | Builds the shared platformer kit |
 | 4 | ✅ **Fake Floor** (playable), ✅ **Almost There** (playable), ✅ **Gravity Is Lying** (playable), ✅ **Glitch Run** (playable) | Reuse and extend the platformer kit |
 | 5 | ✅ **Cursor Escape** (playable), ✅ **Last Pixel** (playable) | Pointer-driven games, browser helpers |
-| 6 | ✅ **One More Step** (playable), **Wrong Door** | Logic engines with automated solvers |
+| 6 | ✅ **One More Step** (playable), ✅ **Wrong Door** (playable) | Logic engines with automated solvers |
 | 7 | **Panic Stack** | Adds a physics library |
 | 8 | **Don't Blink**, **99 Seconds** | Art-heavy scene games |
 | 9 | **Don't Trust The Game** | Comes last because it parodies the other games and uses the most browser tricks |
