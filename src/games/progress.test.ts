@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 import { ALMOST_THERE_ACHIEVEMENTS } from "./almost-there/achievements";
 import { defaultAlmostThereSave } from "./almost-there/save";
 import { FAKE_FLOOR_ACHIEVEMENTS } from "./fake-floor/achievements";
+import { GRAVITY_ACHIEVEMENTS } from "./gravity-is-lying/achievements";
+import { ROOM_IDS as GRAVITY_ROOMS } from "./gravity-is-lying/rooms";
+import { defaultGravitySave, emptyRoomRecord as emptyGravityRoom } from "./gravity-is-lying/save";
 import { ROOM_IDS } from "./fake-floor/rooms";
 import { defaultFakeFloorSave, emptyRoomRecord } from "./fake-floor/save";
 import { NOPE_ACHIEVEMENTS } from "./nope/achievements";
@@ -98,6 +101,22 @@ describe("cabinet progress", () => {
       { label: "Best climb", value: "—" },
       { label: "Fallen", value: "0 m" },
       { label: "Trophies", value: `0/${ALMOST_THERE_ACHIEVEMENTS.length}` },
+    ]);
+  });
+
+  it("summarizes a Gravity Is Lying save (three golden apples a room)", () => {
+    const save = defaultGravitySave();
+    save.rooms["1-01"] = { ...emptyGravityRoom(), clears: 2, apples: 0b111 };
+    save.rooms["3-04"] = { ...emptyGravityRoom(), clears: 1, apples: 0b101 };
+    save.rooms["6-04"] = { ...emptyGravityRoom(), clears: 1 };
+    save.rooms["2-02"] = { ...emptyGravityRoom(), deaths: 9 };
+    save.deaths = 1234;
+    save.achievements = { "fell-up": 1 };
+    expect(summarizeProgress("gravity-is-lying", JSON.stringify(save))).toEqual([
+      { label: "Rooms cleared", value: `3/${GRAVITY_ROOMS.length}` },
+      { label: "Golden apples", value: `5/${GRAVITY_ROOMS.length * 3}` },
+      { label: "Deaths", value: "1,234" },
+      { label: "Trophies", value: `1/${GRAVITY_ACHIEVEMENTS.length}` },
     ]);
   });
 

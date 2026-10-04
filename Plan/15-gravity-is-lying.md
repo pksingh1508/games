@@ -310,11 +310,11 @@ src/games/gravity-is-lying/
 
 ## 13. Build Roadmap
 
-- [ ] **M1: Gravity physics.** 4-direction gravity frames, levers, zones, scarf rope, World 1
-- [ ] **M2: Flipping.** Player flip, spikes on both sides, World 2
-- [ ] **M3: Lies.** Lying HUD arrow, painted arrows, Isaac + leaf tell, timed rotation, World 3
-- [ ] **M4: Rotation + orbit.** Camera rotation, gravity hills, World 4; planetoids + fake planets, World 5
-- [ ] **M5: Finale + polish.** Isaac's Tree, lying anchors, ending, Truth Mode, apples, comfort options
+- [x] **M1: Gravity physics.** 4-direction gravity frames, levers, zones, scarf rope, World 1
+- [x] **M2: Flipping.** Player flip, spikes on both sides, World 2
+- [x] **M3: Lies.** Lying HUD arrow, painted arrows, Isaac + leaf tell, timed rotation, World 3
+- [x] **M4: Rotation + orbit.** Camera rotation, gravity hills, World 4; planetoids + fake planets, World 5
+- [x] **M5: Finale + polish.** Isaac's Tree, lying anchors, ending, Truth Mode, apples, comfort options
 - [ ] **Later:** room editor, daily room, Zero-G world
 
 ---
@@ -327,3 +327,99 @@ src/games/gravity-is-lying/
 - The whole game is completable with reduce motion on (no camera rotation).
 - 60 fps on a mid-range phone, including scarf and particle effects.
 - Progress and apples survive page reloads.
+
+---
+
+## 15. As Built
+
+Gravity Is Lying is playable at `/games/gravity-is-lying/play`: 44 rooms (five worlds of eight, then Isaac's Tree), four-way gravity with levers, zones, your own flip and timed turns, round planetoids, every liar from §3 (the HUD arrow, painted zone arrows, the camera, Isaac and his leaf, painted planets, and in the tree the drips, dust and lamps) and every truth anchor (the scarf, drips, dust, lamps), three golden apples in every room, six achievements, the ending and Truth Mode, reduce motion, both control modes, assist, remappable keys, gamepads and touch. The art is drawn in code with vector shapes (crisp at any angle the camera turns to), and the music (a music box over pads, a tune per world, its melody mirrored when Newt is upside down), the hum and the sounds (ZzFX) are generated in code: there are no asset files.
+
+It reuses the platformer kit (`engine/loop`, `input`, `replay`, `platformer/`) unchanged except for one split: `stepRunner` is now `steerRunner` (speeds, jumps, gravity) followed by the moves, so planets can steer Newt with the same feel and move it their own way. Everything else is the game's own.
+
+### The rooms
+
+| Room | Name | What's in it | What lies | Net | Solver (s) |
+|---|---|---|---|---|---|
+| 1-1 | Which Way Is Down? | 1 lever | — |  | 2.9 |
+| 1-2 | Lever Pull | 2 levers | — |  | 3.6 |
+| 1-3 | Sideways | 1 lever | — |  | 2.2 |
+| 1-4 | Zone In | 1 zone | — |  | 3.0 |
+| 1-5 | Four Walls | 3 levers | — |  | 2.9 |
+| 1-6 | Drip Drop | 3 zones | — |  | 3.5 |
+| 1-7 | Lamp Light | 2 levers | — |  | 3.1 |
+| 1-8 | Exit Experiment | 3 levers, 1 zone | — |  | 8.6 |
+| 2-1 | Flip Switch | flip | — |  | 3.6 |
+| 2-2 | Ceiling Fan | flip | — |  | 6.2 |
+| 2-3 | Look Both Ways | flip | — |  | 3.1 |
+| 2-4 | No Flip Zone | 1 zone, flip | — |  | 4.3 |
+| 2-5 | Spike Sandwich | flip | — |  | 4.5 |
+| 2-6 | Wall to Wall | 1 lever, flip | — |  | 6.3 |
+| 2-7 | Narrow Escape | flip | — |  | 4.8 |
+| 2-8 | The Machine | 1 lever, 1 zone, flip | — |  | 3.8 |
+| 3-1 | The Arrow Lies | gravity up, 1 zone | arrow (always down), Isaac | yes | 3.0 |
+| 3-2 | Painted Arrows | 2 painted wrong | Isaac | yes | 3.4 |
+| 3-3 | Tick Tock | turns upside down every 3.0 s | — | yes | 9.6 |
+| 3-4 | Countdown | flip | Isaac | yes | 5.3 |
+| 3-5 | Mid-Jump Flip | turns upside down every 2.5 s | — |  | 14.8 |
+| 3-6 | Gallery of Lies | 3 painted wrong | arrow (mirrored), Isaac |  | 2.7 |
+| 3-7 | Turn Table | turns clockwise every 2.5 s | — |  | 9.0 |
+| 3-8 | The Curator | 1 painted wrong, flip, turns upside down every 4.0 s | arrow (always down), Isaac |  | 4.7 |
+| 4-1 | Tilted Town | — | camera (turned, right up, turns in front of you), Isaac | yes | 4.5 |
+| 4-2 | Lamp Lane | 1 lever | arrow (camera's down), camera (turned, left up), Isaac |  | 2.0 |
+| 4-3 | Main Street | flip | arrow (camera's down), camera (upside down) |  | 3.4 |
+| 4-4 | Gravity Hill | — | arrow (camera's down), camera (level, tilted 12°), Isaac |  | 1.9 |
+| 4-5 | Rooftops | 1 lever | arrow (camera's down), camera (turned, right up, tilted -8°) |  | 3.2 |
+| 4-6 | Crooked House | 1 zone | arrow (camera's down), camera (turned, left up) |  | 3.6 |
+| 4-7 | Upside Downtown | flip | arrow (camera's down), camera (upside down, tilted 8°) |  | 9.7 |
+| 4-8 | Town Square | 1 lever, flip | arrow (camera's down), camera (turned, right up) |  | 4.7 |
+| 5-1 | Small World | 2 planets | — |  | 3.5 |
+| 5-2 | Hop | 3 planets | — |  | 2.4 |
+| 5-3 | Painted Planet | 2 planets, 1 painted | Isaac | yes | 3.7 |
+| 5-4 | Asteroid Belt | 1 planet, 2 asteroids | — |  | 4.2 |
+| 5-5 | Slingshot | 3 planets | — |  | 1.6 |
+| 5-6 | Gas Giant | 2 planets, 1 painted | Isaac |  | 1.6 |
+| 5-7 | Moons | 3 planets, 2 asteroids | — |  | 4.0 |
+| 5-8 | Orbital | 4 planets, 1 painted, 1 asteroid | — |  | 3.3 |
+| 6-1 | Roots | gravity up, 1 zone | arrow (always down), Isaac, drips, dust and lamps | yes | 3.4 |
+| 6-2 | Branches | 3 painted wrong | Isaac, drips, dust and lamps |  | 5.0 |
+| 6-3 | Canopy | turns upside down every 3.0 s | arrow (always down), Isaac, drips, dust and lamps |  | 15.6 |
+| 6-4 | The Top | 2 levers | arrow (always down), Isaac, drips, dust and lamps |  | 5.4 |
+
+"Solver" is the solver's time with all three golden apples, from the first move to the portal (`rooms/dev-runs.ts`). Rooms are 30 × 17 tiles of 16 px (480 × 272), Tilted Town's 17 × 17 (so they fit the screen at any quarter turn), Orbit's open space of the same size.
+
+### The truth, as drawn
+
+| Anchor | How it tells the truth |
+|---|---|
+| Newt's scarf | Nine linked points (Verlet), each pulled by the real gravity where it is: it hangs, trails and drapes over floors the real way, and its tip dangled into a zone bends that zone's way before you step in. It never lies, even in the tree |
+| Drips | Lab droppers whose tips point where their water falls; the drops fall the real way and splash on walls and planets |
+| Dust | Motes drift the real way; in space they fall toward real planets only, never painted ones |
+| Lamps | Pendulums that swing to hang the real way, wherever the camera has turned the room |
+| The hum | A rising tone (and the room's edge glowing faster) for 0.75 s before every timed turn, then a "whoomp" |
+
+### Differences from the draft
+
+- **Rooms are text, not LDtk**, like the other platformers: rows of characters per room (`rooms/world*.ts`), with zones, levers, Isaac's lines and the camera beside them. Tilted Town's houses are scenery (`h` fronts, `w` windows, `D` doors, `r` roofs), built upright for the room's camera. Orbit rooms are planets, asteroids and points in pixels.
+- **A solver proves every room**, with all three apples: a beam search over the real simulation following each room's waypoints (`core/solver.ts`). Its runs are replayed by the tests. It also found two shortcuts that were closed (1-8's portal got a back wall, 4-8's ceiling got spikes), and the one physics change: momentum from a gravity change mid-jump (a jump turned into a run along the new floor) now fades in the air instead of carrying Newt forever.
+- **The design review is a test** (`rooms/rooms.test.ts`): every room that lies keeps an honest drip, lamp or (in space) dust; only the tree's anchors lie; every liar is first met in a room with a safety net; every timed turn is hummed 45 ticks before, the first one too; nothing on any solver route ever overlaps a wall; every Tilted Town room plays the same with the camera level (reduce motion); nobody dies for standing still at the start; every lie Isaac tells has an honest version for Truth Mode.
+- **Gravity frames** (`core/gravity.ts`) are as planned: Newt's square 12 px hitbox goes into a frame where gravity is down, runs the shared platformer code, and comes back; the world velocity carries through a change. Planets steer Newt with the same runner in a frame that turns with the surface, then move it themselves (circle collisions).
+- **The camera turns in one room only (4-1)**, in front of you; the other Tilted Town rooms are shown already turned (and two tilted, the gravity hills). Turns are eased and never faster than a quarter turn in 0.6 s, and the room shrinks a little while turning so it always fits. With reduce motion the camera never turns and a little frame in the gravity dial shows how the room would be turned. A motion warning comes before Tilted Town.
+- **The arrow's lies**: always one direction, the camera's down (Tilted Town), or mirrored (it swaps left and right, so it still moves when gravity does: the Gallery). The true-arrow assist makes it honest, with a yellow ring.
+- **Controls**: in Newt mode ◀ ▶ walk along Newt's floor, matching the screen when that floor looks level and meaning Newt's own left and right on walls; in screen mode the four arrows go the way they point. Either way a held key keeps walking the same way through a flip or round a planet (`play/controls.ts`). Up and jump, down and flip share keys in Newt mode.
+- **The HUD has its own strip** above the room (or at its side on wide, short screens), so it never hides anything in it; on phones the room sits between the buttons.
+- **Isaac** sits in every room and speaks his lines (at the start, at a tick, or when Newt reaches a spot), in a speech bubble over him, with a pompous babble. His leaf droops when he lies. A line on a clock (his countdown in 3-4) cuts in at once; others wait their turn.
+- **Golden apples** stay found for the whole visit, deaths included, and count when you reach the portal; none count with assist on (the true arrow, slow motion or invincibility), and neither do best times. Safety nets put Newt back where it last stood (gravity and all); invincibility puts nets everywhere.
+- **Achievements**: Upside Downer (ten minutes standing on ceilings), Never Trusted the Arrow (every Liar's Gallery room cleared without dying), Ground Control (every Tilted Town room cleared with the camera turning), Orbital (three different planets in a row, never resting a second on one), Apple Picker, Fell Up. Clearing the last room unlocks Truth Mode (Options), where Isaac tells the truth.
+- **The ending** is a card: Isaac admits he fell up, his leaf standing straight up, with your totals and the Truth Mode switch.
+
+### Testing (as built)
+
+- `rooms/dev-runs.test.ts`: every room replays the solver's run to the portal with all three apples, tick for tick.
+- `rooms/rooms.test.ts`: the design review above, plus the room count, unique names, and which room introduces each idea.
+- `core/world.test.ts`: gravity frames go there and back exactly; Newt falls, lands and walks every way; jumps; levers, zones, flips and the hum; never inside a wall over 3,000 random ticks; spikes, nets, the void, apples and the portal; planets (round and round, painted ones pull nothing, Orbital).
+- `core/session.test.ts`, `core/progress.test.ts`, `save.test.ts`: the clock, deaths and restarts, apples kept, invincibility, ceilings; records, assist, unlocks and every achievement; the save's schema.
+- `play/controls.test.ts`, `render/camera.test.ts`: both control modes, through flips and round planets and with the camera turned; the camera's view, fit, speed limit and reduce motion.
+- `audio/audio.test.ts`: every sound builds, is short and doesn't clip; Isaac's babble; every tune has whole bars, and turns upside down in its own key.
+- `tests/e2e/gravity-is-lying.spec.ts`: the real build in Chromium on a desktop and a phone (Start into 1-1 with Isaac, the lever and the arrow, spikes and R, a clear by hopping between planets with its card and its save, pause and the true arrow, the motion warning and reduce motion, unlocks, touch controls).
+- Frame rate: 60 fps in the heaviest rooms on an emulated phone, also with the CPU slowed 4×.
+

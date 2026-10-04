@@ -67,6 +67,23 @@ const SUMMARIES: Partial<Record<GameSlug, Summarize>> = {
       { label: "Trophies", value: `${Object.keys(record(save.achievements)).length}/7` },
     ];
   },
+  "gravity-is-lying"(save) {
+    // Rooms "1-01" to "5-08", then Isaac's Tree ("6-01" to "6-04"): 44, three golden apples each.
+    const rooms = Object.entries(record(save.rooms))
+      .filter(([id]) => /^[1-5]-0[1-8]$|^6-0[1-4]$/.test(id))
+      .map(([, r]) => record(r));
+    const cleared = rooms.filter((r) => count(r.clears) > 0).length;
+    const apples = rooms.reduce((n, r) => {
+      const bits = count(r.apples) & 7;
+      return n + (bits & 1) + ((bits >> 1) & 1) + ((bits >> 2) & 1);
+    }, 0);
+    return [
+      { label: "Rooms cleared", value: `${cleared}/44` },
+      { label: "Golden apples", value: `${apples}/132` },
+      { label: "Deaths", value: count(save.deaths).toLocaleString("en-US") },
+      { label: "Trophies", value: `${Object.keys(record(save.achievements)).length}/6` },
+    ];
+  },
   "one-tap-chaos"(save) {
     const best = count(save.best);
     // Mirrors the game's unlocks: 12 to start, 3 + 3 + 2 + 2 + 2 more at 10, 20, 30, 40 and 50.
