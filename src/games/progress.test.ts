@@ -6,6 +6,9 @@ import { LEVEL_IDS as CURSOR_LEVELS } from "./cursor-escape/levels";
 import { defaultCursorSave, emptyLevel as emptyCursorLevel } from "./cursor-escape/save";
 import { FAKE_FLOOR_ACHIEVEMENTS } from "./fake-floor/achievements";
 import { GLITCH_ACHIEVEMENTS } from "./glitch-run/achievements";
+import { PIXEL_ACHIEVEMENTS } from "./last-pixel/achievements";
+import { LEVEL_IDS as PIXEL_LEVELS } from "./last-pixel/levels";
+import { defaultLastPixelSave, emptyLevel as emptyPixelLevel } from "./last-pixel/save";
 import { defaultGlitchSave, emptyStage } from "./glitch-run/save";
 import { STAGE_IDS as GLITCH_STAGES } from "./glitch-run/stages";
 import { GRAVITY_ACHIEVEMENTS } from "./gravity-is-lying/achievements";
@@ -159,7 +162,22 @@ describe("cabinet progress", () => {
     ]);
   });
 
+  it("summarizes a Last Pixel save (41 canvases, three stars each)", () => {
+    const save = defaultLastPixelSave();
+    save.levels["1-01"] = { ...emptyPixelLevel(), clears: 2, stars: 7 };
+    save.levels["4-10"] = { ...emptyPixelLevel(), clears: 1, stars: 5 };
+    save.levels["5-01"] = { ...emptyPixelLevel(), clears: 1, stars: 1 };
+    save.stats = { ...save.stats, catches: 1234 };
+    save.achievements = { gotcha: 1, "tab-hunter": 2 };
+    expect(summarizeProgress("last-pixel", JSON.stringify(save))).toEqual([
+      { label: "At 100%", value: `3/${PIXEL_LEVELS.length}` },
+      { label: "Stars", value: `6/${PIXEL_LEVELS.length * 3}` },
+      { label: "Pix caught", value: "1,234×" },
+      { label: "Trophies", value: `2/${PIXEL_ACHIEVEMENTS.length}` },
+    ]);
+  });
+
   it("has nothing to say about games without a summary", () => {
-    expect(summarizeProgress("last-pixel", "{}")).toBeNull();
+    expect(summarizeProgress("panic-stack", "{}")).toBeNull();
   });
 });

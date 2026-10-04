@@ -614,7 +614,7 @@ const DATA: Record<GameSlug, GameData> = {
     inspirations: ["Satisfying cleaning games", "Progressbar95", "Desktop Goose", "Where's Waldo?"],
     session: "1–3 min per level",
     inputs: ["mouse", "touch"],
-    status: "workshop",
+    status: "playable",
   },
 
   "panic-stack": {
