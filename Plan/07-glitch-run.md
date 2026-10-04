@@ -341,11 +341,11 @@ src/engine/postfx/             # shared WebGL2 effects
 
 ## 13. Build Roadmap
 
-- [ ] **M1: Runner core.** Simulation, jump/slide, obstacles, chunk generator, endless mode (no glitches)
-- [ ] **M2: Glitch system.** Telegraphs, postfx layer, the first 6 events, corruption + bits + patches + Clip
-- [ ] **M3: Story part 1.** Stages 1–10, The Debugger chase
-- [ ] **M4: Story part 2.** Remaining events, stages 11–20, Kernel Panic, the ending
-- [ ] **M5: Polish.** Comfort settings, visual beat bar, daily seed, achievements
+- [x] **M1: Runner core.** Simulation, jump/slide, obstacles, chunk generator, endless mode (no glitches)
+- [x] **M2: Glitch system.** Telegraphs, postfx layer, the first 6 events, corruption + bits + patches + Clip
+- [x] **M3: Story part 1.** Stages 1–10, The Debugger chase
+- [x] **M4: Story part 2.** Remaining events, stages 11–20, Kernel Panic, the ending
+- [x] **M5: Polish.** Comfort settings, visual beat bar, daily seed, achievements
 - [ ] **Later:** practice mode, daily challenge links, skins
 
 ---
@@ -358,3 +358,71 @@ src/engine/postfx/             # shared WebGL2 effects
 - With "reduce flashing" on, nothing flashes more than 3 times per second.
 - 60 fps on a mid-range phone with postfx on (or the fallback kicks in automatically).
 - The same seed always produces the same run.
+
+---
+
+## 15. As Built
+
+Glitch Run is playable at `/games/glitch-run/play`: 20 story stages (each ending in The Debugger's chase, and Root's finale at the end), endless mode and Daily Corruption, all 11 glitch events (each warned at least 0.6 s ahead), corruption and its score multiplier, bits, glitch charges and Clip, patches, Kernel Panic, six achievements, the ending (both answers), the share card, the photosensitivity warning, reduce flashing, gentle glitches, reduce motion, the visual beat bar, remappable keys, gamepads and touch. The art is drawn in code (Canvas 2D). The music (four chiptune songs, scheduled from the run's own beats and bitcrushed as corruption rises) and the sounds (ZzFX) are generated in code: there are no asset files.
+
+It reuses `engine/loop`, `input`, `rng`, `platformer/physics` (vertical moves and ground checks: the runner's sideways move is the game's own, pixel by pixel along the beat grid) and the audio engine. The shared sound bank gained one option, `at`, to play a sound at a set time on the audio clock: the cues are scheduled ahead.
+
+### The stages
+
+| Stage | Name | bpm | Corruption at the start | Glitches | Scan lines | Clips needed | Cues | Length |
+|---|---|---|---|---|---|---|---|---|
+| 01 | Boot Sequence | 120 | 0% | Screen Tear | 3 | 0 | 17 | 22 s |
+| 02 | Frame Drop | 120 | 0% | Frame Skip | 4 | 0 | 25 | 27 s |
+| 03 | Swap Meet | 120 | 0% | Input Swap | 4 | 0 | 23 | 25 s |
+| 04 | Tear Down | 124 | 0% | Screen Tear, Frame Skip | 4 | 0 | 26 | 26 s |
+| 05 | Missing Assets | 124 | 0% | Missing Texture, Input Swap | 5 | 0 | 29 | 26 s |
+| 06 | Negative Space | 129 | 0% | Invert, Screen Tear | 4 (1 full) | 1 | 20 | 24 s |
+| 07 | Lag Spike | 129 | 0% | Audio Desync, Missing Texture | 5 (1 full) | 1 | 29 | 25 s |
+| 08 | Déjà Vu | 129 | 0% | Déjà Vu, Audio Desync | 5 (1 full) | 1 | 36 | 26 s |
+| 09 | Low Res | 133 | 0% | Low Res, Frame Skip | 5 (1 full) | 1 | 32 | 23 s |
+| 10 | Double Trouble | 133 | 0% | Ghost Double, Screen Tear | 5 (1 full) | 1 | 35 | 22 s |
+| 11 | Mixed Memory I | 138 | 20% | Screen Tear, Input Swap, Missing Texture, Frame Skip, Low Res, Audio Desync | 6 (1 full) | 1 | 43 | 27 s |
+| 12 | Mixed Memory II | 138 | 25% | Input Swap, Missing Texture, Ghost Double, Screen Tear, Frame Skip, Low Res | 6 (1 full) | 1 | 46 | 28 s |
+| 13 | Mixed Memory III | 144 | 30% | Audio Desync, Input Swap, Invert, Low Res, Missing Texture, Ghost Double | 6 (1 full) | 1 | 40 | 28 s |
+| 14 | Mixed Memory IV | 144 | 35% | Frame Skip, Screen Tear, Ghost Double, Input Swap, Audio Desync, Missing Texture | 6 (1 full) | 1 | 36 | 26 s |
+| 15 | Mixed Memory V | 144 | 40% | Low Res, Input Swap, Screen Tear, Audio Desync, Frame Skip, Ghost Double | 6 (1 full) | 1 | 37 | 26 s |
+| 16 | Not Responding | 144 | 30% | Not Responding, Input Swap | 5 (1 full) | 1 | 28 | 20 s |
+| 17 | Upside Down | 150 | 35% | Upside Down, Missing Texture | 5 (1 full) | 1 | 34 | 20 s |
+| 18 | Heap Overflow I | 150 | 70% | Screen Tear, Input Swap, Low Res, Missing Texture, Audio Desync, Ghost Double, Frame Skip, Not Responding | 7 (2 full) | 2 | 45 | 28 s |
+| 19 | Heap Overflow II | 157 | 80% | Upside Down, Audio Desync, Input Swap, Screen Tear, Not Responding, Low Res, Ghost Double, Missing Texture | 7 (2 full) | 2 | 49 | 26 s |
+| 20 | Root | 164 | 60% | Screen Tear, Input Swap, Not Responding, Low Res, Missing Texture | 10 (3 full) | 3 | 43 | 28 s |
+
+"Clips needed" and "Cues" come from the reference run (below): the Clips it makes (one per full scan line) and the moves the sounds and the beat bar announce. Stages are built from the same chunks as endless mode (text, `gen/chunks.ts`), placed by hand (`stages/stages.ts`), with glitches placed over chunks; Root hands you all three charges at the start.
+
+### How the truth is kept
+
+| Anchor | How it tells the truth |
+|---|---|
+| The simulation | Glitches only ever change what's drawn (the "look") or which button does what (the input layer). A test runs the same inputs with and without the glitches and compares every tick |
+| Your shadow | Drawn last, under where you really are, on the surface beneath you: Audio Desync, Ghost Double and Screen Tear can't move it. Only Not Responding (a frozen screen) hides it |
+| The cues | A sound one beat before every move the reference run makes (high for a jump, low for a slide, a zap for Clip), scheduled on the audio clock from the run's own ticks, so it's never late whatever the screen does |
+| The beat bar | The same cues, drawn along the bottom at the track's own scale (a beat is always 96 px), with "now" under the runner: each one sits under the spot where you make the move |
+| The HUD | Input Swap flips the control keys it shows (and the touch labels); it sits on dark plates, so it reads on an inverted screen and in the white void |
+
+### Differences from the draft
+
+- **Canvas 2D, not WebGL.** The scene is drawn to its own canvas, then torn, pixelated, inverted (`difference`), tinted (`hue`), frozen and covered in noise on the way to the screen. The RGB split is drawn into the line art itself (the track's neon edges and the runner come apart) instead of full-screen tinted copies, the scanlines are CSS over the canvas, noise comes in bands, and Kernel Panic's vignette is a small canvas scaled up. A frame takes about 4 ms at 2880 × 1632 in software rendering, and the heaviest stages hold 60 fps on a phone profile with the CPU slowed 4×. If frames still run long (two 2-second stretches under about 45 fps), the renderer steps down by itself: 1.5 device pixels per pixel, then 1 and no noise.
+- **A beat is 6 tiles at every tempo.** The runner's speed is 96 px a beat, so its position comes straight from the beat (no drift, ever) and every obstacle sits on the music's grid.
+- **A reference run proves everything.** It's a beam search over what a player can do on every half-beat (run, jump, hop, slide, and in chases Clip), using the real simulation (`core/reference.ts`). It proves every chunk can be passed at every endless tempo without glitch power (with and without its hidden platforms), every stage can be cleared (Clip only where a full scan line forces it), and every endless chunk before it's laid: if there's no way through, the chunk is taken back and another tried. Its moves are the cues. Clip states are merged by glitch power in hand (charges and bits), so a stage builds in 0.1–0.6 s, while you read about it in the file browser.
+- **The Debugger's scan lines** sweep in from the right over a beat: a low one (jump it), a high one (slide under it) or a full one (Clip through it). The gap is marked in amber. It hovers at the left edge for the chase, its eye charging before each scan.
+- **Root's finale** has the three planned phases: the scan lines (three of them full), then The Debugger deletes the ground behind you (only behind you: it's for show), then reformats the screen into a white void with obstacles in it, crossed by the cues and the beat bar. The void clears a beat before the `/root` folder.
+- **Endless**: nine tempo steps from 120 to 164 bpm (one every 24 beats), difficulty 1 to 5 (one step every 28 beats), déjà vu from beat 40, corruption creeping 0.4% a beat, and a glitch rolled for every beat from beat 8 (more often with corruption; up to four at once in a Kernel Panic). **Daily Corruption** is seeded by the UTC date (#1 was 1 October 2026), and its best is kept per day.
+- **Stage select is a file browser** (`memory://glitch_run/`): `stage_01.exe` to `stage_20.exe`, `endless.exe` and `daily_corruption_NN.exe`. Files you can't run yet still have corrupted names.
+- **Rules as built**: ten bits make a charge (three at most); a Clip lasts 0.35 s (a little longer if it ends inside something, then you're patched) and adds 10% corruption; patches take 15% off. The score is distance × (1 + corruption/25), plus near misses (+50), phasing through something (+100) and surviving a Kernel Panic (+5,000), all multiplied. Kernel Panic comes at 100%: survive its ten seconds and corruption drops back to 50%.
+- **The ending**: "Yes" fixes the bug: a clean, perfectly working, empty screen (and a button to undo it). "No" is WONTFIX: glitched credits and the Wontfix trophy.
+- **Touch**: the right half of the screen jumps and the left half slides (swappable in the options), with ⚡ in the middle. Input Swap swaps them like any button, and the labels say so.
+- **Comfort**: the photosensitivity warning comes before the first run, with reduce flashing (the arcade-wide setting: Invert becomes a soft violet tint, warning flickers stay under three a second) and gentle glitches (30%) right there. Reduce motion stops the shake, and Upside Down warns without turning the screen.
+
+### Testing (as built)
+
+- `core/run.test.ts`: the beat grid is exact; jumps, slides, walls, spikes, the void, near misses, bits and charges, Clip and phasing, patches, Kernel Panic, scan lines, the reference search, determinism.
+- `glitches/glitches.test.ts`: the director (warnings of at least 0.6 s, at most two at once (four in a panic), the same seed the same glitches, story timing), the golden rule, every look, and the comfort rules (reduce flashing, reduce motion, gentle).
+- `gen/chunks.test.ts`: every chunk and déjà vu variant at every endless tempo, with and without hidden platforms. `gen/endless.test.ts`: the same seed makes the same track and cues; five seeds, five minutes each, always a way through; the daily seed.
+- `stages/stages.test.ts`: every stage can be cleared, and playing the reference run's moves through the real simulation clears it; cues on beats and half-beats; one new glitch per stage, in the plan's order; every warning at least 0.6 s, never more than two at once; Clip only for full scan lines (Clean Code is possible); Root's finale.
+- `core/progress.test.ts`, `save.test.ts`, `audio/audio.test.ts`: records, unlocks and every trophy; the save's schema; every sound short and audible, every cue distinct.
+- `tests/e2e/glitch-run.spec.ts`: the warning and the crash into stage 1, PATCHED and instant retry, a held jump (key and touch) over the first spike, pause, the files, endless and the daily, options, on a computer and a phone.

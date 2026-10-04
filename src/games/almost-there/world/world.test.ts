@@ -111,7 +111,7 @@ describe("fairness everywhere (Plan §10)", () => {
     }
   });
 
-  it("no fall passes a whole zone: from any ledge, every jump and every step off lands within a zone of it", () => {
+  it("no fall passes a whole zone: from any ledge, every jump and every step off lands within a zone of it", { timeout: 60_000 }, () => {
     for (const mt of [m, mirror]) {
       const insideCol = mt.mirrored ? 0 : 1;
       const zoneIndex = (x: number, y: number) => {

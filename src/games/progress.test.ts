@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 import { ALMOST_THERE_ACHIEVEMENTS } from "./almost-there/achievements";
 import { defaultAlmostThereSave } from "./almost-there/save";
 import { FAKE_FLOOR_ACHIEVEMENTS } from "./fake-floor/achievements";
+import { GLITCH_ACHIEVEMENTS } from "./glitch-run/achievements";
+import { defaultGlitchSave, emptyStage } from "./glitch-run/save";
+import { STAGE_IDS as GLITCH_STAGES } from "./glitch-run/stages";
 import { GRAVITY_ACHIEVEMENTS } from "./gravity-is-lying/achievements";
 import { ROOM_IDS as GRAVITY_ROOMS } from "./gravity-is-lying/rooms";
 import { defaultGravitySave, emptyRoomRecord as emptyGravityRoom } from "./gravity-is-lying/save";
@@ -120,7 +123,24 @@ describe("cabinet progress", () => {
     ]);
   });
 
+  it("summarizes a Glitch Run save (twenty stages, and the furthest endless run)", () => {
+    const save = defaultGlitchSave();
+    save.stages["01"] = { ...emptyStage(), clears: 3, best: 9000, clean: true };
+    save.stages["20"] = { ...emptyStage(), clears: 1 };
+    save.stages["07"] = { ...emptyStage(), deaths: 4 };
+    save.endless = { runs: 9, best: 52_000, metres: 2481 };
+    save.totals = { ...save.totals, deaths: 1500 };
+    save.achievements = { wontfix: 1, "clean-code": 2 };
+    expect(summarizeProgress("glitch-run", JSON.stringify(save))).toEqual([
+      { label: "Stages cleared", value: `2/${GLITCH_STAGES.length}` },
+      { label: "Furthest run", value: "2,481 m" },
+      { label: "Times patched", value: "1,500" },
+      { label: "Trophies", value: `2/${GLITCH_ACHIEVEMENTS.length}` },
+    ]);
+    expect(summarizeProgress("glitch-run", JSON.stringify(defaultGlitchSave()))?.[1]).toEqual({ label: "Furthest run", value: "—" });
+  });
+
   it("has nothing to say about games without a summary", () => {
-    expect(summarizeProgress("glitch-run", "{}")).toBeNull();
+    expect(summarizeProgress("last-pixel", "{}")).toBeNull();
   });
 });

@@ -22,6 +22,7 @@ const GAMES: Partial<Record<GameSlug, ComponentType>> = {
   "fake-floor": dynamic(() => import("@/games/fake-floor"), { ssr: false, loading: Loading }),
   "almost-there": dynamic(() => import("@/games/almost-there"), { ssr: false, loading: Loading }),
   "gravity-is-lying": dynamic(() => import("@/games/gravity-is-lying"), { ssr: false, loading: Loading }),
+  "glitch-run": dynamic(() => import("@/games/glitch-run"), { ssr: false, loading: Loading }),
 };
 
 export function GameLoader({ slug }: { slug: GameSlug }) {

@@ -14,6 +14,8 @@ export interface PlayOptions {
   rate?: number;
   /** -1 (left) to 1 (right). */
   pan?: number;
+  /** When to play it, on the audio clock (scheduled ahead: a cue on the beat). Default: now. */
+  at?: number;
 }
 
 export interface SfxBank<N extends string> {
@@ -56,7 +58,7 @@ export function createSfxBank<N extends string>(sounds: Readonly<Record<N, ZzfxP
     return loading;
   };
 
-  const play = (name: N, { volume = 1, rate = 1, pan = 0 }: PlayOptions = {}) => {
+  const play = (name: N, { volume = 1, rate = 1, pan = 0, at }: PlayOptions = {}) => {
     const audio = getAudio();
     if (!audio) return;
     if (!buffers) {
@@ -66,8 +68,8 @@ export function createSfxBank<N extends string>(sounds: Readonly<Record<N, ZzfxP
     const buffer = buffers[name];
     if (!buffer) return;
     // The same sound twice within 30 ms just sounds louder: skip it.
-    const now = audio.ctx.currentTime;
-    if (now - (lastPlayed.get(name) ?? -1) < 0.03) return;
+    const now = Math.max(audio.ctx.currentTime, at ?? 0);
+    if (Math.abs(now - (lastPlayed.get(name) ?? -1)) < 0.03) return;
     lastPlayed.set(name, now);
     const source = audio.ctx.createBufferSource();
     source.buffer = buffer;
@@ -82,7 +84,7 @@ export function createSfxBank<N extends string>(sounds: Readonly<Record<N, ZzfxP
     }
     tail.connect(audio.buses.sfx);
     source.onended = () => level.disconnect();
-    source.start();
+    source.start(now);
   };
 
   return { names, load, play };
