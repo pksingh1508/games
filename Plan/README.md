@@ -112,7 +112,8 @@ src/
     glitch-run/               # Glitch Run: 20 stages and endless; every stage and chunk proven by a reference run (built)
     cursor-escape/            # Cursor Escape: 41 windows on DeskOS 98, each proven by a solver through the real simulation (built)
     last-pixel/               # Last Pixel: 41 canvases to clean up, then catch the last pixel; a bot plays every one to 100% (built)
-    one-more-step/ ...        # one folder per game; entry file: index.tsx
+    one-more-step/            # One More Step: 41 levels on a turn-based grid; a solver proves each one and sets its par (built)
+    wrong-door/ ...           # one folder per game; entry file: index.tsx
   engine/                     # shared, framework-free TypeScript
     loop.ts                   # fixed-timestep loop (60 Hz accumulator) on requestAnimationFrame (built)
     input.ts                  # keyboard / touch buttons / gamepad → game actions, remappable (built)
@@ -140,14 +141,14 @@ tests/e2e/                    # Playwright: games played end to end on desktop a
 
 | Shared piece | Used by |
 |---|---|
-| `engine/loop` (canvas game loop) | Every canvas game: One More Step, Fake Floor, TrapSprint, Glitch Run, Almost There, Last Pixel, Panic Stack, Cursor Escape, Don't Blink, Gravity Is Lying, Don't Trust The Game (platform scenes). One Tap Chaos runs on its own beat clock instead: everything in it is measured in beats |
+| `engine/loop` (canvas game loop) | Every canvas game: Fake Floor, TrapSprint, Glitch Run, Almost There, Last Pixel, Panic Stack, Cursor Escape, Don't Blink, Gravity Is Lying, Don't Trust The Game (platform scenes). One Tap Chaos runs on its own beat clock instead: everything in it is measured in beats. **One More Step** (built) doesn't need one: it's turn-based, so nothing runs between your steps except the animation of the last one |
 | `engine/platformer` | **TrapSprint** (built first), **Fake Floor** (built), **Almost There** (built), **Gravity Is Lying** (built), **Glitch Run** (built: its vertical physics), Don't Trust The Game |
 | `engine/postfx` | Don't Blink, Don't Trust The Game. (Glitch Run, built, does its screen effects in Canvas 2D itself) |
 | `engine/browser` | **Cursor Escape** (built: pointer lock), **Last Pixel** (built: the tab's title and icon, visibility), Don't Trust The Game, 99 Seconds |
-| `engine/rng` | One Tap Chaos, Glitch Run, Wrong Door, Panic Stack, Don't Blink, One More Step (daily puzzle) |
+| `engine/rng` | One Tap Chaos, Glitch Run, Wrong Door, Panic Stack, Don't Blink, **One More Step** (built: each level's footstep tune; a daily puzzle later) |
 | Pure React/DOM (no canvas) | NOPE!, 99 Seconds, Wrong Door |
 | Physics library (Planck.js) | Panic Stack only |
-| Level solvers / generators (Node scripts + tests) | One More Step, Wrong Door |
+| Level solvers / generators (Node scripts + tests) | **One More Step** (built: a breadth-first search through the real rules, run by the unit tests, sets every par), Wrong Door |
 
 ### Global settings (stored once, respected everywhere)
 
@@ -171,7 +172,7 @@ tests/e2e/                    # Playwright: games played end to end on desktop a
 | 3 | ✅ **TrapSprint** (playable) | Builds the shared platformer kit |
 | 4 | ✅ **Fake Floor** (playable), ✅ **Almost There** (playable), ✅ **Gravity Is Lying** (playable), ✅ **Glitch Run** (playable) | Reuse and extend the platformer kit |
 | 5 | ✅ **Cursor Escape** (playable), ✅ **Last Pixel** (playable) | Pointer-driven games, browser helpers |
-| 6 | **One More Step**, **Wrong Door** | Logic engines with automated solvers |
+| 6 | ✅ **One More Step** (playable), **Wrong Door** | Logic engines with automated solvers |
 | 7 | **Panic Stack** | Adds a physics library |
 | 8 | **Don't Blink**, **99 Seconds** | Art-heavy scene games |
 | 9 | **Don't Trust The Game** | Comes last because it parodies the other games and uses the most browser tricks |

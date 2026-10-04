@@ -17,6 +17,9 @@ import { defaultGravitySave, emptyRoomRecord as emptyGravityRoom } from "./gravi
 import { ROOM_IDS } from "./fake-floor/rooms";
 import { defaultFakeFloorSave, emptyRoomRecord } from "./fake-floor/save";
 import { NOPE_ACHIEVEMENTS } from "./nope/achievements";
+import { OMS_ACHIEVEMENTS } from "./one-more-step/achievements";
+import { LEVEL_IDS as OMS_LEVELS } from "./one-more-step/levels";
+import { defaultOmsSave, emptyLevel as emptyOmsLevel } from "./one-more-step/save";
 import { defaultNopeSave } from "./nope/save";
 import { OTC_ACHIEVEMENTS } from "./one-tap-chaos/achievements";
 import { MICROGAME_IDS, unlockedMicrogames } from "./one-tap-chaos/microgames";
@@ -174,6 +177,22 @@ describe("cabinet progress", () => {
       { label: "Stars", value: `6/${PIXEL_LEVELS.length * 3}` },
       { label: "Pix caught", value: "1,234×" },
       { label: "Trophies", value: `2/${PIXEL_ACHIEVEMENTS.length}` },
+    ]);
+  });
+
+  it("summarizes a One More Step save (41 doors, three stars each)", () => {
+    const save = defaultOmsSave();
+    save.levels["1-1"] = { ...emptyOmsLevel(), clears: 3, stars: 7, best: 6 };
+    save.levels["5-8"] = { ...emptyOmsLevel(), clears: 1, stars: 3, best: 10 };
+    save.levels["6-1"] = { ...emptyOmsLevel(), clears: 1, stars: 1, best: 10 };
+    save.levels["2-2"] = emptyOmsLevel();
+    save.stats = { ...save.stats, steps: 12345 };
+    save.achievements = { "zero-steps": 1, architect: 2 };
+    expect(summarizeProgress("one-more-step", JSON.stringify(save))).toEqual([
+      { label: "Doors caught", value: `3/${OMS_LEVELS.length}` },
+      { label: "Stars", value: `6/${OMS_LEVELS.length * 3}` },
+      { label: "Steps walked", value: "12,345" },
+      { label: "Trophies", value: `2/${OMS_ACHIEVEMENTS.length}` },
     ]);
   });
 

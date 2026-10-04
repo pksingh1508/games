@@ -1,0 +1,117 @@
+// World 5, Liar's Floor: everything you learned is suspect. Lazy spikes, a brave door, a fall that's the way out, no undo, the dark, and a narrator who lies. (Plan/01-one-more-step.md §5)
+// Maps checked by the solver (levels/solutions.ts); see engine/types.ts for the legend.
+import type { LevelDef } from "../engine/types";
+
+export const WORLD_5: LevelDef[] = [
+  {
+    id: "5-1",
+    world: 5,
+    name: "Lazy Spikes",
+    map: [
+      "##########",
+      "#P.Z.z.ZE#",
+      "##########",
+    ],
+    door: "still",
+    narrator: [{ at: "start", text: "These spikes are sleepy. Don't wake them." }],
+  },
+  {
+    id: "5-2",
+    world: 5,
+    name: "The Brave Door",
+    map: [
+      "##########",
+      "#P......E#",
+      "#.######.#",
+      "#..._....#",
+      "##########",
+    ],
+    door: "brave",
+    narrator: [{ at: "start", text: "This door isn't running. Oh no." }],
+  },
+  {
+    id: "5-3",
+    world: 5,
+    name: "Basement",
+    map: [
+      "#########",
+      "#.......#",
+      "#.P.....#",
+      "#....E..#",
+      "#.......#",
+      "###B#####",
+      "#########",
+    ],
+    narrator: [{ at: "start", text: "One more step!" }, { at: 1, text: "You're so close!", lie: true }, { at: "fall", text: "Down is a direction too." }],
+  },
+  {
+    id: "5-4",
+    world: 5,
+    name: "No Take-Backs",
+    map: [
+      "########",
+      "#P~~~~.#",
+      "#~#~~#~#",
+      "#~~~E~~#",
+      "########",
+    ],
+    noUndo: true,
+    narrator: [{ at: "start", text: "No take-backs this time." }],
+  },
+  {
+    id: "5-5",
+    world: 5,
+    name: "Steps Left",
+    map: [
+      "###########",
+      "#P..WW.WWE#",
+      "#.#######.#",
+      "#.........#",
+      "###########",
+    ],
+    door: "still",
+    wave: 3,
+    narrator: [{ at: "start", text: "Steps left: see the counter? Don't waste them.", lie: true }],
+  },
+  {
+    id: "5-6",
+    world: 5,
+    name: "Fog",
+    map: [
+      "#########",
+      "#P..#...#",
+      "#.#.#.#.#",
+      "#.#...#E#",
+      "#########",
+    ],
+    door: "still",
+    fog: true,
+    narrator: [{ at: "start", text: "It's a bit dark. You'll be fine." }],
+  },
+  {
+    id: "5-7",
+    world: 5,
+    name: "Liar",
+    map: [
+      "##########",
+      "#P...Z...#",
+      "#.##.##..#",
+      "#....z.E.#",
+      "##########",
+    ],
+    narrator: [{ at: "start", text: "Easy one." }, { at: 1, text: "One more step!", lie: true }, { at: 5, text: "One more step!", lie: true }, { at: 9, text: "Almost there!", lie: true }],
+  },
+  {
+    id: "5-8",
+    world: 5,
+    name: "No Take-Backs II",
+    map: [
+      "#########",
+      "#P~.~.~E#",
+      "#.~.~.~.#",
+      "#########",
+    ],
+    noUndo: true,
+    narrator: [{ at: "start", text: "Again. No take-backs." }],
+  },
+];
