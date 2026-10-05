@@ -334,11 +334,11 @@ src/games/99-seconds/
 
 ## 13. Build Roadmap
 
-- [ ] **M1: Loop engine.** Loop clock, reset, rules engine, Chapter 1 greybox (placeholder art)
-- [ ] **M2: Knowledge systems.** Journal, timed actions, timed events, room memory hints
-- [ ] **M3: Chapter 1 final.** Art, audio, the 99-second soundtrack, fake escape + real escape
-- [ ] **M4: Chapters 2–3.** Watched pot, two clocks, time flies, the 100th second, both endings
-- [ ] **M5: Polish.** Hardcore/Relaxed modes, achievements, Single Loop challenge, accessibility pass
+- [x] **M1: Loop engine.** Loop clock, reset, rules engine, Chapter 1 greybox (placeholder art)
+- [x] **M2: Knowledge systems.** Journal, timed actions, timed events, room memory hints
+- [x] **M3: Chapter 1 final.** Art, audio, the 99-second soundtrack, fake escape + real escape
+- [x] **M4: Chapters 2–3.** Watched pot, two clocks, time flies, the 100th second, both endings
+- [x] **M5: Polish.** Hardcore/Relaxed modes, achievements, Single Loop challenge, accessibility pass
 - [ ] **Later:** room editor, shareable rooms
 
 ---
@@ -351,3 +351,142 @@ src/games/99-seconds/
 - Both endings are reachable.
 - Fully playable by touch on a phone.
 - Progress and the journal survive page reloads.
+
+---
+
+## 15. As Built
+
+99 Seconds is playable at `/games/99-seconds/play`. It has:
+
+- three chapters (The Waiting Room, The Kitchen and The Clock Room), the True Ending with exactly 99 seconds of credits, and the Paradox Ending;
+- the loop clock with chronostasis, timed actions, timed events, things that take their own time (a pot that only boils while nobody watches it), and the room's memory: scratches in your handwriting, and colour that drains while you're stuck;
+- the journal (facts, a timeline, codes and notes, and what's on the walls), Normal, Relaxed and Hardcore modes, and the Single Loop challenge for chapters you've escaped;
+- six trophies, three ranks and a share card.
+
+Everything is made in code, with no asset files:
+
+- **Art:** SVG in a 1600 × 900 scene, drawn in flat shapes with soft lamplight gradients. There are 12 walls and 12 close-ups across the three chapters, plus the mirrored Waiting Room (the same walls drawn flipped, with a lever instead of the keypad, and its notes still readable). Every room leads the eye to a clock: a seven-segment clock over the door, a slow wall clock and an honest oven timer, the back of a giant clock face. Hotspots are real buttons over the picture, labelled for screen readers and at least 44 px. Notes, scratches and the journal are in a handwriting font (Caveat). Small CSS animations bring it to life: the ringing phone, steam, bubbles that freeze while you watch, the stuttering wall clock, turning gears, the pendulum, the little clock's wings, and the rooms folding up in the Paradox.
+- **Sound:** synthesized with Web Audio. There's the constant tick (stretched when a glance holds the second), the reversed whoosh of a reset, and 34 sounds for what you do and what happens, each panned toward its wall.
+- **Music:** each chapter's score is exactly one loop long and is scheduled against the seconds left, so it pauses with the game and stretches with the clock. Chapter 1 is a music box in A minor: the cello comes in with the phone at 77, everything drops when the lights dip at 66, a bell sounds at 42 and the bird's flute at 13. Chapter 2 has a walking bass that slips up a key at 66 and again at 33. Chapter 3 is a mechanical ostinato with the "time flies" theme at 77 and a bell at every landing. Relaxed mode's longer loops start with a quiet bed.
+
+It reuses:
+
+- the audio engine, `engine/save` (plus `engine/save/runs` for run history), the arcade settings (sound, Reduce flashing, text size) and `engine/browser` (the tab's visibility);
+- `games/shared`: achievements, the one-tab guard, sharing, the comfort and device hooks, and the HUD store;
+- the arcade's `Dialog` and `ToggleSwitch`.
+
+It adds no libraries. The handwriting font comes through `next/font`, like the other games' fonts.
+
+The code is in these folders:
+
+- `core/`: the loop (`loop.ts`: the clock, chronostasis, actions, events, processes and zero), the rules' types (`types.ts`) and the room's memory (`memory.ts`). Two more files exist for the tests: a script player (`script.ts`) and the hint reader (`reader.ts`).
+- `rooms/`: one file per chapter (its hotspots, interactions, timed events, processes, items, clues and scratches), and `solutions.ts`, each chapter's golden path split by goal.
+- `art/`: the drawing kit, one file per chapter (walls and close-ups), and the scene (mirroring, the scratches, the dim and the hundredth second's glow).
+- `play/`: the runtime (the clock on `requestAnimationFrame`, sounds, captions, messages and the HUD store).
+- `audio/` (the sounds and the music) and `ui/` (the title, chapters, the play screen, the journal, the endings and the menus), plus the save, progress and trophies.
+
+### A loop
+
+- **The clock** counts game time: 99 seconds, or 150 in Relaxed. Each frame advances it in 50 ms slices, so events and processes land on time even after a slow frame. It holds:
+  - while the game's paused;
+  - while the tab is hidden (the pause card comes up);
+  - during the flash between loops;
+  - while the journal's open (Normal and Relaxed);
+  - in Relaxed, while you read a message (1.5 s plus 45 ms a character).
+- **Chronostasis:** turning to a clock (a wall or close-up with one on it) from somewhere without one holds that second half a second longer, up to 10 s a loop. The tick stretches and the HUD clock glows.
+- **Actions** take time: searching the coat takes 3 s, each screw 6 s, filling the pot 3 s, writing a note 2.5 s and winding the little clock 4 s. A ring shows the progress, with a Stop button, and turning away stops them too. The clock keeps running throughout.
+- **Timed events** happen at the same second every loop, with a sound panned toward their wall and a caption (*[a buzz from the clock, North wall]*). Some only count as clues if you see them: the clock's 07 at 42 only counts if you're looking at it.
+- **Processes** run while their conditions hold:
+  - the pot heats only while nobody's looking at it (50 s);
+  - the ice melts only with the oven on and its door shut (30 s);
+  - the lever's spring holds the mirrored door open for 10 s and takes 30 s to recharge.
+- **At zero** the room decides:
+  - Usually it's a reset: a flash (a fade with Reduce flashing), the reversed whoosh and "Loop 8". Your pockets are empty and everything's back where it was.
+  - Standing in the mirrored doorway gets you out (Chapter 1).
+  - With the hand on 100, the loop gets a hundredth second (Chapter 3).
+
+### The chapters
+
+| Chapter | The way out | Golden path | Hint reader |
+|---|---|---|---|
+| 1. The Waiting Room | The door code is 0742. 42 is scratched behind the photo (the coat's coin turns its two screws), and the clock flickers 07 at 42 if you're watching. Through the door is the same room, mirrored, with a lever that holds the door open for 10 s. Pull it at 10, stand in the doorway and wait for zero. | 3.9 s of doing things; out at zero | 23 loops |
+| 2. The Kitchen | There's no loop clock: the wall clock runs at 0.7 speed, and the oven timer is honest (the fridge note says so). Fill the pot, light the hob and look away for 50 s. Put the ice in the oven with the door shut for 30 s, and take the key out with the mitt. Pour the boiling pot on the hatch's wax, then put the key in the lock. | 18.7 s; out with 38.3 s left | 28 loops |
+| 3. The Clock Room | Take the key and write the three notes you found. At 77 the little clock flies, landing somewhere new every 8 s (on top of the big clock at 70). Catch it, wind it and fit it to the gears' empty axle. The crank puts the hand on 100. At zero the loop gets a hundredth second (6 s long), with a door behind the pendulum. | 19.3 s; the True Ending | 35 loops |
+
+Chapter 1 also has:
+
+- the phone at 77 (a voice like yours says "Don't go through", and in the mirrored room, "Wait in the doorway. Wait for zero.");
+- the lights dipping at 66;
+- a bird at 13;
+- tally marks in the drawer, one for every loop.
+
+### The room's memory
+
+- Every loop without a new clue adds 1 to how stuck the room thinks you are, and a loop with one takes off 5.
+- At 5, 10 and 15, the room scratches a hint for the first goal you haven't reached. It goes on the wall you wake up facing, in your handwriting, and gets plainer each time: *LOOK UP AT THE CLOCK.*, then *THE CLOCK TALKS AT 42. THE PHOTO KNOWS THE REST.*, then *THE DOOR IS 0742.* A goal's scratches never go back, and they're in the journal's "On the walls" tab too.
+- The room's colour drains 7% a loop without a new clue (down to 35%) and snaps back the moment you learn something.
+
+### Modes, ranks and trophies
+
+- **Modes:**
+  - **Normal:** the journal fills in by itself ("noted in your journal") and holds the clock while it's open.
+  - **Relaxed:** 150-second loops, with the events at the same seconds left (the extra time comes first), and reading holds the clock.
+  - **Hardcore:** no journal. Bring a pen.
+- **Ranks** for each chapter: Time Lord (5 loops or fewer), Clockwatcher (6–15) and Groundhog (16+). The chapter card shows the loops, the real time and how many scratches you read, and it shares as a line of ⏳.
+- **Single Loop:** play any chapter you've escaped in one loop; the reset ends it. It keeps your best real time and seconds left, and leaves the story's numbers alone.
+- **Trophies:**
+  - First Try (lol);
+  - Groundhog (50 loops);
+  - A Watched Pot (a minute of staring at the heating pot);
+  - Clockwatcher (the full 10 s in one loop);
+  - Closed Loop;
+  - Paradox.
+- **The title** counts down from 99. Wait it out (or see the credits) and the start button says *You've been here before.*
+
+### How it's proven fair
+
+- **Golden paths** (`rooms/chapters.test.ts`): every chapter escapes in one loop, at 99 and at 150 seconds, with at most 75 s of doing things (rule 1). The Kitchen is the only chapter that doesn't end at zero by design, and it finishes with 38 s left.
+- **Nobody stays stuck forever:** a hint reader plays each chapter knowing nothing it hasn't been told outright. Each loop it does only the parts of the golden path that the room's plainest scratches have spelled out (or that it's already done once), and otherwise stands still. It escapes Chapter 1 in 23 loops (the plan says nobody should need more than 30), Chapter 2 in 28 and Chapter 3 in 35, and the same in Relaxed.
+- **Every rule** has a test:
+  - Chapter 1: 07 only counts if you're looking, wrong codes fail, the mirror, the lever's timing, leaving at zero and the phone.
+  - Chapter 2: the watched pot (looking from inside the oven doesn't count), the oven and the mitt, the wax and the wall clock.
+  - Chapter 3: the flight schedule, the crank, the hundredth second, both endings and tearing off the page.
+- **The data** (`rooms/data.test.ts`):
+  - everything a room mentions exists, and every close-up has a way back;
+  - every hotspot is on screen and big enough, and nothing you can use hides under the turn tabs or Back on a 640 × 360 phone on its side;
+  - every sound that tells you something has a caption (rule 6), and the journal records every goal's answer (rule 5);
+  - the notepad wants exactly the three notes you found.
+- **The loop** (`core/loop.test.ts`): one long tick equals many short ones, chronostasis stops at 10 s, events on the same second all happen, you can only use what you're holding, and the same inputs give the same loop.
+- **The save** (`progress.test.ts`): loops, clues saved mid-loop, escapes and ranks, trophies, Single Loop bests, and broken saves refused.
+- **End to end,** on a computer and a phone, with the browser's clock fast-forwarded:
+  - the title's countdown;
+  - Chapter 1 by a player who knows the way (typed on a computer, tapped on a phone);
+  - a reset that empties your pockets but not your journal;
+  - the journal and a hidden tab holding the clock, and the highlight;
+  - turning by a swipe, and the journal surviving a reload;
+  - the Kitchen without a loop clock, and Hardcore without a journal;
+  - the Clock Room to both endings and the credits.
+
+### Speed
+
+The room is one SVG, redrawn only when the picture changes: at most once a second, or when you do something. Progress rings, messages and captions don't redraw it. In a development build on a Pixel 7 with its processor slowed four times, it holds 60 frames a second during actions and in the busiest scenes (the kitchen with the pot on, the gears, the little clock in flight). A turn shows the new wall within two frames. Slowed ten times, it holds 57–59 frames a second.
+
+### Differences from the draft
+
+- **Chronostasis** holds the second you glance at a clock for an extra half second (the draft had it last 1.5 s), still up to 10 s a loop.
+- **Chapter 1** has more going on than the draft's clue chain. The phone at 77 (your own voice, with a different message in the mirrored room), the lights at 66, the bird at 13 and the tally marks give the loop a rhythm, and give the room's memory something to point at. Standing in the doorway is its own close-up, and the frame glows (and hums) in the last three seconds.
+- **The Kitchen** hides the loop clock for the whole chapter. Its clocks are the oven timer, the slow wall clock and a radio whose tune lasts exactly one loop.
+- **The hundredth second** comes from a crank that moves the short hand (the draft said the minute hand). It lasts 6 real seconds, with the clock on 100 throughout, so there's time to reach the door on a phone.
+- **The notepad** offers six notes: the three you found and three that only look like them. The True Ending needs exactly the real three, and tearing off the page starts again.
+- **The rules engine** grew past the draft's data model:
+  - `any`, `all` and `not` conditions, and conditions on clues, items, the room's version and what's been typed;
+  - effects with `when`/`then`/`else`;
+  - processes (things that take their own time while their conditions hold);
+  - rules for zero;
+  - messages and captions as effects.
+- **Room memory** is goal-based (three stages a goal) instead of per-room effects, so the scratches always speak to what you're stuck on.
+- **The folders** follow the arcade's other games (`core/`, `rooms/`, `art/`, `play/`, `ui/`) instead of `engine/` plus a folder per room.
+- **Hardcore** still holds the clock while the pause card is up (it covers the room) and while the tab is hidden, so a phone call doesn't cost a loop.
+- **Settings:** text size is the arcade's own setting, and the hotspot highlight is the 💡 button (or `H`), not a setting.
+- **Phones:** held upright, the turn arrows and Back sit in a bar under the room, which also says where you're looking. On its side, your pockets go down the right so the room gets the full height.
+- **Later** isn't built: the room editor, shareable rooms, and a ghost of your last loop.

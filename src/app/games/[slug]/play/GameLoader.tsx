@@ -29,6 +29,7 @@ const GAMES: Partial<Record<GameSlug, ComponentType>> = {
   "wrong-door": dynamic(() => import("@/games/wrong-door"), { ssr: false, loading: Loading }),
   "panic-stack": dynamic(() => import("@/games/panic-stack"), { ssr: false, loading: Loading }),
   "dont-blink": dynamic(() => import("@/games/dont-blink"), { ssr: false, loading: Loading }),
+  "99-seconds": dynamic(() => import("@/games/99-seconds"), { ssr: false, loading: Loading }),
 };
 
 export function GameLoader({ slug }: { slug: GameSlug }) {

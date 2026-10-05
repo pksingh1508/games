@@ -116,7 +116,8 @@ src/
     wrong-door/               # Wrong Door: 13 kinds of floor, generated from seeds and checked by a solver as they're made (built)
     panic-stack/              # Panic Stack: Planck.js physics; a careful stacker builds every one of its 36 levels in the tests (built)
     dont-blink/               # Don't Blink: five nights on six rooms drawn in code; a careful tester survives every night (built)
-    99-seconds/ ...           # one folder per game; entry file: index.tsx
+    99-seconds/               # 99 Seconds: three chapters of 99-second loops in SVG; golden paths and a hint reader prove each one (built)
+    dont-trust-the-game/ ...  # one folder per game; entry file: index.tsx
   engine/                     # shared, framework-free TypeScript
     loop.ts                   # fixed-timestep loop (60 Hz accumulator) on requestAnimationFrame (built)
     input.ts                  # keyboard / touch buttons / gamepad → game actions, remappable (built)
@@ -147,11 +148,11 @@ tests/e2e/                    # Playwright: games played end to end on desktop a
 | `engine/loop` (canvas game loop) | Every canvas game: Fake Floor, TrapSprint, Glitch Run, Almost There, Last Pixel, **Panic Stack** (built: four physics sub-steps a tick), Cursor Escape, **Don't Blink** (built: blinks, the clock and the director all run on its ticks), Gravity Is Lying, Don't Trust The Game (platform scenes). One Tap Chaos runs on its own beat clock instead: everything in it is measured in beats. **One More Step** (built) doesn't need one: it's turn-based, so nothing runs between your steps except the animation of the last one |
 | `engine/platformer` | **TrapSprint** (built first), **Fake Floor** (built), **Almost There** (built), **Gravity Is Lying** (built), **Glitch Run** (built: its vertical physics), Don't Trust The Game |
 | `engine/postfx` | Don't Trust The Game. (Glitch Run, built, does its screen effects in Canvas 2D itself; **Don't Blink**, built, does its CCTV look in Canvas 2D and CSS, with each room cached as a bitmap) |
-| `engine/browser` | **Cursor Escape** (built: pointer lock), **Last Pixel** (built: the tab's title and icon, visibility), Don't Trust The Game, 99 Seconds |
+| `engine/browser` | **Cursor Escape** (built: pointer lock), **Last Pixel** (built: the tab's title and icon, visibility), **99 Seconds** (built: a hidden tab pauses the loop), Don't Trust The Game |
 | `engine/rng` | One Tap Chaos, Glitch Run, **Panic Stack** (built: seeded events, the belt's extra items, the Daily Stack), **Don't Blink** (built: every night is seeded, so the tests can replay one exactly), **One More Step** (built: each level's footstep tune; a daily puzzle later), **Wrong Door** (built: every floor, the Daily Door's hotel, the Lucky Floor's host) |
-| Pure React/DOM (no canvas) | NOPE!, 99 Seconds, **Wrong Door** (built: DOM and SVG, doors that swing open in CSS 3D) |
+| Pure React/DOM (no canvas) | NOPE!, **99 Seconds** (built: rooms drawn in SVG, with hotspots as real buttons over them), **Wrong Door** (built: DOM and SVG, doors that swing open in CSS 3D) |
 | Physics library (Planck.js) | **Panic Stack** only (built: Planck.js 1.5.0, pinned) |
-| Level solvers / generators (Node scripts + tests) | **One More Step** (built: a breadth-first search through the real rules, run by the unit tests, sets every par), **Wrong Door** (built: a generator per kind of floor; the solver checks every floor as it's made, and the tests check 10,000 of each kind), **Panic Stack** (built: a careful stacker plays every level through the real physics; a first-timer that believes looks checks the calm introductions), **Don't Blink** (built: a careful tester that only knows what's on its screen survives every night; a guard who never switches cameras doesn't) |
+| Level solvers / generators (Node scripts + tests) | **One More Step** (built: a breadth-first search through the real rules, run by the unit tests, sets every par), **Wrong Door** (built: a generator per kind of floor; the solver checks every floor as it's made, and the tests check 10,000 of each kind), **Panic Stack** (built: a careful stacker plays every level through the real physics; a first-timer that believes looks checks the calm introductions), **Don't Blink** (built: a careful tester that only knows what's on its screen survives every night; a guard who never switches cameras doesn't), **99 Seconds** (built: each chapter's golden path through the real rules, and a hint reader that only does what the room's scratches spell out) |
 
 ### Global settings (stored once, respected everywhere)
 
@@ -177,7 +178,7 @@ tests/e2e/                    # Playwright: games played end to end on desktop a
 | 5 | ✅ **Cursor Escape** (playable), ✅ **Last Pixel** (playable) | Pointer-driven games, browser helpers |
 | 6 | ✅ **One More Step** (playable), ✅ **Wrong Door** (playable) | Logic engines with automated solvers |
 | 7 | ✅ **Panic Stack** (playable) | Adds a physics library |
-| 8 | ✅ **Don't Blink** (playable), **99 Seconds** | Art-heavy scene games |
+| 8 | ✅ **Don't Blink** (playable), ✅ **99 Seconds** (playable) | Art-heavy scene games |
 | 9 | **Don't Trust The Game** | Comes last because it parodies the other games and uses the most browser tricks |
 
 ---
