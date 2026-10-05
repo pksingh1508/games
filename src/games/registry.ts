@@ -271,9 +271,9 @@ const DATA: Record<GameSlug, GameData> = {
     ],
     comfort: ["Captions for audio clues", "Reduce flashing", "No jump scares", "Optional invincibility"],
     inspirations: ["There Is No Game", "Pony Island", "The Stanley Parable", "Frog Fractions"],
-    session: "45–75 min story",
+    session: "25–45 min story",
     inputs: ["keyboard", "mouse", "touch"],
-    status: "workshop",
+    status: "playable",
   },
 
   "fake-floor": {

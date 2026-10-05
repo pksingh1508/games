@@ -3,6 +3,8 @@ import { ALMOST_THERE_ACHIEVEMENTS } from "./almost-there/achievements";
 import { defaultAlmostThereSave } from "./almost-there/save";
 import { NINETY_ACHIEVEMENTS } from "./99-seconds/achievements";
 import { defaultNinetySave } from "./99-seconds/save";
+import { DTTG_ACHIEVEMENTS } from "./dont-trust-the-game/achievements";
+import { defaultDttgSave } from "./dont-trust-the-game/save";
 import { DONT_BLINK_ACHIEVEMENTS } from "./dont-blink/achievements";
 import { defaultDontBlinkSave, emptyNight } from "./dont-blink/save";
 import { CURSOR_ACHIEVEMENTS } from "./cursor-escape/achievements";
@@ -262,7 +264,23 @@ describe("cabinet progress", () => {
     expect(summarizeProgress("99-seconds", JSON.stringify(defaultNinetySave()))![0]).toEqual({ label: "Chapters escaped", value: "0/3" });
   });
 
-  it("has nothing to say about games without a summary", () => {
-    expect(summarizeProgress("dont-trust-the-game", "{}")).toBeNull();
+  it("summarises Don't Trust The Game: chapters, secrets, endings and trophies", () => {
+    const save = defaultDttgSave();
+    save.chapters[1].done = 1;
+    save.chapters[2].done = 2;
+    save.secrets = { poke: 1, tab: 2, "room-405": 3 };
+    save.endings.quit = 1;
+    save.achievements = { hacker: 1 };
+    expect(summarizeProgress("dont-trust-the-game", JSON.stringify(save))).toEqual([
+      { label: "Chapters", value: "2/6" },
+      { label: "Secrets", value: "3/12" },
+      { label: "Endings", value: "1/2" },
+      { label: `Trophies`, value: `1/${DTTG_ACHIEVEMENTS.length}` },
+    ]);
+  });
+
+  it("has nothing to say about an unreadable save", () => {
+    expect(summarizeProgress("dont-trust-the-game", "not json")).toBeNull();
+    expect(summarizeProgress("dont-trust-the-game", null)).toBeNull();
   });
 });

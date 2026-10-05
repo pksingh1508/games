@@ -330,11 +330,11 @@ Playwright scripts play each chapter's golden path, including the reload puzzle,
 
 ## 13. Build Roadmap
 
-- [ ] **M1: Foundation.** Game frame, platformer scene, HELPER with the tell, Chapter 1
-- [ ] **M2: Menus as levels.** Chapter 2 (options) and Chapter 3 (loading), the More Games launcher
-- [ ] **M3: Browser tricks.** Chapter 4 (crash, 404, reload) and Chapter 5 (console, developer mode)
-- [ ] **M4: Endings.** Chapter 6 credits, Quit/Stay endings, "You came back", Truth Mode
-- [ ] **M5: Polish.** TRUTH.exe hints, accessibility, cross-browser and mobile testing
+- [x] **M1: Foundation.** Game frame, platformer scene, HELPER with the tell, Chapter 1
+- [x] **M2: Menus as levels.** Chapter 2 (options) and Chapter 3 (loading), the More Games launcher
+- [x] **M3: Browser tricks.** Chapter 4 (crash, 404, reload) and Chapter 5 (console, developer mode)
+- [x] **M4: Endings.** Chapter 6 credits, Quit/Stay endings, "You came back", Truth Mode
+- [x] **M5: Polish.** TRUTH.exe hints, accessibility, cross-browser and mobile testing
 - [ ] **Later:** achievements, speedrun timer
 
 ---
@@ -347,3 +347,142 @@ Playwright scripts play each chapter's golden path, including the reload puzzle,
 - HELPER's tell is correct on every single line (checked by a test: `lie: true` ⇔ glance animation).
 - Every chapter has working hints and an honest skip.
 - "You came back" triggers correctly on the next visit after the ending.
+
+---
+
+## 15. As Built
+
+Don't Trust The Game is playable at `/games/dont-trust-the-game/play`. It has:
+
+- six chapters: the tutorial, the Options menu that's a level, a loading screen stuck at 99%, a fake crash with a 404 and a void, the developer console, and the credits as a climb;
+- two endings (Quit, which finally works, and Stay), "You came back." on the next visit, and Truth Mode;
+- HELPER, with 80 lines (28 of them lies), each with its tell, and TRUTH.exe, with a riddle, then the answer, for each of 18 steps;
+- every browser trick in §3, each with an in-game way round;
+- 12 secrets, 7 trophies, a Trust Issues report and a share card.
+
+Everything is made in code, with no asset files:
+
+- **Art:** the platformer is pixel art on a 480 × 272 canvas (16 px tiles) inside a "HAPPYTRON 3000" monitor. The hero is the round purple one from the cover, with one big eye. Each scene has its own look, and the look breaks down as you go:
+  - pink blocks and a happy sun with a face (the tutorial);
+  - a dark 2004-style menu (the Options);
+  - a stuck loading screen;
+  - a plain error page with giant digits;
+  - a cosy room 405;
+  - a void that tears (the picture slips sideways now and then, never with Reduce flashing on);
+  - a white room;
+  - a night sky of credits.
+
+  The fake screens (the menus, the launcher, the crash, the console) are HTML, styled so that none of them could pass for a real browser or system dialog. HELPER is an SVG face whose pupils slide sideways for the glance.
+- **Sound:** synthesized with Web Audio. The music is a chiptune jingle that loses a little tune and tempo every chapter. It goes silent for the crash, then plays a single flat tone, and comes back slow and sweet for the credits. HELPER's voice is a chirp per syllable, slightly off-key on lies. There are effects for jumps, coins, paper, pushing, doors and the portal. The volume puzzle's whisper is taps for each number, plus a spoken whisper if the device has a voice of its own (it never uses one that would send the words to a server), plus a caption.
+
+It reuses:
+
+- `engine/platformer` (the shared physics and runner), `engine/loop`, `engine/input` (Jump is remapped at runtime) and `engine/sprites`;
+- `engine/browser`'s `borrowTab` (the tab's title and icon, always given back) and `onTabVisibility`;
+- the audio engine and `engine/save`;
+- `games/shared`: achievements, the one-tab guard, sharing, the device and comfort hooks, and the HUD store;
+- the arcade's `Dialog`, `ToggleSwitch`, `Segmented` and `VolumeSlider` for the real settings.
+
+It adds no libraries.
+
+The code is in these folders:
+
+- `core/`:
+  - the platformer world (`world.ts`): spikes, paper spikes, real coins and the one that doesn't spin, doors, zones, pushable blocks, saws, portals, bonkable cells, levers, stickers and buttons, with cells that depend on the scene's state;
+  - the level format (`level.ts`) and the solver (`solver.ts`, for the tests);
+  - HELPER's tell (`helper.ts`), the console (`console.ts`) and the story as a state machine (`story.ts`).
+- `levels/`: the eight levels, placed by coordinates.
+- `story/`: HELPER's lines (with their lie flag, honest version and trust events), TRUTH.exe's hints and the secrets.
+- `play/`: the platformer runtime, and the director, which every scene talks to. It runs HELPER's queue, the trust tally, the secrets, the stuck timer, captions and toasts.
+- `render/`: the pixel art and the renderer. Each level's still parts are cached as a layer.
+- `browser/tricks.ts`: the reload flag, the tab, fullscreen, selection, `?room=`, the real console and the whisper.
+- `scenes/` (one component per scene), `ui/` (the monitor and the real bar, HELPER, TRUTH.exe, the canvas view, the fake pause menu, the real settings), `audio/`, and the save, progress and trophies.
+
+### HELPER and TRUTH.exe
+
+- **The tell:** a lie's eyes glance sideways 0.35 s in, for 0.7 s, and again every 4.2 s while it's on screen. A truth never glances.
+  - The eyes come from one function (`eyesAt`), and the test that checks every line uses the same one.
+  - The glance is a state change, not an animation, so it shows with Reduce motion too.
+  - "Describe HELPER's eyes" (in the real settings) writes it under each line for players who can't see it.
+- **Lines** type out at the chosen speed (or instantly). Tap the bubble to move on.
+  - A scene's opening lines play in order.
+  - A line about where you are now jumps the queue once the current line has had its moment.
+  - Nothing cuts a lie off before its first glance.
+- **TRUTH.exe** turns up after 3 minutes stuck on the same step with a riddle, and after 6 with the answer. After 10, HELPER, looking right at you, offers to skip the chapter, and it works. "Hints sooner" makes those 1, 2 and 5 minutes. In Truth Mode, TRUTH.exe stays away.
+- **The trust tally** counts:
+  - each lie you act on (touching the coin, the cardboard door, Resume, Back, Easy, a parody game, clicking the loading bar, the saw, Send Error Report, `sudo`);
+  - three truths you can doubt (dying on the real spikes, pressing Quit again, bumping the locked door).
+
+### The chapters
+
+1. **The Tutorial** (72 × 17):
+   - Walk and jump are true. "Collect that coin!" is a lie: it doesn't spin, it has four tiny points, and it kills you.
+   - "Avoid the spikes!" is a lie: they flutter, they're paper, and the low tunnel means you have to go through them.
+   - "The exit is to the right!" is a lie: that door is cardboard and falls flat. The real one starts off the left edge of the screen, back past where you began, and it only counts once you've been through the paper spikes.
+   - Then "Press Esc to continue" (or ☰). In the pause menu, Resume restarts the tutorial, Quit doesn't work, and Options cracks the logo to show the real name.
+2. **The Options Menu:** the menu is HTML over a dark level.
+   - Brightness fades the hidden platforms in; a tiny platform drawn in the menu's corner is the tell.
+   - Jump starts on F13. The remap button dodges your pointer five times, then gives up; Tab and Enter catch it at once.
+   - Easy builds "EASY? NAH." across the way; Hard builds the bridge.
+   - At the top, touching the More Games sign unlocks a three-digit code. At full volume a whisper gives it (7 2 9).
+   - Backwards English makes the gibberish tip readable: "the right door is Right Door".
+   - More Games lists six broken parodies of this arcade's games and Right Door. While it's open, the tab's icon is Right Door's, and after 30 s the icon turns up in the launcher too.
+3. **Now Loading** (36 × 21, with a 30 × 17 safe frame):
+   - The bar is a platform and the spinner is a saw. The dots are stepping stones, with one missing.
+   - The missing 1% is a block on a ledge outside the safe frame. The lever (or real fullscreen) zooms out to show it. Push it off the ledge and it drops into the gap at the end of the bar.
+   - Switch tabs and the title says "don't leave me 🥺", then gives a CD key that skips the whole loading screen. After two minutes the same key turns up in the rotating tips.
+4. **Fatal Error:**
+   - A stylised crash. The stack trace's function names run when clicked: `openSecretDoor()` goes on, and `deleteSave()` counts down and says "Just kidding" inside three seconds.
+   - Then 404: the digits are platforms (climb the 4's diagonal), and the 0 is a portal you drop into. The address bar shows `?room=404`. Bonk the second 4 from below, or type `?room=405`, for room 405, and Back steps out of it (one history entry, never more).
+   - Then the void: a wall all the way up. Four turns of the crank, or a window that changes shape by more than 18% (narrowing it, or turning a phone), squeeze it.
+   - Past the wall is a door frame with "door.png not found". HELPER, looking right at you, says to reload. A reload (or opening the game again) brings the door back. In an installed app there's no reload button, so HELPER offers one.
+5. **The Console:**
+   - "There's nothing in the developer console" is a lie. Desktop players with DevTools open find styled messages, and a real `helper.truth()`.
+   - The poster that looks blank is white on white: select it (or long-press it) and it reads "tap the version number seven times".
+   - The console has `help`, `ls`, `cat` (four files), `jump --height 999` (a moon jump), `whoami`, `echo`, `clear` and `exit`. `sudo` is a nice try; `please open door` opens it.
+6. **The Credits** (30 × 66):
+   - 28 credit lines, each a one-way ledge that wobbles under you.
+   - "If you reach the top, I disappear" is true. At the top, Quit (it works) and Stay (a sweet scene, then the credits again, with Quit still there).
+   - Quit shows the Trust Issues report.
+
+### How it's proven fair
+
+- **Every level** (`levels/levels.test.ts`): a beam-search solver plays each one through the real world simulation.
+  - It's steered by waypoints, and for the push puzzle it's scored by how far the block has to go.
+  - It finishes the tutorial through the paper spikes without dying, reaches the cardboard door, and climbs the Options level with Hard's bridge.
+  - It pushes the 1% into the bar, drops into the 404's portal, bonks the second 4, gets past the void's squeezed wall, and climbs the credits to Quit and to Stay.
+  - It can't reach the More Games sign on Normal, on Easy, or with Jump on F13, and it can't reach the void's door before the wall is squeezed.
+- **The tell** (`core/helper.test.ts`): every one of the 80 lines glances while on screen if and only if it's a lie. Every lie has an honest version, and Truth Mode never glances. Lies sound off-key. Between 30% and 60% of the lines are lies, so the tell matters.
+- **The console** (`core/console.test.ts`) and **the cabinet summary** (`src/games/progress.test.ts`).
+- **End to end,** on a computer and a phone, against the static build:
+  - the title's truths;
+  - HELPER's glance on a lie, and its straight look on the truth;
+  - the remap (keyboard, and tapping the button until it's tired), Easy and Hard, the whisper's caption, and Backwards English;
+  - the favicon trick, given back afterwards;
+  - the tab title begging, then the CD key skipping the loading screen;
+  - `deleteSave()` resolving inside three seconds;
+  - `?room=404` in the address bar, Back and Forward between 404 and 405, and a typed `?room=405` (and too early for it);
+  - the crank, and walking up to the reload line, then a real reload fixing the door;
+  - the poster's selection, seven version taps, `sudo` and `please`, and the real console's `helper.truth()`;
+  - "You came back." (only once), and Truth Mode's honest lines;
+  - the real settings, the reset (which really resets) and the real exit.
+
+### Speed
+
+Each level's still parts are painted once into a layer, and repainted only when a flag changes a cell. A frame is that layer plus the moving things. In a development build on a Pixel 7 with its processor slowed four times, it holds 60 frames a second in the tutorial, the zoomed-out loading screen, 404 and the credits. Slowed ten times, it holds 59.
+
+### Differences from the draft
+
+- **Length:** six chapters of short puzzles come to about 25–45 minutes the first time (the draft guessed 45–75).
+- **Easy and Hard** are only part of Chapter 2's level. The Options menu also hides the climb to More Games, so the whisper's code has something to open. The language trick is a clue to the launcher, not a gate.
+- **The remap button** gives up after five dodges, so it can be caught by a finger as well as a mouse. Upright, the jump button itself shows F13 until then.
+- **The favicon's symbol** is Right Door's icon, the clue to which game in More Games is the way on, not the key to a lock.
+- **The tab title's code** is the loading screen's CD key, an alternative to the platforming. The in-game alternative (the tips) turns up after two minutes.
+- **Window size and rotation** both squeeze the void's wall: rotating a phone changes the screen's shape, just as narrowing a window does. Nothing flips.
+- **Fullscreen** is the whole game, monitor and touch pad, so you can still play in it. Its alternative is a lever on the loading screen's floor.
+- **The real console's password** is a pointer to the manners (and `helper.truth()`), since the game's own console is the main way in.
+- **Back rewinds** only out of room 405: one history entry, so leaving the page is never more than one Back away.
+- **Reload** also counts as opening the game again in the same tab session, and an installed app (with no browser reload button) gets a button.
+- **No engine/postfx:** the tears are a few strips of the canvas redrawn sideways, and none of them happen with Reduce flashing on.
+- **On a phone held upright,** HELPER sits on a strip above the picture, panels (the Options menu, the console) go under it, and the touch pad is along the bottom. A plain platformer scene's monitor shrinks to fit.
+- **Later** isn't built: achievements for every secret, a speedrun timer and seasonal costumes.
