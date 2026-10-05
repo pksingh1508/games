@@ -216,7 +216,7 @@ const DATA: Record<GameSlug, GameData> = {
     inspirations: ["Outer Wilds", "Twelve Minutes", "Majora's Mask", "Escape-the-room games"],
     session: "45–90 min story",
     inputs: ["mouse", "touch"],
-    status: "workshop",
+    status: "playable",
   },
 
   "dont-trust-the-game": {

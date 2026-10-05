@@ -174,6 +174,18 @@ const SUMMARIES: Partial<Record<GameSlug, Summarize>> = {
       { label: "Trophies", value: `${Object.keys(record(save.achievements)).length}/6` },
     ];
   },
+  "99-seconds"(save) {
+    const chapters = record(save.chapters);
+    const escaped = ["waiting-room", "kitchen", "clock-room"].filter((c) => count(record(chapters[c]).done) > 0).length;
+    const endings = record(save.endings);
+    const seen = (count(endings.true) > 0 ? 1 : 0) + (count(endings.paradox) > 0 ? 1 : 0);
+    return [
+      { label: "Chapters escaped", value: `${escaped}/3` },
+      { label: "Loops lived", value: count(save.totalLoops).toLocaleString("en-US") },
+      { label: "Endings", value: `${seen}/2` },
+      { label: "Trophies", value: `${Object.keys(record(save.achievements)).length}/6` },
+    ];
+  },
   "dont-blink"(save) {
     const nights = record(save.nights);
     const cleared = ["1", "2", "3", "4", "5"].filter((n) => count(record(nights[n]).clears) > 0).length;

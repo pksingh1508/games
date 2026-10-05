@@ -5,6 +5,7 @@ import {
   Baloo_2,
   Bangers,
   Bungee,
+  Caveat,
   Cormorant_SC,
   Fraunces,
   Fredoka,
@@ -31,6 +32,8 @@ const vt323 = VT323({ subsets: ["latin"], weight: "400", variable: "--font-g-vt3
 const limelight = Limelight({ subsets: ["latin"], weight: "400", variable: "--font-g-limelight", display: "swap", preload: false });
 const cormorantSc = Cormorant_SC({ subsets: ["latin"], weight: ["600", "700"], variable: "--font-g-cormorant-sc", display: "swap", preload: false });
 const lexend = Lexend({ subsets: ["latin"], variable: "--font-g-lexend", display: "swap", preload: false });
+/** 99 Seconds' handwriting: your journal, and the notes on the walls (it's the same hand). */
+const caveat = Caveat({ subsets: ["latin"], variable: "--font-g-caveat", display: "swap", preload: false });
 const dseg = localFont({
   src: "../assets/fonts/DSEG7Classic-Bold.woff2",
   variable: "--font-g-dseg",
@@ -41,7 +44,7 @@ const dseg = localFont({
 /** Class names that define the CSS variables; applied once on <html>. */
 export const GAME_FONT_VARIABLES = [
   fredoka, bangers, fraunces, baloo, pressStart, rubikGlitch, silkscreen,
-  bungee, rubik, vt323, limelight, cormorantSc, lexend, dseg,
+  bungee, rubik, vt323, limelight, cormorantSc, lexend, caveat, dseg,
 ].map((f) => f.variable);
 
 export interface TitleFont {

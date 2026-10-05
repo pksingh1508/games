@@ -1,0 +1,857 @@
+/* 99 Seconds (Plan/03-99-seconds.md §8–§9): a warm, slightly surreal escape room. Deep brown, cream paper and amber
+   light; Fraunces for the game's own words, a handwriting face for your journal (and the walls), seven-segment red
+   for the clock. Nothing flashes unless it has to: the reset's white flash becomes a fade with Reduce flashing. */
+
+.root {
+  --n9-bg: #2b2421;
+  --n9-panel: #3a302b;
+  --n9-panel-2: #473b35;
+  --n9-line: #5b4d45;
+  --n9-ink: #f2e6d8;
+  --n9-dim: #aca298;
+  --n9-amber: #d98e3f;
+  --n9-amber-hi: #ffb45c;
+  --n9-red: #ff5a36;
+  --n9-paper: #f4eedf;
+  --n9-paper-ink: #2b2421;
+  position: relative;
+  color: var(--n9-ink);
+  background: var(--n9-bg);
+}
+
+.display {
+  font-family: var(--font-g-fraunces), Georgia, serif;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
+.hand {
+  font-family: var(--font-g-caveat), "Comic Sans MS", cursive;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 1rem;
+  border: 1.5px solid var(--n9-line);
+  border-radius: 12px;
+  background: var(--n9-panel-2);
+  color: var(--n9-ink);
+  font-weight: 700;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  transition:
+    border-color 0.12s,
+    background 0.12s,
+    transform 0.08s;
+}
+
+.btn:hover:not(:disabled) {
+  border-color: var(--n9-amber);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn:focus-visible,
+.hotspot:focus-visible,
+.item:focus-visible,
+.tab:focus-visible {
+  outline: 3px solid var(--n9-amber-hi);
+  outline-offset: 2px;
+}
+
+.primary {
+  border-color: var(--n9-amber);
+  background: var(--n9-amber);
+  color: #241a14;
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--n9-amber-hi);
+  border-color: var(--n9-amber-hi);
+}
+
+.card {
+  border: 1px solid var(--n9-line);
+  border-radius: 18px;
+  background: var(--n9-panel);
+}
+
+/* -- The play screen ------------------------------------------------------------------------------ */
+
+.area {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  height: calc(100dvh - 4rem);
+  padding: 0.5rem;
+  overflow: hidden;
+}
+
+@media (min-width: 900px) {
+  .area {
+    padding: 0.75rem 1rem;
+  }
+}
+
+/* A phone held upright: the room right under the HUD, then the turn bar, what you read and hear, and your pockets. */
+.narration {
+  display: none;
+}
+
+@media (max-aspect-ratio: 1/1) {
+  .area {
+    grid-template-rows: auto auto auto auto minmax(0, 1fr);
+    align-content: start;
+  }
+  .stagePane {
+    height: calc((100vw - 1rem) * 9 / 16);
+  }
+  .pockets {
+    align-self: start;
+  }
+  .stage .message,
+  .stage .caption {
+    display: none;
+  }
+  .narration {
+    display: grid;
+    gap: 0.35rem;
+    min-height: 3.2rem;
+    align-content: start;
+  }
+  .narration .message,
+  .narration .caption {
+    position: static;
+    max-width: none;
+    transform: none;
+    text-align: left;
+    font-size: 0.98rem;
+  }
+}
+
+/* Upright: turn (or back out) under the room, with where you're looking in between. */
+.navBar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.navLeft {
+  justify-self: start;
+  min-width: 3.5rem;
+}
+
+.navRight {
+  grid-column: 3;
+  justify-self: end;
+  min-width: 3.5rem;
+}
+
+.place {
+  grid-column: 2;
+  font-size: 1.35rem;
+  color: var(--n9-dim);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.place::first-letter {
+  text-transform: uppercase;
+}
+
+/* A phone on its side: the pockets go down the right, so the room can have all the height there is. */
+@media (orientation: landscape) and (max-height: 560px) {
+  .area {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  .hud {
+    grid-column: 1 / -1;
+  }
+  .pockets {
+    flex-direction: column;
+    align-items: stretch;
+    width: 10.5rem;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+}
+
+.hud {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem 0.8rem;
+  min-height: 3rem;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--n9-line);
+  border-radius: 14px;
+  background: var(--n9-panel);
+}
+
+/* The HUD's icon buttons: 44 px squares at any text size, so the HUD fits a 360 px phone. */
+.hudBtn {
+  width: 44px;
+  min-height: 44px;
+  padding: 0;
+}
+
+@media (min-width: 640px) {
+  .hudLabelled {
+    width: auto;
+    padding: 0.5rem 0.9rem;
+  }
+}
+
+/* The loop clock (or the kitchen's lack of one) sits in the middle of what's left. */
+.clock {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 5.5rem;
+  height: 2.6rem;
+  margin-inline: auto;
+  padding: 0 0.6rem;
+  border-radius: 8px;
+  background: #141010;
+  box-shadow: inset 0 0 0 2px #2b2420;
+}
+
+.clock svg {
+  height: 1.8rem;
+  width: auto;
+}
+
+.noClock {
+  max-width: 6.5rem;
+  margin-inline: auto;
+  font-size: 1.25rem;
+  line-height: 1;
+  text-align: center;
+  color: var(--n9-dim);
+}
+
+@media (max-width: 480px) {
+  .hud {
+    column-gap: 0.4rem;
+    padding-inline: 0.35rem;
+  }
+  .clock {
+    min-width: 0;
+  }
+}
+
+.stretched {
+  animation: stretched 0.5s ease-out;
+}
+
+@keyframes stretched {
+  from {
+    box-shadow:
+      inset 0 0 0 2px #2b2420,
+      0 0 18px 4px rgba(255, 90, 54, 0.45);
+  }
+}
+
+.stagePane {
+  container-type: size;
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  min-width: 0;
+}
+
+.stage {
+  position: relative;
+  width: min(100cqw, calc(100cqh * 16 / 9));
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #1a1614;
+  box-shadow:
+    0 0 0 2px #120e0c,
+    0 16px 40px rgba(0, 0, 0, 0.5);
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.scene {
+  position: absolute;
+  inset: 0;
+  transition: filter 1.2s ease;
+}
+
+/* Hotspots: invisible buttons over the picture, outlined on hover, focus and when you ask for help. */
+.hotspot {
+  position: absolute;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 12px;
+  background: transparent;
+  cursor: pointer;
+  transform: translate(0, 0);
+}
+
+.hotspot:hover {
+  box-shadow: inset 0 0 0 2px rgba(255, 213, 138, 0.55);
+}
+
+.highlight .hotspot {
+  box-shadow:
+    inset 0 0 0 3px var(--n9-amber-hi),
+    0 0 18px rgba(255, 180, 92, 0.6);
+  animation: pulse 0.7s ease-in-out 3;
+}
+
+.holding .hotspot {
+  cursor: crosshair;
+}
+
+@keyframes pulse {
+  50% {
+    box-shadow:
+      inset 0 0 0 3px var(--n9-amber-hi),
+      0 0 4px rgba(255, 180, 92, 0.2);
+  }
+}
+
+/* Turning: tabs flush with the room's edges, so they cover as little of it as they can (no hotspot sits under
+   them: rooms/data.test.ts). In pixels, so a bigger text size doesn't grow them over the room. */
+.arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 64px;
+  margin-top: -32px;
+  background: rgba(20, 16, 14, 0.55);
+  color: var(--n9-ink);
+  opacity: 0.75;
+}
+
+.arrowLeft {
+  left: 0;
+  border-radius: 0 12px 12px 0;
+}
+
+.arrowRight {
+  right: 0;
+  border-radius: 12px 0 0 12px;
+}
+
+.arrow:hover {
+  opacity: 1;
+  background: rgba(20, 16, 14, 0.8);
+}
+
+/* Back out of a close-up: the top-left corner, which no close-up uses. */
+.backBtn {
+  position: absolute;
+  left: 0.5rem;
+  top: 0.5rem;
+  z-index: 6;
+}
+
+/* In a small room (a phone on its side), just the arrow, so it stays in its corner at any text size. */
+@container (max-height: 300px) {
+  .backBtn {
+    left: 8px;
+    top: 8px;
+    width: 44px;
+    min-height: 44px;
+    padding: 0;
+  }
+  .backLabel {
+    display: none;
+  }
+}
+
+.message {
+  position: absolute;
+  left: 50%;
+  bottom: 0.6rem;
+  z-index: 7;
+  max-width: calc(100% - 7rem);
+  padding: 0.45rem 0.9rem;
+  border-radius: 10px;
+  background: rgba(20, 16, 14, 0.88);
+  color: var(--n9-ink);
+  font-size: clamp(0.85rem, 2.1cqw, 1.05rem);
+  line-height: 1.35;
+  text-align: center;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.caption {
+  position: absolute;
+  left: 50%;
+  top: 0.6rem;
+  z-index: 7;
+  max-width: calc(100% - 2rem);
+  padding: 0.25rem 0.7rem;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.78);
+  color: #f2f2f2;
+  font-size: clamp(0.8rem, 1.9cqw, 0.98rem);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.noted {
+  position: absolute;
+  right: 0.6rem;
+  top: 0.6rem;
+  z-index: 8;
+  padding: 0.35rem 0.75rem;
+  border-radius: 10px;
+  background: var(--n9-paper);
+  color: var(--n9-paper-ink);
+  font-family: var(--font-g-caveat), cursive;
+  font-size: 1.25rem;
+  transform: rotate(2deg);
+  animation: noted 0.35s cubic-bezier(0.2, 1.4, 0.4, 1);
+  pointer-events: none;
+}
+
+@keyframes noted {
+  from {
+    opacity: 0;
+    transform: rotate(2deg) translateY(-12px);
+  }
+}
+
+/* The action ring: how far through searching, unscrewing, filling… */
+.ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 9;
+  display: grid;
+  place-items: center;
+  gap: 0.25rem;
+  padding: 0.6rem 0.9rem 0.5rem;
+  border-radius: 16px;
+  background: rgba(20, 16, 14, 0.82);
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.ring > svg {
+  width: 3.4rem;
+  height: 3.4rem;
+}
+
+/* Between loops: the flash (or, with Reduce flashing, a fade). */
+.transition {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  background: #fffdf6;
+  animation: flash 1.4s ease-out forwards;
+}
+
+.transition[data-soft] {
+  background: #1a1614;
+  animation: fade 1.4s ease-in-out forwards;
+}
+
+.transition span {
+  color: #2b2421;
+  font-size: clamp(2rem, 7cqw, 4.5rem);
+}
+
+.transition[data-soft] span {
+  color: var(--n9-ink);
+}
+
+@keyframes flash {
+  0% {
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+    background: #2b2421;
+  }
+  100% {
+    opacity: 0;
+    background: #2b2421;
+  }
+}
+
+@keyframes fade {
+  0% {
+    opacity: 0;
+  }
+  30%,
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* The hundredth second. */
+.extra {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  box-shadow: inset 0 0 120px 30px rgba(255, 180, 92, 0.45);
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(20, 16, 14, 0.82);
+}
+
+/* -- The pockets ---------------------------------------------------------------------------------- */
+
+.pockets {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 3.6rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--n9-line);
+  border-radius: 14px;
+  background: var(--n9-panel);
+  overflow-x: auto;
+}
+
+.item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.9rem;
+  padding: 0.3rem 0.7rem 0.3rem 0.4rem;
+  border: 1.5px solid var(--n9-line);
+  border-radius: 12px;
+  background: var(--n9-panel-2);
+  color: var(--n9-ink);
+  white-space: nowrap;
+  touch-action: none;
+  cursor: grab;
+}
+
+.item[aria-pressed="true"] {
+  border-color: var(--n9-amber-hi);
+  background: #5a4630;
+  box-shadow: 0 0 12px rgba(255, 180, 92, 0.35);
+}
+
+.item svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+.ghost {
+  position: fixed;
+  z-index: 100;
+  width: 3rem;
+  height: 3rem;
+  margin: -1.5rem 0 0 -1.5rem;
+  pointer-events: none;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.5));
+}
+
+/* -- The journal --------------------------------------------------------------------------------- */
+
+.journal {
+  position: relative;
+  width: min(46rem, 100%);
+  max-height: calc(100dvh - 7rem);
+  overflow: auto;
+  padding: 1.4rem 1.6rem 1.6rem;
+  border-radius: 6px 14px 14px 6px;
+  background:
+    repeating-linear-gradient(to bottom, transparent 0 2.05rem, rgba(90, 130, 170, 0.28) 2.05rem calc(2.05rem + 1px)),
+    var(--n9-paper);
+  color: var(--n9-paper-ink);
+  box-shadow:
+    inset 6px 0 0 #c9776a,
+    0 24px 60px rgba(0, 0, 0, 0.6);
+}
+
+.journal .entry {
+  font-family: var(--font-g-caveat), cursive;
+  font-size: 1.45rem;
+  line-height: 2.05rem;
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.4rem 0 0.8rem;
+}
+
+.tab {
+  padding: 0.25rem 0.8rem;
+  border-radius: 999px;
+  border: 1.5px solid #bfb49a;
+  background: transparent;
+  color: var(--n9-paper-ink);
+  font-weight: 700;
+}
+
+.tab[aria-selected="true"] {
+  background: var(--n9-paper-ink);
+  color: var(--n9-paper);
+  border-color: var(--n9-paper-ink);
+}
+
+/* -- In-scene animations (global class names, used inside the SVG) ------------------------------- */
+
+.stage :global(.n9-ring) {
+  animation: ringShake 0.12s linear infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes ringShake {
+  25% {
+    transform: rotate(-3deg);
+  }
+  75% {
+    transform: rotate(3deg);
+  }
+}
+
+.stage :global(.n9-steam) {
+  animation: steam 1.6s ease-in-out infinite;
+}
+
+@keyframes steam {
+  50% {
+    transform: translateY(-10px);
+    opacity: 0.4;
+  }
+}
+
+.stage :global(.n9-rattle) {
+  animation: rattle 0.18s linear infinite;
+}
+
+@keyframes rattle {
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+/* The watched pot: the bubbles move for a moment as you look, then freeze. */
+.stage :global(.n9-freeze) {
+  animation: bubble 0.45s ease-out 1 forwards;
+}
+
+.stage :global(.n9-boil) {
+  animation: bubble 0.5s linear infinite;
+}
+
+@keyframes bubble {
+  from {
+    transform: translateY(8px);
+  }
+  to {
+    transform: translateY(-6px);
+  }
+}
+
+.stage :global(.n9-stutter) {
+  animation: stutter 2.3s steps(1) infinite;
+}
+
+@keyframes stutter {
+  0% {
+    transform: rotate(0deg);
+  }
+  31% {
+    transform: rotate(2.5deg);
+  }
+  38% {
+    transform: rotate(0deg);
+  }
+  72% {
+    transform: rotate(-1.5deg);
+  }
+  80% {
+    transform: rotate(0deg);
+  }
+}
+
+.stage :global(.n9-flap) {
+  animation: flap 0.22s ease-in-out infinite alternate;
+  transform-box: fill-box;
+  transform-origin: center bottom;
+}
+
+@keyframes flap {
+  to {
+    transform: scaleY(0.55);
+  }
+}
+
+.stage :global(.n9-spin-cw) {
+  animation: spin 9s linear infinite;
+}
+
+.stage :global(.n9-spin-ccw) {
+  animation: spin 7s linear infinite reverse;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.stage :global(.n9-swing) {
+  animation: swing 3.2s ease-in-out infinite alternate;
+}
+
+@keyframes swing {
+  from {
+    transform: rotate(-16deg);
+  }
+  to {
+    transform: rotate(16deg);
+  }
+}
+
+.stage :global(.n9-feather) {
+  animation: feather 2s ease-in forwards;
+}
+
+@keyframes feather {
+  to {
+    transform: translate(-30px, 90px) rotate(40deg);
+    opacity: 0;
+  }
+}
+
+.stage :global(.n9-frame-glow) {
+  animation: frameGlow 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes frameGlow {
+  to {
+    opacity: 0.55;
+  }
+}
+
+/* Paused (or between loops): the room holds still (the flash between loops doesn't). */
+.stage[data-held] .scene :global(*) {
+  animation-play-state: paused !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage :global(.n9-swing),
+  .stage :global(.n9-spin-cw),
+  .stage :global(.n9-spin-ccw),
+  .stage :global(.n9-stutter),
+  .stage :global(.n9-ring),
+  .stage :global(.n9-flap),
+  .highlight .hotspot,
+  .noted,
+  .stretched {
+    animation: none;
+  }
+}
+
+:global(html[data-motion="reduce"]) .stage :global(.n9-swing),
+:global(html[data-motion="reduce"]) .stage :global(.n9-spin-cw),
+:global(html[data-motion="reduce"]) .stage :global(.n9-spin-ccw),
+:global(html[data-motion="reduce"]) .stage :global(.n9-ring),
+:global(html[data-motion="reduce"]) .stage :global(.n9-flap) {
+  animation: none;
+}
+
+/* -- The title ------------------------------------------------------------------------------------ */
+
+.title {
+  position: relative;
+  display: grid;
+  min-height: calc(100dvh - 4rem);
+  place-items: center;
+  overflow: hidden;
+  padding: 2rem 1rem;
+  background: radial-gradient(ellipse at 50% 35%, #3a2c24 0%, #1e1714 70%);
+}
+
+.bigClock {
+  display: inline-block;
+  padding: 1rem 1.6rem;
+  border-radius: 18px;
+  background: #141010;
+  box-shadow:
+    inset 0 0 0 4px #2b2420,
+    0 0 60px rgba(255, 90, 54, 0.18);
+}
+
+.bigClock svg {
+  height: clamp(5rem, 16vw, 9rem);
+  width: auto;
+}
+
+.credits {
+  position: relative;
+  min-height: calc(100dvh - 4rem);
+  overflow: hidden;
+  background: #120e0c;
+}
+
+.roll {
+  animation: roll 99s linear forwards;
+}
+
+@keyframes roll {
+  from {
+    transform: translateY(100vh);
+  }
+  to {
+    transform: translateY(-100%);
+  }
+}
+
+.fold {
+  animation: fold 2.4s cubic-bezier(0.6, 0, 0.4, 1) forwards;
+  transform-origin: center;
+}
+
+@keyframes fold {
+  40% {
+    transform: perspective(900px) rotateY(80deg) scale(0.8);
+  }
+  100% {
+    transform: perspective(900px) rotateY(180deg) scale(0.02);
+    opacity: 0;
+  }
+}

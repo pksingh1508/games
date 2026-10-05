@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { ALMOST_THERE_ACHIEVEMENTS } from "./almost-there/achievements";
 import { defaultAlmostThereSave } from "./almost-there/save";
+import { NINETY_ACHIEVEMENTS } from "./99-seconds/achievements";
+import { defaultNinetySave } from "./99-seconds/save";
 import { DONT_BLINK_ACHIEVEMENTS } from "./dont-blink/achievements";
 import { defaultDontBlinkSave, emptyNight } from "./dont-blink/save";
 import { CURSOR_ACHIEVEMENTS } from "./cursor-escape/achievements";
@@ -244,7 +246,23 @@ describe("cabinet progress", () => {
     expect(summarizeProgress("dont-blink", JSON.stringify(defaultDontBlinkSave()))![1]).toEqual({ label: "Endless best", value: "—" });
   });
 
+  it("summarizes a 99 Seconds save (chapters escaped, loops lived, endings)", () => {
+    const save = defaultNinetySave();
+    save.chapters["waiting-room"] = { ...save.chapters["waiting-room"], done: 1, escapedIn: 7 };
+    save.chapters.kitchen = { ...save.chapters.kitchen, done: 2, escapedIn: 4 };
+    save.totalLoops = 1234;
+    save.endings = { true: 0, paradox: 3 };
+    save.achievements = { paradox: 1 };
+    expect(summarizeProgress("99-seconds", JSON.stringify(save))).toEqual([
+      { label: "Chapters escaped", value: "2/3" },
+      { label: "Loops lived", value: "1,234" },
+      { label: "Endings", value: "1/2" },
+      { label: "Trophies", value: `1/${NINETY_ACHIEVEMENTS.length}` },
+    ]);
+    expect(summarizeProgress("99-seconds", JSON.stringify(defaultNinetySave()))![0]).toEqual({ label: "Chapters escaped", value: "0/3" });
+  });
+
   it("has nothing to say about games without a summary", () => {
-    expect(summarizeProgress("99-seconds", "{}")).toBeNull();
+    expect(summarizeProgress("dont-trust-the-game", "{}")).toBeNull();
   });
 });
