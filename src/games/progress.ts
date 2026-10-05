@@ -156,6 +156,24 @@ const SUMMARIES: Partial<Record<GameSlug, Summarize>> = {
       { label: "Trophies", value: `${Object.keys(record(save.achievements)).length}/6` },
     ];
   },
+  "panic-stack"(save) {
+    // Levels "1-1" to "6-6": 36, three stars each.
+    const levels = Object.entries(record(save.levels))
+      .filter(([id]) => /^[1-6]-[1-6]$/.test(id))
+      .map(([, l]) => record(l));
+    const cleared = levels.filter((l) => count(l.clears) > 0).length;
+    const stars = levels.reduce((n, l) => {
+      const bits = count(l.stars) & 7;
+      return n + (bits & 1) + ((bits >> 1) & 1) + ((bits >> 2) & 1);
+    }, 0);
+    const best = count(record(save.endless).best);
+    return [
+      { label: "Levels cleared", value: `${cleared}/36` },
+      { label: "Stars", value: `${stars}/108` },
+      { label: "Endless best", value: best ? `${best.toFixed(1)} m` : "—" },
+      { label: "Trophies", value: `${Object.keys(record(save.achievements)).length}/6` },
+    ];
+  },
   "one-tap-chaos"(save) {
     const best = count(save.best);
     // Mirrors the game's unlocks: 12 to start, 3 + 3 + 2 + 2 + 2 more at 10, 20, 30, 40 and 50.

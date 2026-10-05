@@ -20,6 +20,8 @@ import { NOPE_ACHIEVEMENTS } from "./nope/achievements";
 import { OMS_ACHIEVEMENTS } from "./one-more-step/achievements";
 import { LEVEL_IDS as OMS_LEVELS } from "./one-more-step/levels";
 import { defaultOmsSave, emptyLevel as emptyOmsLevel } from "./one-more-step/save";
+import { PANIC_ACHIEVEMENTS } from "./panic-stack/achievements";
+import { defaultPanicStackSave, emptyLevel as emptyPanicLevel } from "./panic-stack/save";
 import { WRONG_DOOR_ACHIEVEMENTS } from "./wrong-door/achievements";
 import { defaultWrongDoorSave } from "./wrong-door/save";
 import { defaultNopeSave } from "./nope/save";
@@ -211,7 +213,21 @@ describe("cabinet progress", () => {
     expect(summarizeProgress("wrong-door", JSON.stringify(defaultWrongDoorSave()))![1]).toEqual({ label: "Best Endless floor", value: "—" });
   });
 
+  it("summarizes a Panic Stack save (levels, stars, the Endless best)", () => {
+    const save = defaultPanicStackSave();
+    save.levels = { "1-1": { ...emptyPanicLevel(), clears: 2, stars: 7 }, "1-2": { ...emptyPanicLevel(), clears: 1, stars: 1 }, "1-3": emptyPanicLevel() };
+    save.endless = { best: 12.34, runs: 3 };
+    save.achievements = { "cat-person": 1 };
+    expect(summarizeProgress("panic-stack", JSON.stringify(save))).toEqual([
+      { label: "Levels cleared", value: "2/36" },
+      { label: "Stars", value: "4/108" },
+      { label: "Endless best", value: "12.3 m" },
+      { label: "Trophies", value: `1/${PANIC_ACHIEVEMENTS.length}` },
+    ]);
+    expect(summarizeProgress("panic-stack", JSON.stringify(defaultPanicStackSave()))![2]).toEqual({ label: "Endless best", value: "—" });
+  });
+
   it("has nothing to say about games without a summary", () => {
-    expect(summarizeProgress("panic-stack", "{}")).toBeNull();
+    expect(summarizeProgress("dont-blink", "{}")).toBeNull();
   });
 });
