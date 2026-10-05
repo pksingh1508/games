@@ -331,11 +331,11 @@ src/games/dont-blink/
 
 ## 13. Build Roadmap
 
-- [ ] **M1: Core.** Blink state machine, strain, one camera scene, 3 anomaly types, reporting
-- [ ] **M2: Night 1–2.** 5 cameras, Anomaly Director, credibility, the Visitor
-- [ ] **M3: Nights 3–5.** Static blinks, fake blinks, slow changes, office anomalies, lying HUD, mirror
-- [ ] **M4: Ending + modes.** Ending sequence, Endless Night, Custom Night, reference photos
-- [ ] **M5: Polish.** CCTV effects, audio, comfort settings, achievements
+- [x] **M1: Core.** Blink state machine, strain, one camera scene, 3 anomaly types, reporting
+- [x] **M2: Night 1–2.** 5 cameras, Anomaly Director, credibility, the Visitor
+- [x] **M3: Nights 3–5.** Static blinks, fake blinks, slow changes, office anomalies, lying HUD, mirror
+- [x] **M4: Ending + modes.** Ending sequence, Endless Night, Custom Night, reference photos
+- [x] **M5: Polish.** CCTV effects, audio, comfort settings, achievements
 - [ ] **Later:** Real Blink Mode (opt-in webcam)
 
 ---
@@ -348,3 +348,91 @@ src/games/dont-blink/
 - The Visitor always plays its scraping sound when it moves.
 - With "reduce flashing" on, the game never goes fully black.
 - The game runs smoothly on a mid-range phone with CCTV effects on (or falls back automatically).
+
+---
+
+## 15. As Built
+
+Don't Blink is playable at `/games/dont-blink/play`. It has:
+
+- five nights, Endless Night and Custom Night, the ending and the photo after the credits;
+- six rooms: the five cameras and your own office, with 65 objects and 93 changes (11 to 17 a room) across all nine types;
+- the Visitor, reference photos, credibility, eye strain and long blinks;
+- each night's tricks: static and power cuts (Night 3); fake blinks, slow changes and your office (Night 4); mirrors, "it knows", the lying HUD and footsteps from the wrong side (Night 5);
+- six trophies, three ranks (and Fired), a share card, assist mode and captions.
+
+Everything is made in code, with no asset files:
+
+- **Art:** Canvas 2D. Each room is a one-point-perspective box painted in flat shapes (marble checks, damask, flagstones, concrete, a long corridor), and every object is a small drawing function of its state. The CCTV look is a green cast, a grain tile and a slow rolling band on the canvas, with scanlines, the vignette and the on-screen text (camera, REC, time) in CSS. Your office has no grade at all: it's your own eyes. The eyelids are two DOM layers with curved edges, moved every frame.
+- **Sound:** synthesized with Web Audio. A low hum and a ticking clock; the Visitor's stone scrape (filtered noise in uneven pulls over a low rumble), panned to its room's side of the museum and quieter the further away it is; static, the report click, accepted and denied, the statue settling home, the manager's buzz, creaks, footsteps, the lights buzzing, a heartbeat from three unreported changes (racing at five), the hour chime and the 6 AM bell. There's no music.
+
+It reuses:
+
+- `engine/loop` (the fixed 60 Hz loop) and `engine/rng` (every night is seeded);
+- the audio engine and `engine/save` (plus `engine/save/runs` for run history);
+- `games/shared`: achievements, the one-tab guard, sharing, comfort hooks and the HUD store;
+- the arcade's `Dialog` and `ToggleSwitch`, and the arcade-wide Reduce flashing, jump scares and colour-blind settings.
+
+It adds no libraries.
+
+The code is in these folders:
+
+- `core/`: the blink (`blink.ts`: eyelids, strain, long blinks), the rooms' data (`catalogue.ts`), the Anomaly Director (`director.ts`), reporting (`report.ts`), the nights (`nights.ts`), the night itself (`game.ts`: the clock, cameras, changes, the Visitor, credibility, the HUD's lies) and a careful tester (`bot.ts`) for the tests and QA.
+- `scenes/`: one file per room (its objects, their drawings and their changes), the paint kit, the perspective box, the Visitor's drawing and the scene renderer.
+- `render/`: the camera view (`view.ts`) and the eyelids' maths (`lids.ts`).
+- `play/`: the runtime (the loop, sounds, captions, the HUD store).
+- `audio/` and `ui/` (the title, the nights, the play screen, results, the ending, the menus), and the save, progress and trophies.
+
+### A night
+
+- **Blinks** every 5–6.5 s on Night 1, down to 3.5–5 s on Night 5 (35% slower in assist mode). A blink is 5 ticks closing, 7 closed and 5 opening (0.28 s); the lids are only fully shut in the closed phase, which is when changes are made.
+- **Holding your eyes open** stops the blink timer and fills the strain meter in 8 s. At 100% the eyes shut for 1.5 s, and two or three changes land at once. Letting go drains it in 6 s, and each blink takes off 10%.
+- **The director** fills a budget at the night's rate (3 changes an hour on Night 1, 5.5 on Night 5) and spends it when the screen is covered, with at least 5 s between changes. It picks a camera first (rooms that already have changes are less likely; the room you're watching is twice as likely, three times on Night 1, so you see the trick; on Night 5 rooms you haven't looked at are up to four times as likely), then a change in it, never on an object that's already changed.
+- **Five unreported changes** start an 8-second countdown (the edge of the screen pulses red, your heart races). Report one in time and it stops; otherwise they come for you.
+- **The Visitor** starts on its pedestal in the Sculpture Hall and walks Gallery → Lobby → Corridor → your office, one room per move. It only moves during a blink, never while you're watching its camera, and never sooner than 30 s into the night or 12 s after its last move (16 s from the corridor, outside your door). It's half as likely to step off its pedestal as to keep coming, and rests there 25 s after you send it home. Every move scrapes, panned toward its room, with a caption: *[stone scraping — Gallery]*. Reporting it anywhere but its pedestal (as an intruder, something extra, or something moved) sends it home. It isn't one of the five changes.
+- **Credibility:** false reports in an hour; a warning (the manager texts you) at 4 and fired at 7 on Night 1, then 3 and 6, then 3 and 5. A new hour wipes the slate. Assist mode counts them but never fires you.
+- **Reference photos:** the camera's morning photo beside the live view (under it, on a phone held upright) for 8 s: 5 on Night 1, 4 on Nights 2–4, 3 on Night 5, unlimited in assist mode.
+
+| Night | Hour | Changes an hour | Subtlety | The Visitor | Brings in |
+|---|---|---|---|---|---|
+| 1. Training | 50 s | 3 | 1–2 | stays put | Three cameras |
+| 2. Full Shift | 60 s | 4 | 1–3 | 35% a blink | All five cameras, the Visitor |
+| 3. Static | 65 s | 4.5 | 1–4 | 45% | Camera static hides changes; power cuts every 22–45 s |
+| 4. Doubt | 70 s | 4.6 | 2–4 | 50% | Fake blinks; slow changes (about one an hour, 26–30 s each); your office |
+| 5. It Knows | 75 s | 5.5 | 2–5 | 65% | Mirrors; it favours rooms you haven't watched; the lying HUD; footsteps from the other side |
+
+### Reporting
+
+Click (or tap) what changed, or where it was; the type picker opens (`R` first if you like). Pick one of the nine types (`1`–`9`). Every object is clickable where it is and, if it's moved or gone, where it was. Things that only appear as changes (an extra painting, a figure) aren't clickable until they're there, so clicking around gives nothing away. A wrong type on a changed object, or anything on an unchanged one, is a false report. Matching is flexible where it's genuinely ambiguous: a light also counts as Changed, a door as Changed, a count as Missing, a figure as Extra, and anything missing as Moved (gone, or moved out of sight?). A mirror is reported as Mirror anywhere on the picture, and clicks on a mirrored picture are read the right way round. Reporting the empty pedestal as Missing gets a hint ("It isn't gone"), not a false report.
+
+### How it's proven fair
+
+- **Changes only while the screen is covered** (`core/game.test.ts`): every change made across five nights played by the tester is checked against the eyelids, the static and the power cut at the moment it's made. Slow changes are the exception the plan allows: they creep in by at most a few pixels a tick.
+- **One change per object:** every few ticks of five nights, no two changes share an object, and every object without a change is exactly as it was in the morning (fixes put things back).
+- **The Visitor always scrapes:** every move, on Nights 2–5 over three seeds, comes with a scrape from the room it moved to, during a blink. Watched all night, it never leaves its pedestal.
+- **Every night is survivable by a tester with the reference photos:** a careful tester plays every night on six seeds and makes it to 6 AM every time, with no false reports. It only knows what a player could: what's on the camera it's watching (once it's looked for 0.7 s plus 0.5 s per subtlety level, 60% longer for subtle changes without a photo up), the HUD's count, and where the scrape came from. It takes 0.9 s to file a report, gives a camera 3.5 s when it's hunting, uses its photos on subtle nights and never holds its eyes open. A guard who never switches cameras loses Nights 2–5. At a slower human pace (1.2 s plus 0.9 s a level to spot, 1.6 s to file, 5 s a camera), it survives Nights 1–3 every time, Night 4 nine times in ten and Night 5 four in ten. In Endless the careful tester lasts 10–18 hours and the slower pace 5–9.
+- **Soft blinks never go black** (`render/lids.test.ts`, and end to end): with Reduce flashing on, the lids are at most 72% opaque and never meet, and the picture behind them dims by at most half and blurs, so a change can't be made out.
+- **The rest:** blinks, strain and long blinks; every report rule (ghost boxes, mirrors, the Visitor, the hint); credibility per hour and in assist mode; the photo budget; the countdown; static and power cuts hiding changes only from Night 3; the lying HUD (every label moves, the clock runs backwards, Endless never lies); colour changes switched off; the nights' order and catalogues (every camera has plenty to change on every night); Custom Night; the rank; the save and the cabinet's summary.
+- **End to end,** on a computer and a phone: the title's blinks, the flicker notice and the manager's note, cameras by click, tap and key, a real change reported (the test fixes the night's seed and plays the same night itself to know where it'll be), a false report, the photo, holding your eyes open by key and by a held touch, pausing and leaving, getting fired, unlocks, and soft blinks.
+
+### Speed
+
+Each room is drawn once into its own buffer and only redrawn when something in it changes (a slow change redraws it a few times a second). A frame is one picture, one fill, one small noise tile and a band. On a Pixel 7 with its processor slowed four times, and on a desktop at 2566 × 1604, it holds 60 frames a second (95th percentile 17.6 ms). If frames run long (two seconds averaging over 24 ms), the canvas drops to one pixel per CSS pixel and loses its grain: at 40 times slower, that's what happened.
+
+### Differences from the draft
+
+- **The CCTV look** is Canvas 2D plus CSS, not a WebGL pass: the arcade has no shared `engine/postfx`, and cached room buffers keep phones at 60 fps. There's no colour fringing.
+- **The camera thumbnails** are buttons, not live pictures: watching one camera means not watching the others.
+- **Five changes start a countdown** instead of ending the night at once, so the fifth change, which can land on a camera you aren't watching, can still be answered.
+- **Clicking the picture** opens the type picker straight away; `R` (or the Report button) is there too.
+- **The data model** has `x`, `y`, `visible`, `variant` and `tint` (for colour and for slow changes like a door creaking open), but no rotation or scale; slow changes move position and tint.
+- **Fake blinks** are flutters: the lids drop halfway and lift again, sometimes with a creak from somewhere. Nothing ever changes in them.
+- **The lying HUD** comes once on Night 5, for a minute, between 2:00 and 4:30: the clock runs backwards and the report labels swap places, while their icons stay true. The tell is the HUD's font, flickering.
+- **Footsteps** come with 30% of Night 5's changes, from a room on the other side of the museum.
+- **Night 4** stops at subtlety 4 (5 waits for Night 5) and has 4.6 changes an hour and four photos: with everything else it brings, the measured difficulty was a cliff.
+- **Endless** climbs from Night 2's settings to Night 5's over its first six hours, then adds 0.75 changes an hour, shorter gaps between changes and faster blinks every hour. Its clock never lies (it's your score). Endless and Custom open once you've survived Night 2.
+- **The ranks:** Hawk Eye is 90% accuracy, at most one change missed and an average reaction within 6 + 2.5 × the night's number seconds; Night Owl is 70% and at most three missed; then Sleepy. Fired if you were.
+- **The scare** (only with jump scares on) is the Visitor's face, suddenly far too close, with a sting. It never flashes.
+- **Colour changes** can be switched off in the game's options, and are off anyway while one of the arcade's colour-blind modes is on.
+- **Real Blink Mode isn't built.** It's "Later" in this plan; it needs MediaPipe's model and WebAssembly files hosted on our own site (several megabytes) and a webcam permission flow, so it waits.
+- **The folders** are `core/`, `scenes/` (one file per room, not `scene.json` and art layers), `render/`, `play/`, `audio/` and `ui/`. The strain lives in `blink.ts`; there's no `experimental/` yet.

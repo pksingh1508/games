@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { ALMOST_THERE_ACHIEVEMENTS } from "./almost-there/achievements";
 import { defaultAlmostThereSave } from "./almost-there/save";
+import { DONT_BLINK_ACHIEVEMENTS } from "./dont-blink/achievements";
+import { defaultDontBlinkSave, emptyNight } from "./dont-blink/save";
 import { CURSOR_ACHIEVEMENTS } from "./cursor-escape/achievements";
 import { LEVEL_IDS as CURSOR_LEVELS } from "./cursor-escape/levels";
 import { defaultCursorSave, emptyLevel as emptyCursorLevel } from "./cursor-escape/save";
@@ -227,7 +229,22 @@ describe("cabinet progress", () => {
     expect(summarizeProgress("panic-stack", JSON.stringify(defaultPanicStackSave()))![2]).toEqual({ label: "Endless best", value: "—" });
   });
 
+  it("summarizes a Don't Blink save (nights survived, the Endless best, the statue sent home)", () => {
+    const save = defaultDontBlinkSave();
+    save.nights = { "1": { ...emptyNight(), tries: 2, clears: 1, best: "night-owl" }, "2": { ...emptyNight(), clears: 3 }, "3": { ...emptyNight(), tries: 4 } };
+    save.endless = { best: 7.4, runs: 2 };
+    save.stats = { ...save.stats, visitorHome: 1234 };
+    save.achievements = { "eagle-eye": 1, "who-are-you": 2 };
+    expect(summarizeProgress("dont-blink", JSON.stringify(save))).toEqual([
+      { label: "Nights survived", value: "2/5" },
+      { label: "Endless best", value: "7 h 24 m" },
+      { label: "Statue sent home", value: "1,234×" },
+      { label: "Trophies", value: `2/${DONT_BLINK_ACHIEVEMENTS.length}` },
+    ]);
+    expect(summarizeProgress("dont-blink", JSON.stringify(defaultDontBlinkSave()))![1]).toEqual({ label: "Endless best", value: "—" });
+  });
+
   it("has nothing to say about games without a summary", () => {
-    expect(summarizeProgress("dont-blink", "{}")).toBeNull();
+    expect(summarizeProgress("99-seconds", "{}")).toBeNull();
   });
 });

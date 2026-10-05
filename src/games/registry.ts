@@ -836,13 +836,13 @@ const DATA: Record<GameSlug, GameData> = {
       "The Visitor, a statue that moves when you don't look",
       "Camera static that hides changes",
       "Reference photos to check your memory",
-      "Optional webcam blink detection (on your device only)",
+      "Your own office changes too, and on the last night the HUD lies",
     ],
     comfort: ["No jump scares by default", "Reduce flashing: soft blinks", "Captions for sound cues", "Assist mode"],
     inspirations: ["I'm on Observation Duty", "Five Nights at Freddy's", "Doctor Who's Weeping Angels"],
     session: "6–8 min nights",
     inputs: ["mouse", "touch", "keyboard"],
-    status: "workshop",
+    status: "playable",
   },
 
   "gravity-is-lying": {

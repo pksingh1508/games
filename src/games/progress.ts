@@ -174,6 +174,19 @@ const SUMMARIES: Partial<Record<GameSlug, Summarize>> = {
       { label: "Trophies", value: `${Object.keys(record(save.achievements)).length}/6` },
     ];
   },
+  "dont-blink"(save) {
+    const nights = record(save.nights);
+    const cleared = ["1", "2", "3", "4", "5"].filter((n) => count(record(nights[n]).clears) > 0).length;
+    const best = count(record(save.endless).best);
+    const hours = Math.floor(best);
+    const minutes = Math.floor((best - hours) * 60);
+    return [
+      { label: "Nights survived", value: `${cleared}/5` },
+      { label: "Endless best", value: best > 0 ? `${hours} h ${String(minutes).padStart(2, "0")} m` : "—" },
+      { label: "Statue sent home", value: `${count(record(save.stats).visitorHome).toLocaleString("en-US")}×` },
+      { label: "Trophies", value: `${Object.keys(record(save.achievements)).length}/6` },
+    ];
+  },
   "one-tap-chaos"(save) {
     const best = count(save.best);
     // Mirrors the game's unlocks: 12 to start, 3 + 3 + 2 + 2 + 2 more at 10, 20, 30, 40 and 50.
