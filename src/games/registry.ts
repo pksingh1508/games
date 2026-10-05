@@ -671,7 +671,7 @@ const DATA: Record<GameSlug, GameData> = {
     inspirations: ["Tricky Towers", "Jenga", "Stack", "Overcooked"],
     session: "1–3 min per level",
     inputs: ["mouse", "touch"],
-    status: "workshop",
+    status: "playable",
   },
 
   "cursor-escape": {
