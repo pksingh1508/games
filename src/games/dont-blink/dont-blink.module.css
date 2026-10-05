@@ -1,0 +1,825 @@
+/* Don't Blink (Plan/14-dont-blink.md §8–§9): a night guard's desk. A security console in the dark: phosphor
+   green on black glass, Cormorant SC for the museum's own words, VT323 for the cameras' on-screen text. Nothing
+   ever flashes at full brightness; with Reduce flashing on, nothing goes fully black either. */
+
+.root {
+  --db-bg: #0b0f0e;
+  --db-panel: #121917;
+  --db-panel-2: #1a2320;
+  --db-line: #2a3632;
+  --db-ink: #cfe8dc;
+  --db-dim: #85968e;
+  --db-green: #7cffb2;
+  --db-green-deep: #2f7a52;
+  --db-red: #ff6b5e;
+  --db-amber: #ffc861;
+  --db-paper: #efe6d2;
+  --db-paper-ink: #2a241a;
+  position: relative;
+  color: var(--db-ink);
+  background: var(--db-bg);
+}
+
+.display {
+  font-family: var(--font-g-cormorant-sc), Georgia, serif;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 0.95;
+}
+
+.mono {
+  font-family: var(--font-g-vt323), ui-monospace, monospace;
+  letter-spacing: 0.02em;
+}
+
+/* -- Buttons ------------------------------------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 1rem;
+  border: 1.5px solid var(--db-line);
+  border-radius: 10px;
+  background: var(--db-panel-2);
+  color: var(--db-ink);
+  font-weight: 700;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  transition:
+    border-color 0.12s,
+    background 0.12s,
+    transform 0.08s;
+}
+
+.btn:hover:not(:disabled) {
+  border-color: var(--db-green-deep);
+  background: #1f2b27;
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn:focus-visible,
+.cam:focus-visible,
+.type:focus-visible,
+.card:focus-visible {
+  outline: 2px solid var(--db-green);
+  outline-offset: 2px;
+}
+
+.primary {
+  border-color: var(--db-green);
+  background: var(--db-green);
+  color: #08110c;
+}
+
+.primary:hover:not(:disabled) {
+  background: #9dffc6;
+  border-color: #9dffc6;
+}
+
+.danger {
+  border-color: color-mix(in oklab, var(--db-red) 60%, transparent);
+  color: #ffd2cc;
+}
+
+/* -- The play screen ----------------------------------------------------------------------------- */
+
+.area {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  height: calc(100dvh - 4rem);
+  padding: 0.5rem;
+  overflow: hidden;
+}
+
+@media (min-width: 900px) {
+  .area {
+    padding: 0.75rem 1rem;
+  }
+}
+
+/* Short and wide (a phone on its side): controls to the right of the monitor. */
+@media (max-height: 520px) and (orientation: landscape) {
+  .area {
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .area > .bar {
+    grid-column: 1 / -1;
+  }
+  .controls {
+    flex-direction: column;
+    justify-content: center;
+    width: 13rem;
+  }
+}
+
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.9rem;
+  min-height: 2.75rem;
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--db-line);
+  border-radius: 12px;
+  background: var(--db-panel);
+}
+
+.stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+}
+
+.clock {
+  font-family: var(--font-g-vt323), ui-monospace, monospace;
+  font-size: 1.7rem;
+  line-height: 1;
+  color: var(--db-green);
+  text-shadow: 0 0 10px color-mix(in oklab, var(--db-green) 45%, transparent);
+}
+
+/* The lying HUD's tell: its font flickers. */
+.lying .clock,
+.lying .typeLabel {
+  animation: fontFlicker 0.9s steps(1) infinite;
+}
+
+@keyframes fontFlicker {
+  0%,
+  100% {
+    font-family: var(--font-g-vt323), ui-monospace, monospace;
+  }
+  37% {
+    font-family: var(--font-g-cormorant-sc), Georgia, serif;
+  }
+  44% {
+    font-family: var(--font-g-vt323), ui-monospace, monospace;
+  }
+  71% {
+    font-family: ui-monospace, monospace;
+  }
+  76% {
+    font-family: var(--font-g-vt323), ui-monospace, monospace;
+  }
+}
+
+.pips {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.pip {
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--db-green-deep);
+}
+
+.pip[data-on] {
+  background: var(--db-amber);
+  border-color: var(--db-amber);
+  box-shadow: 0 0 8px color-mix(in oklab, var(--db-amber) 60%, transparent);
+}
+
+.pips[data-danger] .pip[data-on] {
+  background: var(--db-red);
+  border-color: var(--db-red);
+}
+
+.cred {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.cred > span {
+  width: 0.45rem;
+  height: 1rem;
+  border-radius: 2px;
+  background: var(--db-green-deep);
+}
+
+.cred > span[data-gone] {
+  background: transparent;
+  outline: 1px solid var(--db-line);
+}
+
+.cred[data-warned] > span:not([data-gone]) {
+  background: var(--db-amber);
+}
+
+.meter {
+  position: relative;
+  width: 5.5rem;
+  height: 0.6rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--db-panel-2);
+  outline: 1px solid var(--db-line);
+}
+
+.meter > span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: linear-gradient(90deg, var(--db-green), var(--db-amber) 70%, var(--db-red));
+  transition: width 0.1s linear;
+}
+
+/* -- The monitor --------------------------------------------------------------------------------- */
+
+.monitor {
+  position: relative;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 0.5rem;
+  min-height: 0;
+}
+
+/* A tall screen (a phone held upright): the monitor sits right under the HUD at full width, the reference photo
+   under it, and the controls under that, so nothing floats in the middle of the screen. */
+@media (max-aspect-ratio: 1/1) {
+  .area {
+    grid-template-rows: auto auto minmax(0, 1fr);
+    align-content: start;
+  }
+  .monitor {
+    grid-auto-flow: row;
+    grid-auto-rows: auto;
+    grid-auto-columns: auto;
+  }
+  .monitor > .pane {
+    height: calc((100vw - 1rem) / 1.6);
+    max-height: calc((100dvh - 14rem) / 2);
+  }
+  .monitor > .pane:only-of-type {
+    max-height: calc(100dvh - 18rem);
+  }
+  .controls {
+    align-content: flex-start;
+  }
+}
+
+.pane {
+  container-type: size;
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  min-width: 0;
+}
+
+.screen {
+  position: relative;
+  width: min(100cqw, calc(100cqh * 1.6));
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #050706;
+  box-shadow:
+    0 0 0 2px #050706,
+    0 0 0 6px #1a201e,
+    0 18px 40px rgba(0, 0, 0, 0.55);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.scanlines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.16) 0 1px, transparent 1px 3px);
+  mix-blend-mode: multiply;
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(0, 0, 0, 0.55) 100%);
+}
+
+.office .vignette {
+  background: radial-gradient(ellipse at 45% 60%, transparent 50%, rgba(10, 6, 2, 0.6) 100%);
+}
+
+.osd {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  padding: 0.5rem 0.75rem;
+  font-family: var(--font-g-vt323), ui-monospace, monospace;
+  font-size: clamp(0.95rem, 2.6cqw, 1.5rem);
+  line-height: 1;
+  color: #e8fff1;
+  text-shadow:
+    0 0 6px rgba(124, 255, 178, 0.5),
+    1px 1px 0 rgba(0, 0, 0, 0.6);
+}
+
+.osd > * {
+  position: absolute;
+}
+
+.rec {
+  display: inline-block;
+  width: 0.55em;
+  height: 0.55em;
+  margin-right: 0.35em;
+  border-radius: 999px;
+  background: #ff4d4d;
+  vertical-align: 0.05em;
+  animation: rec 2s steps(1) infinite;
+}
+
+@keyframes rec {
+  50% {
+    opacity: 0.2;
+  }
+}
+
+/* The eyelids: from the top and bottom, a soft curved edge. Moved by the runtime every frame. */
+.lid {
+  position: absolute;
+  left: -4%;
+  right: -4%;
+  height: 54%;
+  pointer-events: none;
+  z-index: 30;
+  will-change: transform;
+}
+
+.lidTop {
+  top: 0;
+  transform: translateY(-100%);
+  border-radius: 0 0 50% 50% / 0 0 22% 22%;
+  background: linear-gradient(to bottom, #020101 0%, #070403 82%, #1a0f0c 100%);
+}
+
+.lidBottom {
+  bottom: 0;
+  transform: translateY(100%);
+  border-radius: 50% 50% 0 0 / 22% 22% 0 0;
+  background: linear-gradient(to top, #020101 0%, #070403 82%, #1a0f0c 100%);
+}
+
+.lids {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 30;
+}
+
+.reduce .lidTop,
+.reduce .lidBottom {
+  background: #18201d;
+}
+
+/* Report mode: a crosshair, a banner, the ring where you clicked. */
+.reporting .screen {
+  cursor: crosshair;
+  box-shadow:
+    0 0 0 2px #050706,
+    0 0 0 6px var(--db-amber),
+    0 18px 40px rgba(0, 0, 0, 0.55);
+}
+
+.ring {
+  position: absolute;
+  width: 2.6rem;
+  height: 2.6rem;
+  margin: -1.3rem 0 0 -1.3rem;
+  border: 2px solid var(--db-amber);
+  border-radius: 999px;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+  z-index: 20;
+}
+
+.banner {
+  position: absolute;
+  left: 50%;
+  bottom: 0.6rem;
+  transform: translateX(-50%);
+  z-index: 25;
+  max-width: calc(100% - 1rem);
+  padding: 0.35rem 0.8rem;
+  border-radius: 8px;
+  background: rgba(8, 12, 10, 0.86);
+  border: 1px solid var(--db-amber);
+  color: #ffe9bf;
+  font-size: 0.9rem;
+  text-align: center;
+  pointer-events: none;
+}
+
+.caption {
+  position: absolute;
+  left: 50%;
+  bottom: 0.6rem;
+  transform: translateX(-50%);
+  z-index: 24;
+  max-width: calc(100% - 1rem);
+  padding: 0.25rem 0.7rem;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.78);
+  color: #f2f2f2;
+  font-size: clamp(0.85rem, 2.2cqw, 1.05rem);
+  text-align: center;
+  pointer-events: none;
+}
+
+.reporting .caption {
+  bottom: 3rem;
+}
+
+/* REPORT ACCEPTED / NO ANOMALY FOUND. */
+.stamp {
+  position: absolute;
+  left: 50%;
+  top: 22%;
+  z-index: 26;
+  padding: 0.45rem 1rem 0.55rem;
+  border: 3px solid currentColor;
+  border-radius: 8px;
+  background: rgba(6, 10, 8, 0.82);
+  text-align: center;
+  pointer-events: none;
+  transform: translateX(-50%) rotate(-4deg);
+  animation: stamp 0.28s cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+
+.stamp[data-ok] {
+  color: var(--db-green);
+}
+
+.stamp:not([data-ok]) {
+  color: var(--db-red);
+}
+
+.stamp b {
+  display: block;
+  font-family: var(--font-g-vt323), ui-monospace, monospace;
+  font-size: clamp(1.4rem, 4.4cqw, 2.4rem);
+  line-height: 1;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.stamp span {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--db-ink);
+  font-size: clamp(0.8rem, 2cqw, 1rem);
+}
+
+@keyframes stamp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) rotate(-4deg) scale(1.6);
+  }
+}
+
+/* Five changes waiting. */
+.dangerEdge {
+  position: absolute;
+  inset: 0;
+  z-index: 22;
+  pointer-events: none;
+  box-shadow: inset 0 0 60px 10px rgba(255, 60, 40, 0.35);
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  50% {
+    box-shadow: inset 0 0 90px 18px rgba(255, 60, 40, 0.5);
+  }
+}
+
+.countdown {
+  position: absolute;
+  top: 0.6rem;
+  left: 50%;
+  z-index: 26;
+  transform: translateX(-50%);
+  padding: 0.2rem 0.7rem;
+  border-radius: 8px;
+  background: rgba(40, 6, 4, 0.85);
+  border: 1px solid var(--db-red);
+  color: #ffd2cc;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* The reference photo: a print from the guard binder. */
+.photo {
+  position: relative;
+  width: min(100cqw, calc(100cqh * 1.6));
+  aspect-ratio: 16 / 10;
+  padding: 3%;
+  padding-bottom: 7%;
+  border-radius: 4px;
+  background: var(--db-paper);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.6);
+  transform: rotate(0.8deg);
+}
+
+.photo canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  filter: sepia(0.35) saturate(0.85) contrast(1.05);
+}
+
+.photo figcaption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 1.2%;
+  color: var(--db-paper-ink);
+  font-family: var(--font-g-cormorant-sc), Georgia, serif;
+  font-weight: 700;
+  font-size: clamp(0.8rem, 3.2cqw, 1.2rem);
+  text-align: center;
+}
+
+/* -- Controls ------------------------------------------------------------------------------------ */
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.cams {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  justify-content: center;
+}
+
+.cam {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  min-width: 5.6rem;
+  min-height: 2.9rem;
+  padding: 0.25rem 0.6rem;
+  border: 1.5px solid var(--db-line);
+  border-radius: 8px;
+  background: #0d1311;
+  color: var(--db-ink);
+  text-align: left;
+  line-height: 1.05;
+  touch-action: manipulation;
+}
+
+.cam small {
+  font-family: var(--font-g-vt323), ui-monospace, monospace;
+  font-size: 0.95rem;
+  color: var(--db-dim);
+}
+
+.cam[aria-pressed="true"] {
+  border-color: var(--db-green);
+  background: #13241c;
+  box-shadow: 0 0 12px color-mix(in oklab, var(--db-green) 25%, transparent);
+}
+
+.cam[aria-pressed="true"] small {
+  color: var(--db-green);
+}
+
+@media (max-width: 640px) {
+  .cams {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+  }
+  .cam {
+    min-width: 0;
+  }
+}
+
+.actions {
+  display: flex;
+  gap: 0.4rem;
+  justify-content: center;
+}
+
+@media (max-width: 640px) {
+  .actions {
+    width: 100%;
+  }
+  .actions > * {
+    flex: 1;
+  }
+}
+
+.eye {
+  -webkit-touch-callout: none;
+}
+
+.eye[data-held] {
+  border-color: var(--db-amber);
+  background: #2a2412;
+  color: #ffe9bf;
+}
+
+.reportBtn[aria-pressed="true"] {
+  border-color: var(--db-amber);
+  background: #2a2412;
+}
+
+/* The type picker. */
+.picker {
+  position: absolute;
+  z-index: 40;
+  width: min(22rem, calc(100% - 1rem));
+  padding: 0.6rem;
+  border: 1px solid var(--db-amber);
+  border-radius: 12px;
+  background: rgba(10, 14, 12, 0.96);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+}
+
+.types {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+}
+
+.type {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  min-height: 3.6rem;
+  padding: 0.35rem 0.2rem;
+  border: 1px solid var(--db-line);
+  border-radius: 8px;
+  background: var(--db-panel-2);
+  color: var(--db-ink);
+  font-size: 0.85rem;
+  line-height: 1.1;
+  touch-action: manipulation;
+}
+
+.type:hover {
+  border-color: var(--db-amber);
+}
+
+.typeLabel {
+  font-weight: 700;
+}
+
+.type kbd {
+  font-family: var(--font-g-vt323), ui-monospace, monospace;
+  font-size: 0.8rem;
+  color: var(--db-dim);
+}
+
+/* -- Cards and screens --------------------------------------------------------------------------- */
+
+.card {
+  border: 1px solid var(--db-line);
+  border-radius: 16px;
+  background: var(--db-panel);
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(4, 6, 5, 0.82);
+}
+
+.note {
+  max-width: 34rem;
+  padding: 1.6rem 1.8rem;
+  border-radius: 4px;
+  background: var(--db-paper);
+  color: var(--db-paper-ink);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  transform: rotate(-0.6deg);
+}
+
+.note p {
+  font-family: Georgia, serif;
+  line-height: 1.55;
+}
+
+.fade {
+  animation: fadeOut 2.6s ease-in forwards;
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* The scare (only if jump scares are on): no flash, just something very close, very suddenly. */
+.scare {
+  animation: scare 0.35s cubic-bezier(0.1, 1.4, 0.3, 1);
+}
+
+@keyframes scare {
+  from {
+    transform: scale(0.4);
+  }
+}
+
+.sunrise {
+  background:
+    radial-gradient(ellipse at 50% 120%, rgba(255, 196, 120, 0.55), transparent 60%),
+    linear-gradient(to bottom, #1b2433 0%, #4a3a4a 45%, #c4785a 85%, #f2b36b 100%);
+}
+
+/* The title: black, the name, and things that change while you blink. */
+.title {
+  position: relative;
+  display: grid;
+  min-height: calc(100dvh - 4rem);
+  place-items: center;
+  overflow: hidden;
+  padding: 2rem 1rem;
+  background: radial-gradient(ellipse at 50% 40%, #111816 0%, #050706 70%);
+}
+
+.eyes {
+  display: flex;
+  gap: 2.4rem;
+  justify-content: center;
+}
+
+.eyeShape {
+  position: relative;
+  width: 4.2rem;
+  height: 2.1rem;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #dfe9e2;
+  box-shadow: inset 0 -6px 10px rgba(0, 0, 0, 0.3);
+}
+
+.iris {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin: -0.75rem 0 0 -0.75rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, #050505 34%, #2f7a52 36%, #1a3d2b 70%);
+  transition: transform 0.01s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stamp,
+  .dangerEdge,
+  .rec,
+  .scare {
+    animation: none;
+  }
+}
+
+:global(html[data-motion="reduce"]) .stamp,
+:global(html[data-motion="reduce"]) .dangerEdge,
+:global(html[data-motion="reduce"]) .rec {
+  animation: none;
+}
