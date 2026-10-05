@@ -199,6 +199,18 @@ const SUMMARIES: Partial<Record<GameSlug, Summarize>> = {
       { label: "Trophies", value: `${Object.keys(record(save.achievements)).length}/6` },
     ];
   },
+  "dont-trust-the-game"(save) {
+    const chapters = record(save.chapters);
+    const finished = ["1", "2", "3", "4", "5", "6"].filter((c) => count(record(chapters[c]).done) > 0).length;
+    const endings = record(save.endings);
+    const seen = (count(endings.quit) > 0 ? 1 : 0) + (count(endings.stay) > 0 ? 1 : 0);
+    return [
+      { label: "Chapters", value: `${finished}/6` },
+      { label: "Secrets", value: `${Object.keys(record(save.secrets)).length}/12` },
+      { label: "Endings", value: `${seen}/2` },
+      { label: "Trophies", value: `${Object.keys(record(save.achievements)).length}/7` },
+    ];
+  },
   "one-tap-chaos"(save) {
     const best = count(save.best);
     // Mirrors the game's unlocks: 12 to start, 3 + 3 + 2 + 2 + 2 more at 10, 20, 30, 40 and 50.
